@@ -52,6 +52,14 @@ function initialize(){
 	camera = new Camera(new Vector2(-canvas.width/2, -canvas.height/2));
 }
 
+function initializeWorld(){
+
+}
+
+function initializePlayer(){
+	gameObjects.push(new TextButton(new Vector2(100, 100), 50, 50, "Test"));
+}
+
 function run(){
 	// Game loop
 	var tick = function(){

@@ -31,12 +31,16 @@ socket.on('created', function (room, clientId) {
   console.log('Created room', room, '- my client ID is', clientId);
   isWorld = true;
   playerId = clientId;
+
+  initializeWorld();
 });
 
 socket.on('joined', function (room, clientId) {
   console.log('This peer has joined room', room, 'with client ID', clientId);
   isWorld = false;
   playerId = clientId;
+
+  initializePlayer();
 });
 
 socket.on('full', function (room) {

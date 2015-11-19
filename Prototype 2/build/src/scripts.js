@@ -1,3 +1,99 @@
+//*****************************************************************************************
+//	Button
+//*****************************************************************************************
+
+function TextButton(position, width, height, text){
+	this.type = "TextButton";
+	this.isAlive = true;
+	
+	// Positioning
+	this.position = position;
+	this.previousPos = this.position.clone();
+	this.width = width;
+	this.height = height;
+
+	// Graphics
+	this.depth = 0;
+	this.bgColor = color.BLUE;
+	this.bgAlpha = 1;
+	this.text = text;
+	this.textColor = color.BLACK;
+	this.textHoverColor = color.BLACK;
+
+	// State
+	this.mouseOver = false;
+	this.isPressed = false;
+	this.isToggled = false;
+	this.isDisabled = false;
+
+	// Destroys the object (removes it from gameObjects)
+	this.kill = function(){
+		this.unfocus();
+		this.isAlive = false;
+	};
+
+	// Returns the hitbox
+	this.getHitbox = function(){
+		return new AABB(this.position.x-this.width/2, this.position.y-this.height/2, this.width, this.height);
+	};
+
+	// Focus	
+	this.focus = function(){
+		if(!this.isFocused){
+			focus(this);
+			this.isFocused = true;
+		}
+	};
+
+	// Remove focus
+	this.unfocus = function(){
+		if(this.isFocused){
+			unfocus(this);
+			this.isFocused = false;
+		}
+	};
+
+	// onClick gets called when the button is pressed (it sets isPressed on true for easier communication with other objects)
+	this.onClick = function(){
+		this.isPressed = true;
+	};
+
+	// Update
+	this.update = function(){
+		// Save the previous position for interpolation (also reset mouseOver and isPressed)
+		this.previousPos = this.position.clone();
+
+		this.mouseOver = false;
+		this.isPressed = false;
+
+		// Check if the button is not disabled
+		if(!this.isDisabled){
+			// Check if the mouse is hovering over the button
+			this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
+			
+			// Call the onClick function when the button is pressed
+			if(this.mouseOver && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+				this.onClick();
+			}
+		}
+	};
+
+	// Render
+	this.render = function(lagOffset){
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+
+		// Background
+		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, this.bgColor, this.bgAlpha);
+
+		// Text
+		ctx.textAlign = "center";
+		ctx.textBaseline = "middle";
+		if(!this.mouseOver){drawText(ctx, drawX, drawY, this.width, 24, this.text, "Arial", 24, this.textColor, 1);}
+		else{drawText(ctx, drawX, drawY, this.width, 24, this.text, "Arial", 24, this.textHoverColor, 1);}
+		ctx.textBaseline = "alphabetic";
+	};
+}
 /****************************************************************************
  * Initial setup
  ****************************************************************************/
@@ -31,12 +127,16 @@ socket.on('created', function (room, clientId) {
   console.log('Created room', room, '- my client ID is', clientId);
   isWorld = true;
   playerId = clientId;
+
+  initializeWorld();
 });
 
 socket.on('joined', function (room, clientId) {
   console.log('This peer has joined room', room, 'with client ID', clientId);
   isWorld = false;
   playerId = clientId;
+
+  initializePlayer();
 });
 
 socket.on('full', function (room) {
@@ -294,6 +394,37 @@ function drawEllipse(ctx, x, y, w, h, fill, color, alpha){
 	if(fill){ ctx.fill(); }else{ ctx.stroke(); }
 	ctx.globalAlpha = 1;
 }
+
+// TODO improve
+function drawText(ctx, x, y, maxLineWidth, lineHeight, text, font, size, color, alpha){
+	if(alpha === undefined){alpha = 1;}
+	ctx.font = size+"px "+font;
+	ctx.fillStyle = color;
+	ctx.globalAlpha = alpha;
+
+	var lines = text.split("\n");
+    for (var i = 0; i < lines.length; i++) {
+        var words = lines[i].split(' ');
+        var line = '';
+
+        for (var n = 0; n < words.length; n++) {
+            var testLine = line + words[n] + ' ';
+            var lineWidth = ctx.measureText(testLine).width;
+            if (lineWidth > maxLineWidth && n > 0) {
+                ctx.fillText(line, x, y);
+                line = words[n] + ' ';
+                y += lineHeight;
+            } else {
+                line = testLine;
+            }
+        }
+        ctx.fillText(line, x, y);
+        y += lineHeight;
+    }
+	
+	//ctx.fillText(text, x, y);
+	ctx.globalAlpha = 1;
+}
 //*****************************************************************************************
 //	Input
 //*****************************************************************************************
@@ -434,6 +565,14 @@ function initialize(){
 
 	// Camera
 	camera = new Camera(new Vector2(-canvas.width/2, -canvas.height/2));
+}
+
+function initializeWorld(){
+
+}
+
+function initializePlayer(){
+	gameObjects.push(new TextButton(new Vector2(100, 100), 50, 50, "Test"));
 }
 
 function run(){
@@ -628,6 +767,36 @@ function checkPointvsAABB(point, rect){
 			point.y < rect.y || point.y > rect.y + rect.height);
 }
 
+//*****************************************************************************************
+//	Player
+//*****************************************************************************************
+
+function Player(id, position){
+	this.type = "Player";
+	this.isAlive = true;
+
+	// Physics
+	this.position = position;
+	this.previousPos = this.position.clone();
+
+	// Data
+	this.id = id;
+
+	this.kill = function(){
+		this.isAlive = false;
+	}
+
+	this.update = function(){
+		this.previousPos = this.position.clone();
+	}
+
+	this.render = function(lagOffset){
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+
+		// Render
+	}
+}
 //*****************************************************************************************
 //	Utility
 //*****************************************************************************************

@@ -197,3 +197,34 @@ function drawEllipse(ctx, x, y, w, h, fill, color, alpha){
 	if(fill){ ctx.fill(); }else{ ctx.stroke(); }
 	ctx.globalAlpha = 1;
 }
+
+// TODO improve
+function drawText(ctx, x, y, maxLineWidth, lineHeight, text, font, size, color, alpha){
+	if(alpha === undefined){alpha = 1;}
+	ctx.font = size+"px "+font;
+	ctx.fillStyle = color;
+	ctx.globalAlpha = alpha;
+
+	var lines = text.split("\n");
+    for (var i = 0; i < lines.length; i++) {
+        var words = lines[i].split(' ');
+        var line = '';
+
+        for (var n = 0; n < words.length; n++) {
+            var testLine = line + words[n] + ' ';
+            var lineWidth = ctx.measureText(testLine).width;
+            if (lineWidth > maxLineWidth && n > 0) {
+                ctx.fillText(line, x, y);
+                line = words[n] + ' ';
+                y += lineHeight;
+            } else {
+                line = testLine;
+            }
+        }
+        ctx.fillText(line, x, y);
+        y += lineHeight;
+    }
+	
+	//ctx.fillText(text, x, y);
+	ctx.globalAlpha = 1;
+}
