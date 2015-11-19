@@ -57,7 +57,8 @@ function initializeWorld(){
 }
 
 function initializePlayer(){
-	gameObjects.push(new TextButton(new Vector2(100, 100), 50, 50, "Test"));
+	var b = new TextButton(new Vector2(100, 100), 50, 50, "Test");
+	gameObjects.push(b);
 }
 
 function run(){

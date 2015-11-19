@@ -12,7 +12,7 @@ var promtArray = ['cats', 'dogs', 'playstation', 'xbox', 'coke', 'pepsi', 'pirat
 var promtString;
 
 //TODO this should be a function
-var temp1, temp2:
+var temp1, temp2;
 temp1 = promtArray.shift();
 temp2 = promtArray.shift();
 promtString = temp1 +' or ' +temp2 +'?';

@@ -108,7 +108,7 @@ var promtArray = ['cats', 'dogs', 'playstation', 'xbox', 'coke', 'pepsi', 'pirat
 var promtString;
 
 //TODO this should be a function
-var temp1, temp2:
+var temp1, temp2;
 temp1 = promtArray.shift();
 temp2 = promtArray.shift();
 promtString = temp1 +' or ' +temp2 +'?';
@@ -572,7 +572,9 @@ function initializeWorld(){
 }
 
 function initializePlayer(){
-	gameObjects.push(new TextButton(new Vector2(100, 100), 50, 50, "Test"));
+	var b = new TextButton(new Vector2(100, 100), 50, 50, "Test");
+	b.onClick(submitNewPromt('butts', 'boobs'));
+	gameObjects.push(b);
 }
 
 function run(){
