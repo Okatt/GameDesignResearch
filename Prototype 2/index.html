@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Prototype 2</title>
+    	<meta charset="UTF-8">
+        <link rel="stylesheet" href="build/css/main.css">
+
+        <style>
+            canvas {
+                position: absolute;
+                margin: auto;
+                top: 0;
+                bottom: 0;
+                right: 0;
+                left: 0;
+                z-index: 0;
+            }
+        </style>
+    </head>
+    <body class='body' oncontextmenu="return false">
+        <script>
+            // Undo dubble click selection
+            document.ondblclick = function(evt){
+                if (window.getSelection){ window.getSelection().removeAllRanges(); }
+                else if (document.selection){ document.selection.empty(); }
+            };
+        </script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="build/src/scripts.js"></script>
+
+    </body>
+</html>
