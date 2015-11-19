@@ -7,6 +7,16 @@ var configuration = {'iceServers': [{'url': 'stun:stun.l.google.com:19302'}]},
 
 var isWorld;                    // True if it should display the world
 var playerId;
+var playerIDArray = [];
+var promtArray = ['cats', 'dogs', 'playstation', 'xbox', 'coke', 'pepsi', 'pirates', 'ninjas'];
+var promtString;
+
+//TODO this should be a function
+var temp1, temp2:
+temp1 = promtArray.shift();
+temp2 = promtArray.shift();
+promtString = temp1 +' or ' +temp2 +'?';
+promtArray.push(temp1, temp2);
 
 var room = "lobby";
 
@@ -30,9 +40,9 @@ socket.on('joined', function (room, clientId) {
 });
 
 socket.on('full', function (room) {
-    alert('Room "' + room + '" is full. We will create a new room for you.');
-    window.location.hash = '';
-    window.location.reload();
+  alert('Room "' + room + '" is full. We will create a new room for you.');
+  window.location.hash = '';
+  window.location.reload();
 });
 
 socket.on('log', function (array) {
@@ -40,8 +50,18 @@ socket.on('log', function (array) {
 });
 
 socket.on('message', function (message){
-    console.log('Client received message:', message);
-    signalingMessageCallback(message);
+  console.log('Client received message:', message);
+  signalingMessageCallback(message);
+});
+
+socket.on('newPlayer', function(newPlayerID){
+  console.log('New player joined the game with ID: ' +newPlayerID);
+  //player = new playerObject(newPlayerID);
+});
+
+socket.on('newPrompt', function(px, py){
+  console.log('New promt added to queue: ' +px +' or ' +py +'?');
+  promtArray.push(px, py);
 });
 
 // Send message to signaling server
@@ -62,6 +82,9 @@ if(location.hostname.match(/localhost|127\.0\.0/)){socket.emit('ipaddr');}
 //**************************************************************************** 
 // Aux functions, mostly UI-related
 //****************************************************************************
+function submitNewPromt(px, py){
+  socket.emit('newPrompt', px, py);
+}
 
 function logError(err) {
     console.log(err.toString(), err);

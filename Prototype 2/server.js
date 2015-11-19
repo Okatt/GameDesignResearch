@@ -10,6 +10,7 @@ var socketIO = require('socket.io');
 var fileServer = new(static.Server)();
 
 var port = 2013;
+var worldID;
 
 var app = http.createServer(function (req, res) {
   fileServer.serve(req, res);
@@ -26,7 +27,6 @@ io.sockets.on('connection', function (socket){
 	}
 
 	socket.on('disconnect', function(){
-		socket.broadcast.emit('newInitiator');
 	});
 
 	socket.on('message', function (message) {
@@ -43,13 +43,18 @@ io.sockets.on('connection', function (socket){
 
 		if (numClients === 0){
 			socket.join(room);
+			worldID = socket.id;
 			socket.emit('created', room, socket.id);
 
 		} else {
 			socket.join(room);
             socket.emit('joined', room, socket.id);
-
+            io.sockets.socket(worldID).emit('newPlayer', socket.id);
 		}
+	});
+
+	socket.on('newPrompt', function(px, py){
+		io.sockets.socket(worldID).emit(px, py);
 	});
 
     socket.on('ipaddr', function () {
