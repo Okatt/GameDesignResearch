@@ -104,17 +104,11 @@ var configuration = {'iceServers': [{'url': 'stun:stun.l.google.com:19302'}]},
 var isWorld;                    // True if it should display the world
 var playerId;
 var playerIDArray = [];
-var promtArray = ['cats', 'dogs', 'playstation', 'xbox', 'coke', 'pepsi', 'pirates', 'ninjas'];
-var promtString;
-
-//TODO this should be a function
-var temp1, temp2;
-temp1 = promtArray.shift();
-temp2 = promtArray.shift();
-promtString = temp1 +' or ' +temp2 +'?';
-promtArray.push(temp1, temp2);
 
 var room = "lobby";
+var playerName;
+var isMatched = false;
+var matchId;
 
 /****************************************************************************
  * Signaling server 
@@ -127,7 +121,6 @@ socket.on('created', function (room, clientId) {
   console.log('Created room', room, '- my client ID is', clientId);
   isWorld = true;
   playerId = clientId;
-
   initializeWorld();
 });
 
@@ -135,7 +128,7 @@ socket.on('joined', function (room, clientId) {
   console.log('This peer has joined room', room, 'with client ID', clientId);
   isWorld = false;
   playerId = clientId;
-
+  playerName = prompt('Voer je naam in: ');
   initializePlayer();
 });
 
@@ -156,12 +149,36 @@ socket.on('message', function (message){
 
 socket.on('newPlayer', function(newPlayerID){
   console.log('New player joined the game with ID: ' +newPlayerID);
-  //player = new playerObject(newPlayerID);
+  //TODO
+  //player = new playerObject(newPlayerID, randomPosition);
+  //gameObjects.push(player)
 });
 
-socket.on('newPrompt', function(px, py){
-  console.log('New promt added to queue: ' +px +' or ' +py +'?');
-  promtArray.push(px, py);
+socket.on('potentialMatch', function(matchedPlayerID){
+  console.log('potential match request');
+  if(!isMatched){
+    socket.emit('confirmedMatch', matchedPlayerID, playerId);
+  }
+});
+
+socket.on('confirmedMatch', function(p1ID, p2ID){
+  if(isWorld){
+    //TODO
+    //move both players with p1ID and p2ID together
+  }
+  else {
+    if(p1ID === playerId){
+      isMatched = true;
+      matchId = p2ID;
+      console.log(playerId +' matched with ' +p2ID);
+    }
+    else if(p2ID === playerId){
+      isMatched = true;
+      matchId = p1ID;
+      console.log(playerId +' matched with ' +p1ID);
+    }
+  }
+  
 });
 
 // Send message to signaling server
@@ -182,9 +199,6 @@ if(location.hostname.match(/localhost|127\.0\.0/)){socket.emit('ipaddr');}
 //**************************************************************************** 
 // Aux functions, mostly UI-related
 //****************************************************************************
-function submitNewPromt(px, py){
-  socket.emit('newPrompt', px, py);
-}
 
 function logError(err) {
     console.log(err.toString(), err);
@@ -573,8 +587,12 @@ function initializeWorld(){
 
 function initializePlayer(){
 	var b = new TextButton(new Vector2(100, 100), 50, 50, "Test");
-	b.onClick(submitNewPromt('butts', 'boobs'));
 	gameObjects.push(b);
+	//TODO
+	//move this attemptMatch emit to a proper function
+	if(isMatched === false){
+			socket.emit('attemptMatch', playerId);
+	}
 }
 
 function run(){
@@ -776,6 +794,7 @@ function checkPointvsAABB(point, rect){
 function Player(id, position){
 	this.type = "Player";
 	this.isAlive = true;
+	this.matched = false;
 
 	// Physics
 	this.position = position;

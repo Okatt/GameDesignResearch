@@ -5,6 +5,7 @@
 function Player(id, position){
 	this.type = "Player";
 	this.isAlive = true;
+	this.matched = false;
 
 	// Physics
 	this.position = position;
