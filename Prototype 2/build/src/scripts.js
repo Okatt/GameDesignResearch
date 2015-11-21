@@ -181,6 +181,25 @@ socket.on('confirmedMatch', function(p1ID, p2ID){
   
 });
 
+socket.on('unMatch', function(p1ID, p2ID){
+  if(isWorld){
+    //TODO
+    //move both players with p1ID and p2ID away from eachother
+  }
+  else {
+    if(p1ID === playerId){
+      isMatched = false;
+      matchId = null;
+      console.log(playerId +' unmatched ' +p2ID);
+    }
+    else if(p2ID === playerId){
+      isMatched = false;
+      matchId = null;
+      console.log(playerId +' unmatched ' +p1ID);
+    }
+  }
+});
+
 // Send message to signaling server
 function sendMessage(message){
     console.log('Client sending message: ', message);
@@ -199,6 +218,21 @@ if(location.hostname.match(/localhost|127\.0\.0/)){socket.emit('ipaddr');}
 //**************************************************************************** 
 // Aux functions, mostly UI-related
 //****************************************************************************
+function seekMatch(){
+  //TODO
+  //call this function whenever a match should be sought and keep calling it until a match is found (while ismatched === false >)
+  if(!isMatched){
+      socket.emit('attemptMatch', playerId);
+  }
+}
+
+function endMatch(){
+  //TODO
+  //only 1 player should call this function OR the server needs to check the potentialMatchArray if it doesnt already contain the IDs
+  if(isMatched){
+    socket.emit('unMatch', playerId, matchId);
+  }
+}
 
 function logError(err) {
     console.log(err.toString(), err);
@@ -588,11 +622,6 @@ function initializeWorld(){
 function initializePlayer(){
 	var b = new TextButton(new Vector2(100, 100), 50, 50, "Test");
 	gameObjects.push(b);
-	//TODO
-	//move this attemptMatch emit to a proper function
-	if(isMatched === false){
-			socket.emit('attemptMatch', playerId);
-	}
 }
 
 function run(){

@@ -101,6 +101,19 @@ io.sockets.on('connection', function (socket){
 		io.sockets.socket(worldID).emit('confirmedMatch', matchID, playerID);
 	});
 
+	socket.on('unMatch', function(p1ID, p2ID){
+		log('unmatched ' +p1ID +' and ' +p2ID);
+
+		potentialMatchArray.push(p1ID, p2ID);
+		
+		//emit the unmatch to the first person
+		io.sockets.socket(p1ID).emit('unMatch', p1ID, p2ID);
+		//emit the unmatch to the second person
+		io.sockets.socket(p2ID).emit('unMatch', p1ID, p2ID);
+		//emit the unmatch to the world
+		io.sockets.socket(worldID).emit('unMatch', p1ID, p2ID);
+	});
+
     socket.on('ipaddr', function () {
         var ifaces = os.networkInterfaces();
         for (var dev in ifaces) {

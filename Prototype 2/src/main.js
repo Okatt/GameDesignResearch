@@ -59,11 +59,6 @@ function initializeWorld(){
 function initializePlayer(){
 	var b = new TextButton(new Vector2(100, 100), 50, 50, "Test");
 	gameObjects.push(b);
-	//TODO
-	//move this attemptMatch emit to a proper function
-	if(isMatched === false){
-			socket.emit('attemptMatch', playerId);
-	}
 }
 
 function run(){
