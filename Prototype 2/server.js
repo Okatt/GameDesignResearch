@@ -21,7 +21,14 @@ var app = http.createServer(function (req, res) {
 
 var io = socketIO.listen(app);
 io.sockets.on('connection', function (socket){
-
+	function contains(a, obj) {
+    for (var i = 0; i < a.length; i++) {
+        if (a[i] === obj) {
+            return true;
+        }
+    }
+    	return false;
+	}
     // convenience function to log server messages on the client
     function log(){
 		var array = [">>> Message from server:"];
@@ -104,14 +111,27 @@ io.sockets.on('connection', function (socket){
 	socket.on('unMatch', function(p1ID, p2ID){
 		log('unmatched ' +p1ID +' and ' +p2ID);
 
-		potentialMatchArray.push(p1ID, p2ID);
-		
+		if(!contains(potentialMatchArray, p1ID)){
+			potentialMatchArray.push(p1ID);
+		}
+		if(!contains(potentialMatchArray, p2ID)){
+			potentialMatchArray.push(p2ID);
+		}
+
 		//emit the unmatch to the first person
 		io.sockets.socket(p1ID).emit('unMatch', p1ID, p2ID);
 		//emit the unmatch to the second person
 		io.sockets.socket(p2ID).emit('unMatch', p1ID, p2ID);
 		//emit the unmatch to the world
 		io.sockets.socket(worldID).emit('unMatch', p1ID, p2ID);
+	});
+
+	//TODO
+	//function should take all parameters (shape, color, eyes, feet etc.)
+	socket.on('characterInfo', function(matchID, color, shape, name){
+		//TODO
+		//emit should send all parameters
+		io.sockets.socket(matchID).emit('characterInfo', color, shape, name);
 	});
 
     socket.on('ipaddr', function () {

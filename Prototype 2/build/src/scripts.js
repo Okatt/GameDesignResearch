@@ -110,6 +110,14 @@ var playerName;
 var isMatched = false;
 var matchId;
 
+var playerShape = randomRange(0, 5);
+var playerColor = randomRange(0, 5);
+
+var matchShape;
+var matchColor;
+var matchName;
+
+
 /****************************************************************************
  * Signaling server 
  ****************************************************************************/
@@ -155,6 +163,8 @@ socket.on('newPlayer', function(newPlayerID){
 });
 
 socket.on('potentialMatch', function(matchedPlayerID){
+  //TODO
+  //only 1 potential match should end up matching
   console.log('potential match request');
   if(!isMatched){
     socket.emit('confirmedMatch', matchedPlayerID, playerId);
@@ -186,18 +196,20 @@ socket.on('unMatch', function(p1ID, p2ID){
     //TODO
     //move both players with p1ID and p2ID away from eachother
   }
-  else {
-    if(p1ID === playerId){
+  else if(p1ID === playerId || p2ID === playerId){
       isMatched = false;
       matchId = null;
+      matchColor = null;
+      matchShape = null;
+      matchName = null;
       console.log(playerId +' unmatched ' +p2ID);
-    }
-    else if(p2ID === playerId){
-      isMatched = false;
-      matchId = null;
-      console.log(playerId +' unmatched ' +p1ID);
-    }
   }
+});
+
+socket.on('characterInfo', function(color, shape, name){
+  matchColor = color;
+  matchShape = shape;
+  matchName = name;
 });
 
 // Send message to signaling server
@@ -231,6 +243,25 @@ function endMatch(){
   //only 1 player should call this function OR the server needs to check the potentialMatchArray if it doesnt already contain the IDs
   if(isMatched){
     socket.emit('unMatch', playerId, matchId);
+  }
+}
+
+function sendCharacterInfo(){
+  //TODO
+  //emit all the variables (color, shape, eyes, feet etc.)
+  socket.emit('characterInfo', matchId, playerColor, playerShape, playerName);
+}
+
+function confirmCode(){
+  var input;
+  input = prompt('Ga naar de deur en voer de speler naam van je partner in: ');
+  //TODO
+  //change to socket.emit and check if both entered the correct code maybe?
+  if(input === matchName){
+    return true;
+  }
+  else {
+    return false;
   }
 }
 
