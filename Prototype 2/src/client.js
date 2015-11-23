@@ -54,6 +54,14 @@ socket.on('log', function (array) {
   console.log.apply(console, array);
 });
 
+socket.on('playerLeft', function(id){
+  for(var i = 0; i < gameObjects.length; i++){
+    if(gameObjects[i].type === "Player" && gameObjects[i].id === id){
+      gameObjects[i].kill();
+    }
+  }
+});
+
 socket.on('message', function (message){
   console.log('Client received message:', message);
   signalingMessageCallback(message);

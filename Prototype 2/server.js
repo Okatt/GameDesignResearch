@@ -49,6 +49,7 @@ io.sockets.on('connection', function (socket){
 				break;
 			}
 		}
+		io.sockets.socket(worldID).emit('playerLeft', socket.id);
 	});
 
 	socket.on('message', function (message) {
