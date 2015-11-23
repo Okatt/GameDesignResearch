@@ -17,7 +17,7 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 	// Graphics
 	this.depth = canvas.height-this.position.y;
 	this.eyes = eyes;
-	this.body = new Sprite(spritesheet_characters_s, shapeIndex*60, colorIndex*60, 60, 60, new Vector2(30, 60));
+	this.body = new Sprite(spritesheet_characters_s, shapeIndex/2, colorIndex/2, 60, 60, new Vector2(30, 60));
 	
 	// Data
 	this.isFollowing = player;
