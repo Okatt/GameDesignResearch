@@ -2,7 +2,7 @@
 //	Player
 //*****************************************************************************************
 
-function Player(id, position){
+function Player(id, position, color, shape){
 	this.type = "Player";
 	this.isAlive = true;
 	
@@ -12,6 +12,8 @@ function Player(id, position){
 	this.velocity = new Vector2(0, 0);
 	this.width = 40;
 	this.height = 40;
+	this.color = color;
+	this.shape = shape;
 	
 	// Data
 	this.id = id;
@@ -75,6 +77,6 @@ function Player(id, position){
 		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
 
 		// Render
-		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, color.BLACK, 1);
+		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, colorArray[this.color], 1);
 	}
 }

@@ -108,8 +108,9 @@ var playerName;
 var isMatched = false;
 var matchId;
 
-var playerShape = randomRange(0, 5);
-var playerColor = randomRange(0, 5);
+var playerColor = Math.round(randomRange(0, 5));
+var playerShape = Math.round(randomRange(0, 5));
+
 
 var matchShape;
 var matchColor;
@@ -161,10 +162,12 @@ socket.on('message', function (message){
   signalingMessageCallback(message);
 });
 
-socket.on('newPlayer', function(newPlayerID){
-  console.log('New player joined the game with ID: ' +newPlayerID);
+socket.on('newPlayer', function(newPlayerID, color, shape){
+  console.log('New player joined the game with ID: ' +newPlayerID +' color: ' +color +' shape: ' +shape);
   randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
-  player = new Player(newPlayerID, randomPosition);
+  //ADDED:
+  //color and shape var, these properties decide what the new player looks like
+  player = new Player(newPlayerID, randomPosition, color, shape);
   // Spawn the player in an empty space
   while(checkCollision(player) || checkOutOfBounds(player)){
     player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
@@ -234,7 +237,7 @@ function sendMessage(message){
 //****************************************************************************
 
 // Join a room
-socket.emit('connect', room);
+socket.emit('connect', room, playerColor, playerShape);
 
 if(location.hostname.match(/localhost|127\.0\.0/)){socket.emit('ipaddr');}
 
@@ -290,7 +293,8 @@ function gotRemoteStream(event) {
 //*****************************************************************************************
 
 // Colors
-var color = {BLACK: "#000000", DARK_GREY: "#323232", WHITE: "#FFFFFF", BLUE: "#0090FF", GREEN: "#7AFF2D"};
+var color = {BLACK: "#000000", DARK_GREY: "#323232", WHITE: "#FFFFFF", BLUE: "#0090FF", GREEN: "#7AFF2D", PINK: "#F319FF", RED: "#FF0000", YELLOW: "#FFFF00"};
+var colorArray = [color.BLACK, color.DARK_GREY, color.WHITE, color.PINK, color.RED, color.YELLOW];
 
 
 // Camera
@@ -940,7 +944,7 @@ function checkPointvsAABB(point, rect){
 //	Player
 //*****************************************************************************************
 
-function Player(id, position){
+function Player(id, position, color, shape){
 	this.type = "Player";
 	this.isAlive = true;
 	
@@ -950,6 +954,8 @@ function Player(id, position){
 	this.velocity = new Vector2(0, 0);
 	this.width = 40;
 	this.height = 40;
+	this.color = color;
+	this.shape = shape;
 	
 	// Data
 	this.id = id;
@@ -1013,7 +1019,7 @@ function Player(id, position){
 		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
 
 		// Render
-		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, color.BLACK, 1);
+		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, colorArray[this.color], 1);
 	}
 }
 //*****************************************************************************************

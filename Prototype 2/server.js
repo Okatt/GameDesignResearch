@@ -58,7 +58,7 @@ io.sockets.on('connection', function (socket){
 		socket.broadcast.emit('message', message);
 	});
 
-	socket.on('connect', function (room) {
+	socket.on('connect', function (room, color, shape) {
         log('Request to create or join room ' + room);
 
 		var numClients = io.sockets.clients(room).length;
@@ -74,7 +74,7 @@ io.sockets.on('connection', function (socket){
             socket.emit('joined', room, socket.id);
             playerIDArray.push(socket.id);
             potentialMatchArray.push(socket.id);
-            io.sockets.socket(worldID).emit('newPlayer', socket.id);
+            io.sockets.socket(worldID).emit('newPlayer', socket.id, color, shape);
 		}
 	});
 

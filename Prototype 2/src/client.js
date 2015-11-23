@@ -14,8 +14,9 @@ var playerName;
 var isMatched = false;
 var matchId;
 
-var playerShape = randomRange(0, 5);
-var playerColor = randomRange(0, 5);
+var playerColor = Math.round(randomRange(0, 5));
+var playerShape = Math.round(randomRange(0, 5));
+
 
 var matchShape;
 var matchColor;
@@ -67,10 +68,12 @@ socket.on('message', function (message){
   signalingMessageCallback(message);
 });
 
-socket.on('newPlayer', function(newPlayerID){
-  console.log('New player joined the game with ID: ' +newPlayerID);
+socket.on('newPlayer', function(newPlayerID, color, shape){
+  console.log('New player joined the game with ID: ' +newPlayerID +' color: ' +color +' shape: ' +shape);
   randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
-  player = new Player(newPlayerID, randomPosition);
+  //ADDED:
+  //color and shape var, these properties decide what the new player looks like
+  player = new Player(newPlayerID, randomPosition, color, shape);
   // Spawn the player in an empty space
   while(checkCollision(player) || checkOutOfBounds(player)){
     player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
@@ -140,7 +143,7 @@ function sendMessage(message){
 //****************************************************************************
 
 // Join a room
-socket.emit('connect', room);
+socket.emit('connect', room, playerColor, playerShape);
 
 if(location.hostname.match(/localhost|127\.0\.0/)){socket.emit('ipaddr');}
 
