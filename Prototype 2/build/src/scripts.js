@@ -114,6 +114,7 @@ var matchId;
 var attempts = 0;
 var potentialMatchId;
 var isDeciding = false;
+var isSeeking = false;
 
 var playerColor = Math.round(randomRange(0, 5));
 var playerShape = Math.round(randomRange(0, 5));
@@ -186,9 +187,9 @@ socket.on('potentialMatch', function(matchedPlayerID){
   //TODO
   //only 1 potential match should end up matching
   console.log('potential match request');
-  potentialMatchId = matchedPlayerID;
-  if(!isMatched && !isDeciding){
+  if(!isMatched && !isDeciding && !isSeeking){
     //show accept and reject buttons
+    potentialMatchId = matchedPlayerID;
     isDeciding = true;
     acceptButton.isVisible = true;
     acceptButton.isDisabled = false;
@@ -198,7 +199,8 @@ socket.on('potentialMatch', function(matchedPlayerID){
     //
   }
   else {
-    socket.emit('rejectedMatch', potentialMatchId);
+    console.log('already matched, seeking or deciding')
+    socket.emit('rejectedMatch', matchedPlayerID);
   }
 });
 
@@ -208,18 +210,21 @@ socket.on('confirmedMatch', function(p1ID, p2ID){
     //move both players with p1ID and p2ID together
   }
   else {
+    makeBabyButton.isVisible = true;
+    makeBabyButton.isDisabled = false;
+    isDeciding = false;
+    isSeeking = false;
+    isMatched = true;
+    console.log(p1ID +' matched with ' +p2ID);
+
     if(p1ID === playerId){
-      isMatched = true;
       matchId = p2ID;
-      console.log(playerId +' matched with ' +p2ID);
-      sendCharacterInfo()
     }
     else if(p2ID === playerId){
-      isMatched = true;
       matchId = p1ID;
-      console.log(playerId +' matched with ' +p1ID);
-      sendCharacterInfo()
     }
+
+    sendCharacterInfo();
   }
 });
 
@@ -229,6 +234,8 @@ socket.on('unMatch', function(p1ID, p2ID){
     //move both players with p1ID and p2ID away from eachother
   }
   else if(p1ID === playerId || p2ID === playerId){
+      makeBabyButton.isVisible = false;
+      makeBabyButton.isDisabled = true;
       isMatched = false;
       matchId = null;
       matchColor = null;
@@ -239,6 +246,7 @@ socket.on('unMatch', function(p1ID, p2ID){
 });
 
 socket.on('matchRejected', function(){
+  isSeeking = false;
   attempts++;
   seekMatch();
 });
@@ -247,6 +255,8 @@ socket.on('noMatchFound', function(){
   //TODO
   //called when no unmatched players found or all unmatched players have been tried
   //seekMatch();
+  console.log('no match found');
+  isSeeking = false;
   attempts = 0;
 });
 
@@ -277,14 +287,15 @@ if(location.hostname.match(/localhost|127\.0\.0/)){socket.emit('ipaddr');}
 function seekMatch(){
   //TODO
   //call this function whenever a match should be sought and keep calling it until a match is found (while ismatched === false >)
-  if(!isMatched && !isDeciding){
+  if(!isMatched && !isDeciding && !isSeeking){
+      isSeeking = true;
       socket.emit('attemptMatch', playerId, attempts);
   }
 }
 
 function endMatch(){
   //TODO
-  //only 1 player should call this function OR the server needs to check the potentialMatchArray if it doesnt already contain the IDs
+  //function should be called after confirm code is done maybe instead of on a button basis.
   if(isMatched){
     socket.emit('unMatch', playerId, matchId);
   }
@@ -322,10 +333,11 @@ function confirmCode(){
   //TODO
   //change to socket.emit and check if both entered the correct code maybe?
   if(input === matchName){
-    return true;
+    console.log('baby made');
+    //endMatch();
   }
   else {
-    return false;
+    console.log('wrong name');
   }
 }
 
@@ -687,6 +699,7 @@ var previousKeyboard;
 
 var acceptButton;
 var rejectButton;
+var makeBabyButton;
 
 window.onload = function main(){
 	// Create the canvas
@@ -741,6 +754,12 @@ function initializePlayer(){
 	gameObjects.push(rejectButton);
 	rejectButton.isVisible = false;
 	rejectButton.isDisabled = true;
+
+	makeBabyButton = new TextButton(new Vector2(300, 450), 300, 100, "COMBINE DNA", color.DARK_GREY);
+	makeBabyButton.onClick = function(){confirmCode()};
+	gameObjects.push(makeBabyButton);
+	makeBabyButton.isVisible = false;
+	makeBabyButton.isDisabled = true;
 
 	var b = new TextButton(new Vector2(100, 100), 300, 100, "Zoek een Match", color.BLUE);
 	b.onClick = function(){seekMatch()};

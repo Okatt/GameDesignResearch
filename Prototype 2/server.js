@@ -92,6 +92,7 @@ io.sockets.on('connection', function (socket){
 				}
 			}
 			else{
+				log('no users accepted you or are currently untmatched');
 				io.sockets.socket(playerID).emit('noMatchFound');
 			}
 		}

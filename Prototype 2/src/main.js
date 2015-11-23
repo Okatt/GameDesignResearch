@@ -28,6 +28,7 @@ var previousKeyboard;
 
 var acceptButton;
 var rejectButton;
+var makeBabyButton;
 
 window.onload = function main(){
 	// Create the canvas
@@ -82,6 +83,12 @@ function initializePlayer(){
 	gameObjects.push(rejectButton);
 	rejectButton.isVisible = false;
 	rejectButton.isDisabled = true;
+
+	makeBabyButton = new TextButton(new Vector2(300, 450), 300, 100, "COMBINE DNA", color.DARK_GREY);
+	makeBabyButton.onClick = function(){confirmCode()};
+	gameObjects.push(makeBabyButton);
+	makeBabyButton.isVisible = false;
+	makeBabyButton.isDisabled = true;
 
 	var b = new TextButton(new Vector2(100, 100), 300, 100, "Zoek een Match", color.BLUE);
 	b.onClick = function(){seekMatch()};
