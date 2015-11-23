@@ -102,7 +102,7 @@ function applyPhysics(){
 			}else{ob.position.y += ob.velocity.y;}
 
 			// Apply drag
-			ob.velocity.multiply(0.95);
+			ob.velocity.multiply(ob.drag);
 		}
 	}
 }

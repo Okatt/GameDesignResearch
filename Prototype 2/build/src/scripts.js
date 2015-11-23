@@ -1,4 +1,53 @@
 //*****************************************************************************************
+//	Baby
+//*****************************************************************************************
+
+function Baby(position, targetObject){
+	this.type = "Player";
+	this.isAlive = true;
+	
+	// Physics
+	this.position = position;
+	this.previousPos = this.position.clone();
+	this.velocity = new Vector2(0, 0);
+	this.width = 20;
+	this.height = 20;
+	this.drag = 0.99;
+
+	// Graphics
+	
+	// Data
+	this.isFollowing = targetObject;
+	this.isSolid = false;
+	this.isDynamic = true;
+
+	this.kill = function(){
+		this.isAlive = false;
+	}
+
+	this.getHitbox = function(){
+		return new AABB(this.position.x - this.width/2, this.position.y - this.height/2, this.width, this.height);
+	}
+
+	this.update = function(){
+		if(this.isFollowing){
+			var dis = this.position.getVectorTo(this.isFollowing.position);
+			if(dis.length() >= 40){
+				dis.multiply(0.1);
+				this.velocity.add(dis);
+			}
+		}
+	}
+
+	this.render = function(lagOffset){
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+
+		// Render
+		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, color.BLACK, 1);
+	}
+}
+//*****************************************************************************************
 //	Button
 //*****************************************************************************************
 
@@ -730,15 +779,24 @@ function initialize(){
 
 function initializeWorld(){
 	// Test players
-	// for (var i = 0; i < 200; i++) {
+	// for (var i = 0; i < 20; i++) {
 	// 	randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
-	// 	player = new Player(i, randomPosition);
+	// 	player = new Player(i, randomPosition, 0, 0);
 	// 	// Spawn the player in an empty space
 	// 	while(checkCollision(player) || checkOutOfBounds(player)){
 	// 		player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
 	// 		player.previousPos = player.position.clone();
 	// 	}
- 	// 		gameObjects.push(player);
+ // 			gameObjects.push(player);
+ // 			console.log("player");
+ // 			player.addBaby();
+ // 			player.addBaby();
+ // 			player.addBaby();
+ // 			player.addBaby();
+ // 			player.addBaby();
+ // 			player.addBaby();
+ // 			//console.log("baby");
+
 	// }
 }
 
@@ -833,7 +891,7 @@ function render(lagOffset){
 	if(isWorld){
 		// Background
 		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.BLUE, 1);
-		drawRectangle(ctx, 0, canvas.height/2, canvas.width, canvas.height/2, true, color.GREEN, 1);
+		//drawRectangle(ctx, 0, canvas.height/2, canvas.width, canvas.height/2, true, color.GREEN, 1);
 
 		// Render all game objects
 		for (var ob = 0; ob < gameObjects.length; ob++){
@@ -955,7 +1013,7 @@ function applyPhysics(){
 			}else{ob.position.y += ob.velocity.y;}
 
 			// Apply drag
-			ob.velocity.multiply(0.95);
+			ob.velocity.multiply(ob.drag);
 		}
 	}
 }
@@ -1039,6 +1097,9 @@ function Player(id, position, color, shape){
 	this.velocity = new Vector2(0, 0);
 	this.width = 40;
 	this.height = 40;
+	this.drag = 0.95;
+
+	// Graphics
 	this.color = color;
 	this.shape = shape;
 	
@@ -1057,6 +1118,16 @@ function Player(id, position, color, shape){
 
 	this.getHitbox = function(){
 		return new AABB(this.position.x - this.width/2, this.position.y - this.height/2, this.width, this.height);
+	}
+
+	// TODO clean up
+	this.addBaby = function(){
+		var pos = this.position.clone();
+		var offset = new Vector2(0, -60);
+		offset.rotate(randomRange(0, 359));
+		var b = new Baby(new Vector2(pos.x+offset.x, pos.y+offset.y), this);
+
+		gameObjects.push(b);
 	}
 
 	this.update = function(){

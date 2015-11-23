@@ -59,15 +59,24 @@ function initialize(){
 
 function initializeWorld(){
 	// Test players
-	// for (var i = 0; i < 200; i++) {
+	// for (var i = 0; i < 20; i++) {
 	// 	randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
-	// 	player = new Player(i, randomPosition);
+	// 	player = new Player(i, randomPosition, 0, 0);
 	// 	// Spawn the player in an empty space
 	// 	while(checkCollision(player) || checkOutOfBounds(player)){
 	// 		player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
 	// 		player.previousPos = player.position.clone();
 	// 	}
- 	// 		gameObjects.push(player);
+ // 			gameObjects.push(player);
+ // 			console.log("player");
+ // 			player.addBaby();
+ // 			player.addBaby();
+ // 			player.addBaby();
+ // 			player.addBaby();
+ // 			player.addBaby();
+ // 			player.addBaby();
+ // 			//console.log("baby");
+
 	// }
 }
 
@@ -162,7 +171,7 @@ function render(lagOffset){
 	if(isWorld){
 		// Background
 		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.BLUE, 1);
-		drawRectangle(ctx, 0, canvas.height/2, canvas.width, canvas.height/2, true, color.GREEN, 1);
+		//drawRectangle(ctx, 0, canvas.height/2, canvas.width, canvas.height/2, true, color.GREEN, 1);
 
 		// Render all game objects
 		for (var ob = 0; ob < gameObjects.length; ob++){

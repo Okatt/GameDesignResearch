@@ -12,6 +12,9 @@ function Player(id, position, color, shape){
 	this.velocity = new Vector2(0, 0);
 	this.width = 40;
 	this.height = 40;
+	this.drag = 0.95;
+
+	// Graphics
 	this.color = color;
 	this.shape = shape;
 	
@@ -30,6 +33,16 @@ function Player(id, position, color, shape){
 
 	this.getHitbox = function(){
 		return new AABB(this.position.x - this.width/2, this.position.y - this.height/2, this.width, this.height);
+	}
+
+	// TODO clean up
+	this.addBaby = function(){
+		var pos = this.position.clone();
+		var offset = new Vector2(0, -60);
+		offset.rotate(randomRange(0, 359));
+		var b = new Baby(new Vector2(pos.x+offset.x, pos.y+offset.y), this);
+
+		gameObjects.push(b);
 	}
 
 	this.update = function(){
