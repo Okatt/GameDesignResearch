@@ -277,7 +277,7 @@ if(location.hostname.match(/localhost|127\.0\.0/)){socket.emit('ipaddr');}
 function seekMatch(){
   //TODO
   //call this function whenever a match should be sought and keep calling it until a match is found (while ismatched === false >)
-  if(!isMatched){
+  if(!isMatched && !isDeciding){
       socket.emit('attemptMatch', playerId, attempts);
   }
 }
