@@ -151,6 +151,15 @@ io.sockets.on('connection', function (socket){
 		io.sockets.socket(matchID).emit('characterInfo', color, shape, name);
 	});
 
+	socket.on('createBaby', function(p1ID, p2ID, p1C, p1S, p2C, p2S){
+
+		//p1C = player 1 color, p2S = player 2 shape etc.
+		//TODO
+		//randomly select what aspects to take (should be same for both players and should take elements from both parents)
+		io.sockets.socket(worldID).emit('createBaby', p1ID, p1C, p2S);
+		io.sockets.socket(worldID).emit('createBaby', p2ID, p1C, p2S);
+	});
+
     socket.on('ipaddr', function () {
         var ifaces = os.networkInterfaces();
         for (var dev in ifaces) {
