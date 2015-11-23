@@ -10,11 +10,14 @@ function Player(id, position, color, shape){
 	this.position = position;
 	this.previousPos = this.position.clone();
 	this.velocity = new Vector2(0, 0);
-	this.width = 40;
-	this.height = 40;
+	this.width = 60;
+	this.height = 30;
 	this.drag = 0.95;
 
 	// Graphics
+	this.depth = canvas.height-this.position.y;
+	this.body = new Sprite(spritesheet_characters, 0, 0, 100, 100, new Vector2(50, 100));
+
 	this.color = color;
 	this.shape = shape;
 	
@@ -49,6 +52,8 @@ function Player(id, position, color, shape){
 		// Timer
 		this.timer -= UPDATE_DURATION/1000;
 		if(this.timer < 0){this.timer = 0;}
+
+		this.depth = canvas.height-this.position.y;
 
 		switch(this.state){
 			case "IDLE":
@@ -90,6 +95,10 @@ function Player(id, position, color, shape){
 		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
 
 		// Render
-		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, colorArray[this.color], 1);
+		this.body.draw(ctx, drawX, drawY);
+
+		// Hitbox (debug)
+		//var h = this.getHitbox();
+		//drawRectangle(ctx, h.x, h.y, h.width, h.height, true, color.GREEN, 0.5);
 	}
 }

@@ -15,6 +15,7 @@ function Baby(position, targetObject){
 	this.drag = 0.99;
 
 	// Graphics
+	this.depth = canvas.height-this.position.y;
 	
 	// Data
 	this.isFollowing = targetObject;
@@ -30,6 +31,8 @@ function Baby(position, targetObject){
 	}
 
 	this.update = function(){
+		this.depth = canvas.height-this.position.y;
+
 		if(this.isFollowing){
 			var dis = this.position.getVectorTo(this.isFollowing.position);
 			if(dis.length() >= 40){
@@ -44,6 +47,6 @@ function Baby(position, targetObject){
 		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
 
 		// Render
-		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, color.BLACK, 1);
+		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, color.WHITE, 1);
 	}
 }

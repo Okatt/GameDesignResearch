@@ -58,10 +58,16 @@ function initialize(){
 }
 
 function initializeWorld(){
+	// Props
+	gameObjects.push( new Prop(new Vector2(200, 370), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(560, 340), 90, 40, new Sprite(spritesheet_environment, 400, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(canvas.width - 250, 380), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+
 	//Test players
 	for (var i = 0; i < 20; i++) {
 		randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
 		player = new Player(i, randomPosition, 0, 0);
+
 		// Spawn the player in an empty space
 		while(checkCollision(player) || checkOutOfBounds(player)){
 			player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
@@ -75,11 +81,6 @@ function initializeWorld(){
  			player.addBaby();
  			player.addBaby();
 	}
-
-	// Props
-	gameObjects.push( new Prop(new Vector2(200, 370), 80, 30, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
-	gameObjects.push( new Prop(new Vector2(560, 340), 80, 30, new Sprite(spritesheet_environment, 400, 0, 400, 400, new Vector2(196, 366))) );
-	gameObjects.push( new Prop(new Vector2(canvas.width - 250, 380), 80, 30, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
 }
 
 function initializePlayer(){

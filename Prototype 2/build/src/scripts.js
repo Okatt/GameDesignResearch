@@ -15,6 +15,7 @@ function Baby(position, targetObject){
 	this.drag = 0.99;
 
 	// Graphics
+	this.depth = canvas.height-this.position.y;
 	
 	// Data
 	this.isFollowing = targetObject;
@@ -30,6 +31,8 @@ function Baby(position, targetObject){
 	}
 
 	this.update = function(){
+		this.depth = canvas.height-this.position.y;
+
 		if(this.isFollowing){
 			var dis = this.position.getVectorTo(this.isFollowing.position);
 			if(dis.length() >= 40){
@@ -44,7 +47,7 @@ function Baby(position, targetObject){
 		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
 
 		// Render
-		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, color.BLACK, 1);
+		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, color.WHITE, 1);
 	}
 }
 //*****************************************************************************************
@@ -787,10 +790,16 @@ function initialize(){
 }
 
 function initializeWorld(){
+	// Props
+	gameObjects.push( new Prop(new Vector2(200, 370), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(560, 340), 90, 40, new Sprite(spritesheet_environment, 400, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(canvas.width - 250, 380), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+
 	//Test players
 	for (var i = 0; i < 20; i++) {
 		randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
 		player = new Player(i, randomPosition, 0, 0);
+
 		// Spawn the player in an empty space
 		while(checkCollision(player) || checkOutOfBounds(player)){
 			player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
@@ -804,11 +813,6 @@ function initializeWorld(){
  			player.addBaby();
  			player.addBaby();
 	}
-
-	// Props
-	gameObjects.push( new Prop(new Vector2(200, 370), 80, 30, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
-	gameObjects.push( new Prop(new Vector2(560, 340), 80, 30, new Sprite(spritesheet_environment, 400, 0, 400, 400, new Vector2(196, 366))) );
-	gameObjects.push( new Prop(new Vector2(canvas.width - 250, 380), 80, 30, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
 }
 
 function initializePlayer(){
@@ -1106,11 +1110,14 @@ function Player(id, position, color, shape){
 	this.position = position;
 	this.previousPos = this.position.clone();
 	this.velocity = new Vector2(0, 0);
-	this.width = 40;
-	this.height = 40;
+	this.width = 60;
+	this.height = 30;
 	this.drag = 0.95;
 
 	// Graphics
+	this.depth = canvas.height-this.position.y;
+	this.body = new Sprite(spritesheet_characters, 0, 0, 100, 100, new Vector2(50, 100));
+
 	this.color = color;
 	this.shape = shape;
 	
@@ -1145,6 +1152,8 @@ function Player(id, position, color, shape){
 		// Timer
 		this.timer -= UPDATE_DURATION/1000;
 		if(this.timer < 0){this.timer = 0;}
+
+		this.depth = canvas.height-this.position.y;
 
 		switch(this.state){
 			case "IDLE":
@@ -1186,7 +1195,11 @@ function Player(id, position, color, shape){
 		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
 
 		// Render
-		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, colorArray[this.color], 1);
+		this.body.draw(ctx, drawX, drawY);
+
+		// Hitbox (debug)
+		//var h = this.getHitbox();
+		//drawRectangle(ctx, h.x, h.y, h.width, h.height, true, color.GREEN, 0.5);
 	}
 }
 //*****************************************************************************************
@@ -1204,6 +1217,7 @@ function Prop(position, width, height, sprite){
 	this.height = height;
 
 	// Graphics
+	this.depth = canvas.height-this.position.y;
 	this.sprite = sprite;
 	
 	// Data
@@ -1230,8 +1244,8 @@ function Prop(position, width, height, sprite){
 		this.sprite.draw(ctx, drawX, drawY);
 
 		// Hitbox (debug)
-		//var h = this.getHitbox();
-		//drawRectangle(ctx, h.x, h.y, h.width, h.height, true, color.GREEN, 0.5);
+		var h = this.getHitbox();
+		drawRectangle(ctx, h.x, h.y, h.width, h.height, true, color.GREEN, 0.5);
 	}
 }
 //*****************************************************************************************
