@@ -2,7 +2,7 @@
 //	Player
 //*****************************************************************************************
 
-function Player(id, position, color, shape, eyes){
+function Player(id, position, shape, color, eyes){
 	this.type = "Player";
 	this.isAlive = true;
 	
@@ -16,13 +16,11 @@ function Player(id, position, color, shape, eyes){
 
 	// Graphics
 	this.depth = canvas.height-this.position.y;
-	this.body = new Sprite(spritesheet_characters, shape, color, 120, 120, new Vector2(60, 120));
+	this.body = new Sprite(spritesheet_characters, shape*120, color*120, 120, 120, new Vector2(60, 120));
 	this.eyes = eyes;
 
-	
 	this.color = color;
 	this.shape = shape;
-	
 	
 	// Data
 	this.id = id;
@@ -30,11 +28,15 @@ function Player(id, position, color, shape, eyes){
 	this.isSolid = true;
 	this.isDynamic = true;
 	this.state = "IDLE"; // IDLE, MOVING
+	this.babies = [];
 
 	this.timer = 0;
 
 	this.kill = function(){
 		this.isAlive = false;
+		for (var i = 0; i < this.babies.length; i++) {
+			this.babies[i].kill();
+		}
 	}
 
 	this.getHitbox = function(){
@@ -48,6 +50,7 @@ function Player(id, position, color, shape, eyes){
 		offset.rotate(randomRange(0, 359));
 		var b = new Baby(new Vector2(pos.x+offset.x, pos.y+offset.y), this, shapeIndex, colorIndex, eyes);
 
+		this.babies.push(b);
 		gameObjects.push(b);
 	}
 

@@ -64,23 +64,23 @@ function initializeWorld(){
 	gameObjects.push( new Prop(new Vector2(canvas.width - 250, 380), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
 
 	//Test players
-	for (var i = 0; i < 4; i++) {
-		randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
-		player = new Player(i, randomPosition, 0, 0);
+	// for (var i = 0; i < 4; i++) {
+	// 	randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
+	// 	player = new Player(i, randomPosition, 0, 0);
 
-		// Spawn the player in an empty space
-		while(checkCollision(player) || checkOutOfBounds(player)){
-			player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
-			player.previousPos = player.position.clone();
-		}
- 			gameObjects.push(player);
- 			player.addBaby(0, 0, 1);
- 			player.addBaby(1, 4, 1);
- 			player.addBaby(2, 2, 2);
- 			player.addBaby(3, 3, 2);
- 			player.addBaby(0, 0, 3);
- 			player.addBaby(1, 1, 3);
-	}
+	// 	// Spawn the player in an empty space
+	// 	while(checkCollision(player) || checkOutOfBounds(player)){
+	// 		player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
+	// 		player.previousPos = player.position.clone();
+	// 	}
+ // 			gameObjects.push(player);
+ // 			player.addBaby(0, 0, 1);
+ // 			player.addBaby(1, 4, 1);
+ // 			player.addBaby(2, 2, 2);
+ // 			player.addBaby(3, 3, 2);
+ // 			player.addBaby(0, 0, 3);
+ // 			player.addBaby(1, 1, 3);
+	// }
 }
 
 function initializePlayer(){

@@ -17,7 +17,7 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 	// Graphics
 	this.depth = canvas.height-this.position.y;
 	this.eyes = eyes;
-	this.body = new Sprite(spritesheet_characters_s, shapeIndex/2, colorIndex/2, 60, 60, new Vector2(30, 60));
+	this.body = new Sprite(spritesheet_characters_s, shapeIndex*60, colorIndex*60, 60, 60, new Vector2(30, 60));
 	
 	// Data
 	this.isFollowing = player;
@@ -212,8 +212,8 @@ var potentialMatchId;
 var isDeciding = false;
 var isSeeking = false;
 
-var playerColor = Math.floor(randomRange(0, 4.99))*120;
-var playerShape = Math.floor(randomRange(0, 3.99))*120;
+var playerColor = Math.floor(randomRange(0, 4.99));
+var playerShape = Math.floor(randomRange(0, 3.99));
 var playerEyes = Math.floor(randomRange(0, 2.99))+1;
 
 var matchShape;
@@ -267,12 +267,12 @@ socket.on('message', function (message){
   signalingMessageCallback(message);
 });
 
-socket.on('newPlayer', function(newPlayerID, color, shape, eyes){
+socket.on('newPlayer', function(newPlayerID, shape, color, eyes){
   console.log('New player joined the game with ID: ' +newPlayerID +' color: ' +color +' shape: ' +shape);
   randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
   //ADDED:
   //color and shape var, these properties decide what the new player looks like
-  player = new Player(newPlayerID, randomPosition, color, shape, eyes);
+  player = new Player(newPlayerID, randomPosition, shape, color, eyes);
   // Spawn the player in an empty space
   while(checkCollision(player) || checkOutOfBounds(player)){
     player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
@@ -366,10 +366,12 @@ socket.on('characterInfo', function(color, shape, name, eyes){
   matchEyes = eyes;
 });
 
-socket.on('createBaby', function(ID, color, shape, eyes){
-    //TODO
-    //create gameobject that follows the player object with the given ID 
-    //baby should have the color and shape that is given etc.    
+socket.on('createBaby', function(ID, shape, color, eyes){
+  for (var i = 0; i < gameObjects.length; i++) {
+    if(gameObjects[i].type = "Player" && gameObjects[i].id === ID){
+      gameObjects[i].addBaby(shape, color, eyes);
+    }
+  };   
 });
 
 // Send message to signaling server
@@ -441,7 +443,7 @@ function confirmCode(){
   if(input === matchName){
     console.log('baby made');
     socket.emit('createBaby', matchId, playerId, matchColor, matchShape, playerColor, playerShape, matchEyes, playerEyes);
-    //endMatch();
+    endMatch();
   }
   else {
     console.log('wrong name');
@@ -843,23 +845,23 @@ function initializeWorld(){
 	gameObjects.push( new Prop(new Vector2(canvas.width - 250, 380), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
 
 	//Test players
-	for (var i = 0; i < 4; i++) {
-		randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
-		player = new Player(i, randomPosition, 0, 0);
+	// for (var i = 0; i < 4; i++) {
+	// 	randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
+	// 	player = new Player(i, randomPosition, 0, 0);
 
-		// Spawn the player in an empty space
-		while(checkCollision(player) || checkOutOfBounds(player)){
-			player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
-			player.previousPos = player.position.clone();
-		}
- 			gameObjects.push(player);
- 			player.addBaby(0, 0, 1);
- 			player.addBaby(1, 4, 1);
- 			player.addBaby(2, 2, 2);
- 			player.addBaby(3, 3, 2);
- 			player.addBaby(0, 0, 3);
- 			player.addBaby(1, 1, 3);
-	}
+	// 	// Spawn the player in an empty space
+	// 	while(checkCollision(player) || checkOutOfBounds(player)){
+	// 		player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
+	// 		player.previousPos = player.position.clone();
+	// 	}
+ // 			gameObjects.push(player);
+ // 			player.addBaby(0, 0, 1);
+ // 			player.addBaby(1, 4, 1);
+ // 			player.addBaby(2, 2, 2);
+ // 			player.addBaby(3, 3, 2);
+ // 			player.addBaby(0, 0, 3);
+ // 			player.addBaby(1, 1, 3);
+	// }
 }
 
 function initializePlayer(){
@@ -1150,7 +1152,7 @@ function checkPointvsAABB(point, rect){
 //	Player
 //*****************************************************************************************
 
-function Player(id, position, color, shape, eyes){
+function Player(id, position, shape, color, eyes){
 	this.type = "Player";
 	this.isAlive = true;
 	
@@ -1164,13 +1166,11 @@ function Player(id, position, color, shape, eyes){
 
 	// Graphics
 	this.depth = canvas.height-this.position.y;
-	this.body = new Sprite(spritesheet_characters, shape, color, 120, 120, new Vector2(60, 120));
+	this.body = new Sprite(spritesheet_characters, shape*120, color*120, 120, 120, new Vector2(60, 120));
 	this.eyes = eyes;
 
-	
 	this.color = color;
 	this.shape = shape;
-	
 	
 	// Data
 	this.id = id;
@@ -1178,11 +1178,15 @@ function Player(id, position, color, shape, eyes){
 	this.isSolid = true;
 	this.isDynamic = true;
 	this.state = "IDLE"; // IDLE, MOVING
+	this.babies = [];
 
 	this.timer = 0;
 
 	this.kill = function(){
 		this.isAlive = false;
+		for (var i = 0; i < this.babies.length; i++) {
+			this.babies[i].kill();
+		}
 	}
 
 	this.getHitbox = function(){
@@ -1196,6 +1200,7 @@ function Player(id, position, color, shape, eyes){
 		offset.rotate(randomRange(0, 359));
 		var b = new Baby(new Vector2(pos.x+offset.x, pos.y+offset.y), this, shapeIndex, colorIndex, eyes);
 
+		this.babies.push(b);
 		gameObjects.push(b);
 	}
 

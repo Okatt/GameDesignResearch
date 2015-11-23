@@ -19,8 +19,8 @@ var potentialMatchId;
 var isDeciding = false;
 var isSeeking = false;
 
-var playerColor = Math.floor(randomRange(0, 4.99))*120;
-var playerShape = Math.floor(randomRange(0, 3.99))*120;
+var playerColor = Math.floor(randomRange(0, 4.99));
+var playerShape = Math.floor(randomRange(0, 3.99));
 var playerEyes = Math.floor(randomRange(0, 2.99))+1;
 
 var matchShape;
@@ -74,12 +74,12 @@ socket.on('message', function (message){
   signalingMessageCallback(message);
 });
 
-socket.on('newPlayer', function(newPlayerID, color, shape, eyes){
+socket.on('newPlayer', function(newPlayerID, shape, color, eyes){
   console.log('New player joined the game with ID: ' +newPlayerID +' color: ' +color +' shape: ' +shape);
   randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
   //ADDED:
   //color and shape var, these properties decide what the new player looks like
-  player = new Player(newPlayerID, randomPosition, color, shape, eyes);
+  player = new Player(newPlayerID, randomPosition, shape, color, eyes);
   // Spawn the player in an empty space
   while(checkCollision(player) || checkOutOfBounds(player)){
     player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
@@ -173,10 +173,12 @@ socket.on('characterInfo', function(color, shape, name, eyes){
   matchEyes = eyes;
 });
 
-socket.on('createBaby', function(ID, color, shape, eyes){
-    //TODO
-    //create gameobject that follows the player object with the given ID 
-    //baby should have the color and shape that is given etc.    
+socket.on('createBaby', function(ID, shape, color, eyes){
+  for (var i = 0; i < gameObjects.length; i++) {
+    if(gameObjects[i].type = "Player" && gameObjects[i].id === ID){
+      gameObjects[i].addBaby(shape, color, eyes);
+    }
+  };   
 });
 
 // Send message to signaling server
@@ -248,7 +250,7 @@ function confirmCode(){
   if(input === matchName){
     console.log('baby made');
     socket.emit('createBaby', matchId, playerId, matchColor, matchShape, playerColor, playerShape, matchEyes, playerEyes);
-    //endMatch();
+    endMatch();
   }
   else {
     console.log('wrong name');
