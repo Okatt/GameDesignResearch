@@ -36,6 +36,12 @@ io.sockets.on('connection', function (socket){
 	    socket.emit('log', array);
 	}
 
+	// returns one of the two variables
+	function chooseOne(var1, var2){
+		var r = Math.random();
+		return r > 0.5 ? var1 : var2;
+	}
+
 	socket.on('disconnect', function(){
 		for(var i = 0; i < playerIDArray.length; i++){
 			if(playerIDArray[i] === socket.id){
