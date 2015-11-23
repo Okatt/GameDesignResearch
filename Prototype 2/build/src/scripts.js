@@ -60,9 +60,6 @@ function TextButton(position, width, height, text){
 
 	// Update
 	this.update = function(){
-		// Save the previous position for interpolation (also reset mouseOver and isPressed)
-		this.previousPos = this.position.clone();
-
 		this.mouseOver = false;
 		this.isPressed = false;
 
@@ -158,9 +155,14 @@ socket.on('message', function (message){
 
 socket.on('newPlayer', function(newPlayerID){
   console.log('New player joined the game with ID: ' +newPlayerID);
-  //TODO
-  //player = new playerObject(newPlayerID, randomPosition);
-  //gameObjects.push(player)
+  randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
+  player = new Player(newPlayerID, randomPosition);
+  // Spawn the player in an empty space
+  while(checkCollision(player) || checkOutOfBounds(player)){
+    player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
+    player.previousPos = player.position.clone();
+  }
+  gameObjects.push(player);
 });
 
 socket.on('potentialMatch', function(matchedPlayerID){
@@ -648,13 +650,24 @@ function initialize(){
 }
 
 function initializeWorld(){
-
+	// Test players
+	// for (var i = 0; i < 200; i++) {
+	// 	randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
+	// 	player = new Player(i, randomPosition);
+	// 	// Spawn the player in an empty space
+	// 	while(checkCollision(player) || checkOutOfBounds(player)){
+	// 		player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
+	// 		player.previousPos = player.position.clone();
+	// 	}
+ 	// 		gameObjects.push(player);
+	// }
 }
 
 function initializePlayer(){
 	var b = new TextButton(new Vector2(100, 100), 50, 50, "Test");
 	b.onClick = function(){
-		// Enter whatever you want the button to do. (this refers to b)
+		// (this refers to b)
+		// Do whatever
 	};
 	gameObjects.push(b);
 }
@@ -690,6 +703,9 @@ function run(){
 }
 
 function update(){
+	// Apply physics
+	applyPhysics();
+
 	// Update all game objects
 	for (var ob = 0; ob < gameObjects.length; ob++){
 		if(!gameObjects[ob].isAlive){
@@ -816,6 +832,67 @@ function Vector2(x, y){
 	};
 }
 
+// Physics
+function applyPhysics(){
+	// Apply velocity and check for collisions
+	for (var i = 0; i < gameObjects.length; i++){
+		if(gameObjects[i].isDynamic){
+			var ob = gameObjects[i];
+			// Before we apply physics we save the previous position (for better rendering)
+			ob.previousPos = ob.position.clone();
+
+			// Check horizontal movement
+			if( checkCollision(ob, new Vector2(ob.velocity.x, 0)) || checkOutOfBounds(ob, new Vector2(ob.velocity.x, 0)) ){
+				while( !checkCollision(ob, new Vector2(Math.sign(ob.velocity.x), 0)) && !checkOutOfBounds(ob, new Vector2(Math.sign(ob.velocity.x), 0)) ){
+					ob.position.x += Math.sign(ob.velocity.x);
+				}
+				ob.velocity.x = 0;
+			}else{ob.position.x += ob.velocity.x;}
+
+			// Check vertical movement
+			if( checkCollision(ob, new Vector2(0, ob.velocity.y)) || checkOutOfBounds(ob, new Vector2(0, ob.velocity.y)) ){
+				while( !checkCollision(ob, new Vector2(0, Math.sign(ob.velocity.y))) && !checkOutOfBounds(ob, new Vector2(0, Math.sign(ob.velocity.y))) ){
+					ob.position.y += Math.sign(ob.velocity.y);
+				}
+				ob.velocity.y = 0;
+			}else{ob.position.y += ob.velocity.y;}
+
+			// Apply drag
+			ob.velocity.multiply(0.95);
+		}
+	}
+}
+
+// Checks collsion with all other objects
+function checkCollision(object, offset){
+	if(!object.isSolid){ return false;}
+	if(offset === undefined){offset = new Vector2(0, 0);}
+
+	// Create a hitbox that includes the offset
+	var hitbox = new AABB(object.position.x + offset.x - object.width/2, object.position.y + offset.y - object.height/2, object.width, object.height);
+
+	// Check if the new hitbox is colliding with another object
+	for (var i = 0; i < gameObjects.length; i++){
+		// Avoid comparing to itself
+		if(object !== gameObjects[i]){
+			if(gameObjects[i].isSolid){
+				if(checkAABBvsAABB(hitbox, gameObjects[i].getHitbox())){return gameObjects[i];}
+			}
+		}
+	}	
+}
+
+// Checks if the object is within the bounding box
+function checkOutOfBounds(object, offset){
+	if(offset === undefined){offset = new Vector2(0, 0);}
+
+	// Create a hitbox that includes the offset
+	var hitbox = new AABB(object.position.x + offset.x - object.width/2, object.position.y + offset.y - object.height/2, object.width, object.height);
+
+	// Check if the new hitbox is within the bounds
+	return (hitbox.x < 0 || hitbox.x + hitbox.width > canvas.width || hitbox.y < 0 || hitbox.y + hitbox.height > canvas.height);
+}
+
 // Collision Circle
 function CC(x, y, radius){
 	this.x = x;
@@ -858,21 +935,69 @@ function checkPointvsAABB(point, rect){
 function Player(id, position){
 	this.type = "Player";
 	this.isAlive = true;
-	this.matched = false;
-
+	
 	// Physics
 	this.position = position;
 	this.previousPos = this.position.clone();
-
+	this.velocity = new Vector2(0, 0);
+	this.width = 40;
+	this.height = 40;
+	
 	// Data
 	this.id = id;
+	this.matched = false;
+	this.isSolid = true;
+	this.isDynamic = true;
+	this.state = "IDLE"; // IDLE, MOVING
+
+	this.timer = 0;
 
 	this.kill = function(){
 		this.isAlive = false;
 	}
 
+	this.getHitbox = function(){
+		return new AABB(this.position.x - this.width/2, this.position.y - this.height/2, this.width, this.height);
+	}
+
 	this.update = function(){
-		this.previousPos = this.position.clone();
+		// Timer
+		this.timer -= UPDATE_DURATION/1000;
+		if(this.timer < 0){this.timer = 0;}
+
+		switch(this.state){
+			case "IDLE":
+				// Switch state
+				if(this.timer === 0){
+					var dir = new Vector2(0, -1);
+					dir.rotate(randomRange(0, 359));
+					
+					this.velocity.add(dir);
+
+					this.state = "MOVING";
+					this.timer = randomRange(1, 3);
+				}
+				break;
+			case "MOVING":
+				// Switch state
+				if(this.timer === 0){
+					this.state = "IDLE";
+					this.timer = randomRange(2, 8);
+				}
+
+				// Determine velocity
+				var d = this.velocity.clone(); d.normalize();
+				var r = Math.random() > 0.5 ? randomRange(0, 10) : -randomRange(0, 10); d.rotate(r);
+				this.velocity.add(d);
+
+				// Limit velocity
+				if(this.velocity.length() > 3){this.velocity.normalize(); this.velocity.multiply(3);}
+
+				break;
+			default:
+				console.log("Err - State evaluation error: "+this.state+" is not a valid state. Reference: "+this);
+				break;
+		}
 	}
 
 	this.render = function(lagOffset){
@@ -880,7 +1005,7 @@ function Player(id, position){
 		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
 
 		// Render
-		
+		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, color.BLACK, 1);
 	}
 }
 //*****************************************************************************************

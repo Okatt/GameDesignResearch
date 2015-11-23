@@ -53,13 +53,24 @@ function initialize(){
 }
 
 function initializeWorld(){
-
+	// Test players
+	// for (var i = 0; i < 200; i++) {
+	// 	randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
+	// 	player = new Player(i, randomPosition);
+	// 	// Spawn the player in an empty space
+	// 	while(checkCollision(player) || checkOutOfBounds(player)){
+	// 		player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
+	// 		player.previousPos = player.position.clone();
+	// 	}
+ 	// 		gameObjects.push(player);
+	// }
 }
 
 function initializePlayer(){
 	var b = new TextButton(new Vector2(100, 100), 50, 50, "Test");
 	b.onClick = function(){
-		// Enter whatever you want the button to do. (this refers to b)
+		// (this refers to b)
+		// Do whatever
 	};
 	gameObjects.push(b);
 }
@@ -95,6 +106,9 @@ function run(){
 }
 
 function update(){
+	// Apply physics
+	applyPhysics();
+
 	// Update all game objects
 	for (var ob = 0; ob < gameObjects.length; ob++){
 		if(!gameObjects[ob].isAlive){

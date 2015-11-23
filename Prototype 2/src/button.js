@@ -60,9 +60,6 @@ function TextButton(position, width, height, text){
 
 	// Update
 	this.update = function(){
-		// Save the previous position for interpolation (also reset mouseOver and isPressed)
-		this.previousPos = this.position.clone();
-
 		this.mouseOver = false;
 		this.isPressed = false;
 

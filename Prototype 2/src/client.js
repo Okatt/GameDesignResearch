@@ -61,9 +61,14 @@ socket.on('message', function (message){
 
 socket.on('newPlayer', function(newPlayerID){
   console.log('New player joined the game with ID: ' +newPlayerID);
-  //TODO
-  //player = new playerObject(newPlayerID, randomPosition);
-  //gameObjects.push(player)
+  randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
+  player = new Player(newPlayerID, randomPosition);
+  // Spawn the player in an empty space
+  while(checkCollision(player) || checkOutOfBounds(player)){
+    player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
+    player.previousPos = player.position.clone();
+  }
+  gameObjects.push(player);
 });
 
 socket.on('potentialMatch', function(matchedPlayerID){

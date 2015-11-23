@@ -76,6 +76,67 @@ function Vector2(x, y){
 	};
 }
 
+// Physics
+function applyPhysics(){
+	// Apply velocity and check for collisions
+	for (var i = 0; i < gameObjects.length; i++){
+		if(gameObjects[i].isDynamic){
+			var ob = gameObjects[i];
+			// Before we apply physics we save the previous position (for better rendering)
+			ob.previousPos = ob.position.clone();
+
+			// Check horizontal movement
+			if( checkCollision(ob, new Vector2(ob.velocity.x, 0)) || checkOutOfBounds(ob, new Vector2(ob.velocity.x, 0)) ){
+				while( !checkCollision(ob, new Vector2(Math.sign(ob.velocity.x), 0)) && !checkOutOfBounds(ob, new Vector2(Math.sign(ob.velocity.x), 0)) ){
+					ob.position.x += Math.sign(ob.velocity.x);
+				}
+				ob.velocity.x = 0;
+			}else{ob.position.x += ob.velocity.x;}
+
+			// Check vertical movement
+			if( checkCollision(ob, new Vector2(0, ob.velocity.y)) || checkOutOfBounds(ob, new Vector2(0, ob.velocity.y)) ){
+				while( !checkCollision(ob, new Vector2(0, Math.sign(ob.velocity.y))) && !checkOutOfBounds(ob, new Vector2(0, Math.sign(ob.velocity.y))) ){
+					ob.position.y += Math.sign(ob.velocity.y);
+				}
+				ob.velocity.y = 0;
+			}else{ob.position.y += ob.velocity.y;}
+
+			// Apply drag
+			ob.velocity.multiply(0.95);
+		}
+	}
+}
+
+// Checks collsion with all other objects
+function checkCollision(object, offset){
+	if(!object.isSolid){ return false;}
+	if(offset === undefined){offset = new Vector2(0, 0);}
+
+	// Create a hitbox that includes the offset
+	var hitbox = new AABB(object.position.x + offset.x - object.width/2, object.position.y + offset.y - object.height/2, object.width, object.height);
+
+	// Check if the new hitbox is colliding with another object
+	for (var i = 0; i < gameObjects.length; i++){
+		// Avoid comparing to itself
+		if(object !== gameObjects[i]){
+			if(gameObjects[i].isSolid){
+				if(checkAABBvsAABB(hitbox, gameObjects[i].getHitbox())){return gameObjects[i];}
+			}
+		}
+	}	
+}
+
+// Checks if the object is within the bounding box
+function checkOutOfBounds(object, offset){
+	if(offset === undefined){offset = new Vector2(0, 0);}
+
+	// Create a hitbox that includes the offset
+	var hitbox = new AABB(object.position.x + offset.x - object.width/2, object.position.y + offset.y - object.height/2, object.width, object.height);
+
+	// Check if the new hitbox is within the bounds
+	return (hitbox.x < 0 || hitbox.x + hitbox.width > canvas.width || hitbox.y < 0 || hitbox.y + hitbox.height > canvas.height);
+}
+
 // Collision Circle
 function CC(x, y, radius){
 	this.x = x;
