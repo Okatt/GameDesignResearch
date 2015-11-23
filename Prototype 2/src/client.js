@@ -172,8 +172,7 @@ socket.on('characterInfo', function(color, shape, name){
 socket.on('createBaby', function(ID, color, shape){
     //TODO
     //create gameobject that follows the player object with the given ID 
-    //baby should have the color and shape that is given etc.
-    
+    //baby should have the color and shape that is given etc.    
 });
 
 // Send message to signaling server

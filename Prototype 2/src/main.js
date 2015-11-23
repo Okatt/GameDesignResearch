@@ -74,15 +74,12 @@ function initializeWorld(){
 			player.previousPos = player.position.clone();
 		}
  			gameObjects.push(player);
- 			player.addBaby();
- 			player.addBaby();
- 			player.addBaby();
- 			player.addBaby();
- 			player.addBaby();
- 			player.addBaby();
- 			player.addBaby();
- 			player.addBaby();
- 			player.addBaby();
+ 			player.addBaby(0, 0, 1);
+ 			player.addBaby(1, 4, 1);
+ 			player.addBaby(2, 2, 2);
+ 			player.addBaby(3, 3, 2);
+ 			player.addBaby(0, 0, 3);
+ 			player.addBaby(1, 1, 3);
 	}
 }
 

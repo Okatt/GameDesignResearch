@@ -40,11 +40,11 @@ function Player(id, position, color, shape){
 	}
 
 	// TODO clean up
-	this.addBaby = function(){
+	this.addBaby = function(shapeIndex, colorIndex, eyes){
 		var pos = this.position.clone();
 		var offset = new Vector2(0, -60);
 		offset.rotate(randomRange(0, 359));
-		var b = new Baby(new Vector2(pos.x+offset.x, pos.y+offset.y), this);
+		var b = new Baby(new Vector2(pos.x+offset.x, pos.y+offset.y), this, shapeIndex, colorIndex, eyes);
 
 		gameObjects.push(b);
 	}

@@ -2,7 +2,7 @@
 //	Baby
 //*****************************************************************************************
 
-function Baby(position, targetObject){
+function Baby(position, player, shapeIndex, colorIndex, eyes){
 	this.type = "Player";
 	this.isAlive = true;
 	
@@ -16,10 +16,11 @@ function Baby(position, targetObject){
 
 	// Graphics
 	this.depth = canvas.height-this.position.y;
-	this.body = new Sprite(spritesheet_characters_s, Math.floor(randomRange(0, 3.99))*60, 0, 60, 60, new Vector2(30, 60));
+	this.eyes = eyes;
+	this.body = new Sprite(spritesheet_characters_s, shapeIndex*60, colorIndex*60, 60, 60, new Vector2(30, 60));
 	
 	// Data
-	this.isFollowing = targetObject;
+	this.isFollowing = player;
 	this.isSolid = false;
 	this.isDynamic = true;
 
@@ -78,9 +79,19 @@ function Baby(position, targetObject){
 		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
 		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
 
-		// Render
+		// Body
 		this.body.draw(ctx, drawX, drawY);
-		//drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, color.WHITE, 1);
+
+		if(this.eyes === 1){ drawCircle(ctx, drawX, drawY-26, 14, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-26+randomRange(0, 2), 11, true, "#323232", 1); }
+		else if(this.eyes === 2){ 
+			drawCircle(ctx, drawX-10, drawY-24, 10, true, "#FFFFFF", 1); drawCircle(ctx, drawX-10+randomRange(0, 2), drawY-24+randomRange(0, 2), 7, true, "#323232", 1);
+			drawCircle(ctx, drawX+10, drawY-24, 10, true, "#FFFFFF", 1); drawCircle(ctx, drawX+10+randomRange(0, 2), drawY-24+randomRange(0, 2), 7, true, "#323232", 1);
+		}
+		else{
+			drawCircle(ctx, drawX, drawY-38, 8, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-38+randomRange(0, 2), 5, true, "#323232", 1);
+			drawCircle(ctx, drawX-10, drawY-20, 8, true, "#FFFFFF", 1); drawCircle(ctx, drawX-10+randomRange(0, 2), drawY-20+randomRange(0, 2), 5, true, "#323232", 1);
+			drawCircle(ctx, drawX+10, drawY-20, 8, true, "#FFFFFF", 1); drawCircle(ctx, drawX+10+randomRange(0, 2), drawY-20+randomRange(0, 2), 5, true, "#323232", 1);
+		}
 	}
 }
 //*****************************************************************************************
@@ -354,8 +365,7 @@ socket.on('characterInfo', function(color, shape, name){
 socket.on('createBaby', function(ID, color, shape){
     //TODO
     //create gameobject that follows the player object with the given ID 
-    //baby should have the color and shape that is given etc.
-    
+    //baby should have the color and shape that is given etc.    
 });
 
 // Send message to signaling server
@@ -839,15 +849,12 @@ function initializeWorld(){
 			player.previousPos = player.position.clone();
 		}
  			gameObjects.push(player);
- 			player.addBaby();
- 			player.addBaby();
- 			player.addBaby();
- 			player.addBaby();
- 			player.addBaby();
- 			player.addBaby();
- 			player.addBaby();
- 			player.addBaby();
- 			player.addBaby();
+ 			player.addBaby(0, 0, 1);
+ 			player.addBaby(1, 4, 1);
+ 			player.addBaby(2, 2, 2);
+ 			player.addBaby(3, 3, 2);
+ 			player.addBaby(0, 0, 3);
+ 			player.addBaby(1, 1, 3);
 	}
 }
 
@@ -1177,11 +1184,11 @@ function Player(id, position, color, shape){
 	}
 
 	// TODO clean up
-	this.addBaby = function(){
+	this.addBaby = function(shapeIndex, colorIndex, eyes){
 		var pos = this.position.clone();
 		var offset = new Vector2(0, -60);
 		offset.rotate(randomRange(0, 359));
-		var b = new Baby(new Vector2(pos.x+offset.x, pos.y+offset.y), this);
+		var b = new Baby(new Vector2(pos.x+offset.x, pos.y+offset.y), this, shapeIndex, colorIndex, eyes);
 
 		gameObjects.push(b);
 	}
