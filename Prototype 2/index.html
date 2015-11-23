@@ -24,6 +24,9 @@
                 if (window.getSelection){ window.getSelection().removeAllRanges(); }
                 else if (document.selection){ document.selection.empty(); }
             };
+
+            var spritesheet_environment = new Image();
+            spritesheet_environment.src = "build/res/img/spritesheet_environment.png";
         </script>
         <script src="/socket.io/socket.io.js"></script>
         <script src="build/src/scripts.js"></script>

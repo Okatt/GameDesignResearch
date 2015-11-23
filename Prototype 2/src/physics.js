@@ -134,7 +134,7 @@ function checkOutOfBounds(object, offset){
 	var hitbox = new AABB(object.position.x + offset.x - object.width/2, object.position.y + offset.y - object.height/2, object.width, object.height);
 
 	// Check if the new hitbox is within the bounds
-	return (hitbox.x < 0 || hitbox.x + hitbox.width > canvas.width || hitbox.y < 0 || hitbox.y + hitbox.height > canvas.height);
+	return (hitbox.x < 0 || hitbox.x + hitbox.width > canvas.width || hitbox.y < canvas.height*0.3 || hitbox.y + hitbox.height > canvas.height);
 }
 
 // Collision Circle

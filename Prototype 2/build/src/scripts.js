@@ -412,7 +412,8 @@ function gotRemoteStream(event) {
 //*****************************************************************************************
 
 // Colors
-var color = {BLACK: "#000000", DARK_GREY: "#323232", WHITE: "#FFFFFF", BLUE: "#0090FF", GREEN: "#7AFF2D", PINK: "#F319FF", RED: "#FF0000", YELLOW: "#FFFF00"};
+var color = {BLACK: "#000000", DARK_GREY: "#323232", WHITE: "#FFFFFF", GROUND: "#3FA9AB", SKY: "#CF5D5D",
+			 BLUE: "#0090FF", GREEN: "#7AFF2D", PINK: "#F319FF", RED: "#FF0000", YELLOW: "#FFFF00"};
 var colorArray = [color.BLACK, color.DARK_GREY, color.WHITE, color.PINK, color.RED, color.YELLOW];
 
 
@@ -786,26 +787,28 @@ function initialize(){
 }
 
 function initializeWorld(){
-	// Test players
-	// for (var i = 0; i < 20; i++) {
-	// 	randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
-	// 	player = new Player(i, randomPosition, 0, 0);
-	// 	// Spawn the player in an empty space
-	// 	while(checkCollision(player) || checkOutOfBounds(player)){
-	// 		player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
-	// 		player.previousPos = player.position.clone();
-	// 	}
- // 			gameObjects.push(player);
- // 			console.log("player");
- // 			player.addBaby();
- // 			player.addBaby();
- // 			player.addBaby();
- // 			player.addBaby();
- // 			player.addBaby();
- // 			player.addBaby();
- // 			//console.log("baby");
+	//Test players
+	for (var i = 0; i < 20; i++) {
+		randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
+		player = new Player(i, randomPosition, 0, 0);
+		// Spawn the player in an empty space
+		while(checkCollision(player) || checkOutOfBounds(player)){
+			player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
+			player.previousPos = player.position.clone();
+		}
+ 			gameObjects.push(player);
+ 			player.addBaby();
+ 			player.addBaby();
+ 			player.addBaby();
+ 			player.addBaby();
+ 			player.addBaby();
+ 			player.addBaby();
+	}
 
-	// }
+	// Props
+	gameObjects.push( new Prop(new Vector2(200, 370), 80, 30, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(560, 340), 80, 30, new Sprite(spritesheet_environment, 400, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(canvas.width - 250, 380), 80, 30, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
 }
 
 function initializePlayer(){
@@ -898,8 +901,8 @@ function render(lagOffset){
 	//draw for server
 	if(isWorld){
 		// Background
-		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.BLUE, 1);
-		//drawRectangle(ctx, 0, canvas.height/2, canvas.width, canvas.height/2, true, color.GREEN, 1);
+		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.SKY, 1);
+		drawRectangle(ctx, 0, canvas.height*0.3, canvas.width, canvas.height*0.7, true, color.GROUND, 1);
 
 		// Render all game objects
 		for (var ob = 0; ob < gameObjects.length; ob++){
@@ -1053,7 +1056,7 @@ function checkOutOfBounds(object, offset){
 	var hitbox = new AABB(object.position.x + offset.x - object.width/2, object.position.y + offset.y - object.height/2, object.width, object.height);
 
 	// Check if the new hitbox is within the bounds
-	return (hitbox.x < 0 || hitbox.x + hitbox.width > canvas.width || hitbox.y < 0 || hitbox.y + hitbox.height > canvas.height);
+	return (hitbox.x < 0 || hitbox.x + hitbox.width > canvas.width || hitbox.y < canvas.height*0.3 || hitbox.y + hitbox.height > canvas.height);
 }
 
 // Collision Circle
@@ -1184,6 +1187,51 @@ function Player(id, position, color, shape){
 
 		// Render
 		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, colorArray[this.color], 1);
+	}
+}
+//*****************************************************************************************
+//	Environment
+//*****************************************************************************************
+
+function Prop(position, width, height, sprite){
+	this.type = "Prop";
+	this.isAlive = true;
+	
+	// Physics
+	this.position = position;
+	this.previousPos = this.position.clone();
+	this.width = width;
+	this.height = height;
+
+	// Graphics
+	this.sprite = sprite;
+	
+	// Data
+	this.isSolid = true;
+	this.isDynamic = false;
+
+	this.kill = function(){
+		this.isAlive = false;
+	}
+
+	this.getHitbox = function(){
+		return new AABB(this.position.x - this.width/2, this.position.y - this.height/2, this.width, this.height);
+	}
+
+	this.update = function(){
+
+	}
+
+	this.render = function(lagOffset){
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+
+		// Render
+		this.sprite.draw(ctx, drawX, drawY);
+
+		// Hitbox (debug)
+		//var h = this.getHitbox();
+		//drawRectangle(ctx, h.x, h.y, h.width, h.height, true, color.GREEN, 0.5);
 	}
 }
 //*****************************************************************************************
