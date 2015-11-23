@@ -3,7 +3,7 @@
 //*****************************************************************************************
 
 function Baby(position, player, shapeIndex, colorIndex, eyes){
-	this.type = "Player";
+	this.type = "Baby";
 	this.isAlive = true;
 	
 	// Physics

@@ -63,7 +63,7 @@ socket.on('log', function (array) {
 
 socket.on('playerLeft', function(id){
   for(var i = 0; i < gameObjects.length; i++){
-    if(gameObjects[i].type === "Player" && gameObjects[i].id === id){
+    if(gameObjects[i].id !== undefined && gameObjects[i].id === id){
       gameObjects[i].kill();
     }
   }
