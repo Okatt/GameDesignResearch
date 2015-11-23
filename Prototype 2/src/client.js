@@ -19,12 +19,14 @@ var potentialMatchId;
 var isDeciding = false;
 var isSeeking = false;
 
-var playerColor = Math.round(randomRange(0, 5));
-var playerShape = Math.round(randomRange(0, 5));
+var playerColor = Math.floor(randomRange(0, 4.99))*120;
+var playerShape = Math.floor(randomRange(0, 3.99))*120;
+var playerEyes = Math.floor(randomRange(0, 2.99))+1;
 
 var matchShape;
 var matchColor;
 var matchName;
+var matchEyes;
 
 
 /****************************************************************************
@@ -72,12 +74,12 @@ socket.on('message', function (message){
   signalingMessageCallback(message);
 });
 
-socket.on('newPlayer', function(newPlayerID, color, shape){
+socket.on('newPlayer', function(newPlayerID, color, shape, eyes){
   console.log('New player joined the game with ID: ' +newPlayerID +' color: ' +color +' shape: ' +shape);
   randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
   //ADDED:
   //color and shape var, these properties decide what the new player looks like
-  player = new Player(newPlayerID, randomPosition, color, shape);
+  player = new Player(newPlayerID, randomPosition, color, shape, eyes);
   // Spawn the player in an empty space
   while(checkCollision(player) || checkOutOfBounds(player)){
     player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
@@ -144,6 +146,7 @@ socket.on('unMatch', function(p1ID, p2ID){
       matchColor = null;
       matchShape = null;
       matchName = null;
+      matchEyes = null;
       console.log(playerId +' unmatched ' +p2ID);
   }
 });
@@ -163,13 +166,14 @@ socket.on('noMatchFound', function(){
   attempts = 0;
 });
 
-socket.on('characterInfo', function(color, shape, name){
+socket.on('characterInfo', function(color, shape, name, eyes){
   matchColor = color;
   matchShape = shape;
   matchName = name;
+  matchEyes = eyes;
 });
 
-socket.on('createBaby', function(ID, color, shape){
+socket.on('createBaby', function(ID, color, shape, eyes){
     //TODO
     //create gameobject that follows the player object with the given ID 
     //baby should have the color and shape that is given etc.    
@@ -186,7 +190,7 @@ function sendMessage(message){
 //****************************************************************************
 
 // Join a room
-socket.emit('connect', room, playerColor, playerShape);
+socket.emit('connect', room, playerColor, playerShape, playerEyes);
 
 if(location.hostname.match(/localhost|127\.0\.0/)){socket.emit('ipaddr');}
 
@@ -233,7 +237,7 @@ function rejectMatch(){
 function sendCharacterInfo(){
   //TODO
   //emit all the variables (color, shape, eyes, feet etc.)
-  socket.emit('characterInfo', matchId, playerColor, playerShape, playerName);
+  socket.emit('characterInfo', matchId, playerColor, playerShape, playerName, playerEyes);
 }
 
 function confirmCode(){
@@ -243,7 +247,7 @@ function confirmCode(){
   //change to socket.emit and check if both entered the correct code maybe?
   if(input === matchName){
     console.log('baby made');
-    socket.emit('createBaby', matchId, playerId, matchColor, matchShape, playerColor, playerShape);
+    socket.emit('createBaby', matchId, playerId, matchColor, matchShape, playerColor, playerShape, matchEyes, playerEyes);
     //endMatch();
   }
   else {

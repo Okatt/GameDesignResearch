@@ -2,7 +2,7 @@
 //	Player
 //*****************************************************************************************
 
-function Player(id, position, color, shape){
+function Player(id, position, color, shape, eyes){
 	this.type = "Player";
 	this.isAlive = true;
 	
@@ -16,11 +16,13 @@ function Player(id, position, color, shape){
 
 	// Graphics
 	this.depth = canvas.height-this.position.y;
-	this.eyes = Math.floor(randomRange(0, 2.99))+1;
-	this.body = new Sprite(spritesheet_characters, Math.floor(randomRange(0, 3.99))*120, Math.floor(randomRange(0, 4.99))*120, 120, 120, new Vector2(60, 120));
+	this.body = new Sprite(spritesheet_characters, shape, color, 120, 120, new Vector2(60, 120));
+	this.eyes = eyes;
 
+	
 	this.color = color;
 	this.shape = shape;
+	
 	
 	// Data
 	this.id = id;

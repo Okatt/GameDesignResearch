@@ -64,7 +64,7 @@ io.sockets.on('connection', function (socket){
 		socket.broadcast.emit('message', message);
 	});
 
-	socket.on('connect', function (room, color, shape) {
+	socket.on('connect', function (room, color, shape, eyes) {
         log('Request to create or join room ' + room);
 
 		var numClients = io.sockets.clients(room).length;
@@ -80,7 +80,7 @@ io.sockets.on('connection', function (socket){
             socket.emit('joined', room, socket.id);
             playerIDArray.push(socket.id);
             potentialMatchArray.push(socket.id);
-            io.sockets.socket(worldID).emit('newPlayer', socket.id, color, shape);
+            io.sockets.socket(worldID).emit('newPlayer', socket.id, color, shape, eyes);
 		}
 	});
 
@@ -151,19 +151,22 @@ io.sockets.on('connection', function (socket){
 
 	//TODO
 	//function should take all parameters (shape, color, eyes, feet etc.)
-	socket.on('characterInfo', function(matchID, color, shape, name){
+	socket.on('characterInfo', function(matchID, color, shape, name, eyes){
 		//TODO
 		//emit should send all parameters
-		io.sockets.socket(matchID).emit('characterInfo', color, shape, name);
+		io.sockets.socket(matchID).emit('characterInfo', color, shape, name, eyes);
 	});
 
-	socket.on('createBaby', function(p1ID, p2ID, p1C, p1S, p2C, p2S){
+	socket.on('createBaby', function(p1ID, p2ID, p1C, p1S, p2C, p2S, p1E, p2E){
 
 		//p1C = player 1 color, p2S = player 2 shape etc.
 		//TODO
 		//randomly select what aspects to take (should be same for both players and should take elements from both parents)
-		io.sockets.socket(worldID).emit('createBaby', p1ID, p1C, p2S);
-		io.sockets.socket(worldID).emit('createBaby', p2ID, p1C, p2S);
+		 var shape = chooseOne(p1S, p2S);
+		 var color = chooseOne(p1C, p2C);
+		 var eyes = chooseOne(p1E, p2E);
+		io.sockets.socket(worldID).emit('createBaby', p1ID, shape, color, eyes);
+		io.sockets.socket(worldID).emit('createBaby', p2ID, shape, color, eyes);
 	});
 
     socket.on('ipaddr', function () {
