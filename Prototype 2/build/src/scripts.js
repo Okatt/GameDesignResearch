@@ -16,6 +16,7 @@ function Baby(position, targetObject){
 
 	// Graphics
 	this.depth = canvas.height-this.position.y;
+	this.body = new Sprite(spritesheet_characters_s, Math.floor(randomRange(0, 3.99))*60, 0, 60, 60, new Vector2(30, 60));
 	
 	// Data
 	this.isFollowing = targetObject;
@@ -30,16 +31,47 @@ function Baby(position, targetObject){
 		return new AABB(this.position.x - this.width/2, this.position.y - this.height/2, this.width, this.height);
 	}
 
+	// Adds extra velocity to avoid obstacles
+	this.avoidObstacles = function(){
+		var v = new Vector2(0, 0);
+		for (var i = 0; i < gameObjects.length; i++) {
+			if(this !== gameObjects[i]){
+				var dist = this.position.getVectorTo(gameObjects[i].position);
+				var dl = dist.length();
+				if(dl < 30){
+					// If the obstacle is closer it has more inpact on the extra velocity
+					v.x -= dist.x*(30/dl); 
+					v.y -= dist.y*(30/dl);
+
+					v.normalize();
+					v.multiply(0.25);
+					this.velocity.add(v);
+				}
+			}
+		}		
+	};
+
+	this.follow = function(){
+		var dist = this.position.getVectorTo(this.isFollowing.position);
+		if(dist.length() <= 20){
+			dist.normalize();
+			this.velocity.x += -dist.x*0.4;
+			this.velocity.y += -dist.y*0.2;
+		}else if(dist.length() >= 60){
+			dist.normalize();
+			this.velocity.x += dist.x*0.4;
+			this.velocity.y += dist.y*0.2;
+		}else{
+			if(Math.abs(this.isFollowing.position.x - this.position.x) < 100)this.velocity.x -= Math.sign(dist.x)*0.2;
+			if(Math.abs(this.isFollowing.position.y - this.position.y) > 100){this.velocity.y += Math.sign(dist.y)*0.2;}
+		}
+	}
+
 	this.update = function(){
 		this.depth = canvas.height-this.position.y;
 
-		if(this.isFollowing){
-			var dis = this.position.getVectorTo(this.isFollowing.position);
-			if(dis.length() >= 40){
-				dis.multiply(0.1);
-				this.velocity.add(dis);
-			}
-		}
+		if(this.isFollowing){ this.follow(); }
+		this.avoidObstacles();
 	}
 
 	this.render = function(lagOffset){
@@ -47,7 +79,8 @@ function Baby(position, targetObject){
 		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
 
 		// Render
-		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, color.WHITE, 1);
+		this.body.draw(ctx, drawX, drawY);
+		//drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, color.WHITE, 1);
 	}
 }
 //*****************************************************************************************
@@ -415,8 +448,7 @@ function gotRemoteStream(event) {
 //*****************************************************************************************
 
 // Colors
-var color = {BLACK: "#000000", DARK_GREY: "#323232", WHITE: "#FFFFFF", GROUND: "#3FA9AB", SKY: "#CF5D5D",
-			 BLUE: "#0090FF", GREEN: "#7AFF2D", PINK: "#F319FF", RED: "#FF0000", YELLOW: "#FFFF00"};
+var color = {BLACK: "#000000", DARK_GREY: "#323232", WHITE: "#FFFFFF", GROUND: "#3FA9AB", SKY: "#CF5D5D", BLUE: "#0090FF", GREEN: "#7AFF2D", PINK: "#F319FF", RED: "#FF0000", YELLOW: "#FFFF00"};
 var colorArray = [color.BLACK, color.DARK_GREY, color.WHITE, color.PINK, color.RED, color.YELLOW];
 
 
@@ -642,6 +674,7 @@ function drawText(ctx, x, y, maxLineWidth, lineHeight, text, font, size, color, 
 	//ctx.fillText(text, x, y);
 	ctx.globalAlpha = 1;
 }
+
 //*****************************************************************************************
 //	Input
 //*****************************************************************************************
@@ -796,7 +829,7 @@ function initializeWorld(){
 	gameObjects.push( new Prop(new Vector2(canvas.width - 250, 380), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
 
 	//Test players
-	for (var i = 0; i < 20; i++) {
+	for (var i = 0; i < 4; i++) {
 		randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
 		player = new Player(i, randomPosition, 0, 0);
 
@@ -806,6 +839,9 @@ function initializeWorld(){
 			player.previousPos = player.position.clone();
 		}
  			gameObjects.push(player);
+ 			player.addBaby();
+ 			player.addBaby();
+ 			player.addBaby();
  			player.addBaby();
  			player.addBaby();
  			player.addBaby();
@@ -1035,7 +1071,7 @@ function applyPhysics(){
 
 // Checks collsion with all other objects
 function checkCollision(object, offset){
-	if(!object.isSolid){ return false;}
+	if(!object.isSolid){ return false; }
 	if(offset === undefined){offset = new Vector2(0, 0);}
 
 	// Create a hitbox that includes the offset
@@ -1054,6 +1090,7 @@ function checkCollision(object, offset){
 
 // Checks if the object is within the bounding box
 function checkOutOfBounds(object, offset){
+	if(!object.isSolid){ return false; }
 	if(offset === undefined){offset = new Vector2(0, 0);}
 
 	// Create a hitbox that includes the offset
@@ -1116,7 +1153,8 @@ function Player(id, position, color, shape){
 
 	// Graphics
 	this.depth = canvas.height-this.position.y;
-	this.body = new Sprite(spritesheet_characters, 0, 0, 100, 100, new Vector2(50, 100));
+	this.eyes = Math.floor(randomRange(0, 2.99))+1;
+	this.body = new Sprite(spritesheet_characters, Math.floor(randomRange(0, 3.99))*120, Math.floor(randomRange(0, 4.99))*120, 120, 120, new Vector2(60, 120));
 
 	this.color = color;
 	this.shape = shape;
@@ -1194,8 +1232,20 @@ function Player(id, position, color, shape){
 		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
 		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
 
-		// Render
+		// Body
 		this.body.draw(ctx, drawX, drawY);
+
+		// Eyes
+		if(this.eyes === 1){ drawCircle(ctx, drawX, drawY-50, 25, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-50+randomRange(0, 2), 22, true, "#323232", 1); }
+		else if(this.eyes === 2){ 
+			drawCircle(ctx, drawX-22, drawY-50, 20, true, "#FFFFFF", 1); drawCircle(ctx, drawX-22+randomRange(0, 2), drawY-50+randomRange(0, 2), 17, true, "#323232", 1);
+			drawCircle(ctx, drawX+22, drawY-50, 20, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-50+randomRange(0, 2), 17, true, "#323232", 1);
+		}
+		else{
+			drawCircle(ctx, drawX, drawY-74, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-74+randomRange(0, 2), 15, true, "#323232", 1);
+			drawCircle(ctx, drawX-22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX-22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
+			drawCircle(ctx, drawX+22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
+		}		
 
 		// Hitbox (debug)
 		//var h = this.getHitbox();
@@ -1244,8 +1294,8 @@ function Prop(position, width, height, sprite){
 		this.sprite.draw(ctx, drawX, drawY);
 
 		// Hitbox (debug)
-		var h = this.getHitbox();
-		drawRectangle(ctx, h.x, h.y, h.width, h.height, true, color.GREEN, 0.5);
+		//var h = this.getHitbox();
+		//drawRectangle(ctx, h.x, h.y, h.width, h.height, true, color.GREEN, 0.5);
 	}
 }
 //*****************************************************************************************

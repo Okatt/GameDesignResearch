@@ -64,7 +64,7 @@ function initializeWorld(){
 	gameObjects.push( new Prop(new Vector2(canvas.width - 250, 380), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
 
 	//Test players
-	for (var i = 0; i < 20; i++) {
+	for (var i = 0; i < 4; i++) {
 		randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
 		player = new Player(i, randomPosition, 0, 0);
 
@@ -74,6 +74,9 @@ function initializeWorld(){
 			player.previousPos = player.position.clone();
 		}
  			gameObjects.push(player);
+ 			player.addBaby();
+ 			player.addBaby();
+ 			player.addBaby();
  			player.addBaby();
  			player.addBaby();
  			player.addBaby();

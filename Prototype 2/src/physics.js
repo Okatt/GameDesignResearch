@@ -109,7 +109,7 @@ function applyPhysics(){
 
 // Checks collsion with all other objects
 function checkCollision(object, offset){
-	if(!object.isSolid){ return false;}
+	if(!object.isSolid){ return false; }
 	if(offset === undefined){offset = new Vector2(0, 0);}
 
 	// Create a hitbox that includes the offset
@@ -128,6 +128,7 @@ function checkCollision(object, offset){
 
 // Checks if the object is within the bounding box
 function checkOutOfBounds(object, offset){
+	if(!object.isSolid){ return false; }
 	if(offset === undefined){offset = new Vector2(0, 0);}
 
 	// Create a hitbox that includes the offset

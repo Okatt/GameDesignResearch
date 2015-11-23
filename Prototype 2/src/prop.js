@@ -40,7 +40,7 @@ function Prop(position, width, height, sprite){
 		this.sprite.draw(ctx, drawX, drawY);
 
 		// Hitbox (debug)
-		var h = this.getHitbox();
-		drawRectangle(ctx, h.x, h.y, h.width, h.height, true, color.GREEN, 0.5);
+		//var h = this.getHitbox();
+		//drawRectangle(ctx, h.x, h.y, h.width, h.height, true, color.GREEN, 0.5);
 	}
 }
