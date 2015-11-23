@@ -266,6 +266,13 @@ socket.on('characterInfo', function(color, shape, name){
   matchName = name;
 });
 
+socket.on('createBaby', function(ID, color, shape){
+    //TODO
+    //create gameobject that follows the player object with the given ID 
+    //baby should have the color and shape that is given etc.
+    
+});
+
 // Send message to signaling server
 function sendMessage(message){
     console.log('Client sending message: ', message);
@@ -334,6 +341,7 @@ function confirmCode(){
   //change to socket.emit and check if both entered the correct code maybe?
   if(input === matchName){
     console.log('baby made');
+    socket.emit('createBaby', matchId, playerId, matchColor, matchShape, playerColor, playerShape);
     //endMatch();
   }
   else {
