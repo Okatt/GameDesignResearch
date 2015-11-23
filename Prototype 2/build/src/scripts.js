@@ -55,7 +55,7 @@ function TextButton(position, width, height, text){
 
 	// onClick gets called when the button is pressed (it sets isPressed on true for easier communication with other objects)
 	this.onClick = function(){
-		this.isPressed = true;
+
 	};
 
 	// Update
@@ -73,6 +73,7 @@ function TextButton(position, width, height, text){
 			
 			// Call the onClick function when the button is pressed
 			if(this.mouseOver && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+				this.isPressed = true;
 				this.onClick();
 			}
 		}
@@ -652,6 +653,9 @@ function initializeWorld(){
 
 function initializePlayer(){
 	var b = new TextButton(new Vector2(100, 100), 50, 50, "Test");
+	b.onClick = function(){
+		// Enter whatever you want the button to do. (this refers to b)
+	};
 	gameObjects.push(b);
 }
 
@@ -876,6 +880,7 @@ function Player(id, position){
 		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
 
 		// Render
+		
 	}
 }
 //*****************************************************************************************

@@ -55,7 +55,7 @@ function TextButton(position, width, height, text){
 
 	// onClick gets called when the button is pressed (it sets isPressed on true for easier communication with other objects)
 	this.onClick = function(){
-		this.isPressed = true;
+
 	};
 
 	// Update
@@ -73,6 +73,7 @@ function TextButton(position, width, height, text){
 			
 			// Call the onClick function when the button is pressed
 			if(this.mouseOver && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+				this.isPressed = true;
 				this.onClick();
 			}
 		}

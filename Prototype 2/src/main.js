@@ -58,6 +58,9 @@ function initializeWorld(){
 
 function initializePlayer(){
 	var b = new TextButton(new Vector2(100, 100), 50, 50, "Test");
+	b.onClick = function(){
+		// Enter whatever you want the button to do. (this refers to b)
+	};
 	gameObjects.push(b);
 }
 

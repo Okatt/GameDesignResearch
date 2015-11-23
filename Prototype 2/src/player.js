@@ -27,5 +27,6 @@ function Player(id, position){
 		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
 
 		// Render
+		
 	}
 }
