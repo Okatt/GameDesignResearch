@@ -14,9 +14,12 @@ var playerName;
 var isMatched = false;
 var matchId;
 
+var attempts = 0;
+var potentialMatchId;
+var isDeciding = false;
+
 var playerColor = Math.round(randomRange(0, 5));
 var playerShape = Math.round(randomRange(0, 5));
-
 
 var matchShape;
 var matchColor;
@@ -86,8 +89,19 @@ socket.on('potentialMatch', function(matchedPlayerID){
   //TODO
   //only 1 potential match should end up matching
   console.log('potential match request');
-  if(!isMatched){
-    socket.emit('confirmedMatch', matchedPlayerID, playerId);
+  potentialMatchId = matchedPlayerID;
+  if(!isMatched && !isDeciding){
+    //show accept and reject buttons
+    isDeciding = true;
+    acceptButton.isVisible = true;
+    acceptButton.isDisabled = false;
+
+    rejectButton.isVisible = true;
+    rejectButton.isDisabled = false;
+    //
+  }
+  else {
+    socket.emit('rejectedMatch', potentialMatchId);
   }
 });
 
@@ -101,14 +115,15 @@ socket.on('confirmedMatch', function(p1ID, p2ID){
       isMatched = true;
       matchId = p2ID;
       console.log(playerId +' matched with ' +p2ID);
+      sendCharacterInfo()
     }
     else if(p2ID === playerId){
       isMatched = true;
       matchId = p1ID;
       console.log(playerId +' matched with ' +p1ID);
+      sendCharacterInfo()
     }
   }
-  
 });
 
 socket.on('unMatch', function(p1ID, p2ID){
@@ -124,6 +139,18 @@ socket.on('unMatch', function(p1ID, p2ID){
       matchName = null;
       console.log(playerId +' unmatched ' +p2ID);
   }
+});
+
+socket.on('matchRejected', function(){
+  attempts++;
+  seekMatch();
+});
+
+socket.on('noMatchFound', function(){
+  //TODO
+  //called when no unmatched players found or all unmatched players have been tried
+  //seekMatch();
+  attempts = 0;
 });
 
 socket.on('characterInfo', function(color, shape, name){
@@ -154,7 +181,7 @@ function seekMatch(){
   //TODO
   //call this function whenever a match should be sought and keep calling it until a match is found (while ismatched === false >)
   if(!isMatched){
-      socket.emit('attemptMatch', playerId);
+      socket.emit('attemptMatch', playerId, attempts);
   }
 }
 
@@ -164,6 +191,26 @@ function endMatch(){
   if(isMatched){
     socket.emit('unMatch', playerId, matchId);
   }
+}
+
+function acceptMatch(){
+  acceptButton.isVisible = false;
+  acceptButton.isDisabled = true;
+
+  rejectButton.isVisible = false;
+  rejectButton.isDisabled = true;
+  isDeciding = false;
+  socket.emit('confirmedMatch', potentialMatchId, playerId);
+}
+
+function rejectMatch(){
+  acceptButton.isVisible = false;
+  acceptButton.isDisabled = true;
+
+  rejectButton.isVisible = false;
+  rejectButton.isDisabled = true;
+  isDeciding = false;
+  socket.emit('rejectedMatch', potentialMatchId);
 }
 
 function sendCharacterInfo(){

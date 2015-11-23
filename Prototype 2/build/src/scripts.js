@@ -2,7 +2,7 @@
 //	Button
 //*****************************************************************************************
 
-function TextButton(position, width, height, text){
+function TextButton(position, width, height, text, bgColor){
 	this.type = "TextButton";
 	this.isAlive = true;
 	
@@ -14,7 +14,7 @@ function TextButton(position, width, height, text){
 
 	// Graphics
 	this.depth = 0;
-	this.bgColor = color.BLUE;
+	this.bgColor = bgColor;
 	this.bgAlpha = 1;
 	this.text = text;
 	this.textColor = color.BLACK;
@@ -25,6 +25,7 @@ function TextButton(position, width, height, text){
 	this.isPressed = false;
 	this.isToggled = false;
 	this.isDisabled = false;
+	this.isVisible = true;
 
 	// Destroys the object (removes it from gameObjects)
 	this.kill = function(){
@@ -78,7 +79,8 @@ function TextButton(position, width, height, text){
 
 	// Render
 	this.render = function(lagOffset){
-		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
+		if(this.isVisible){
+					var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
 		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
 
 		// Background
@@ -90,6 +92,7 @@ function TextButton(position, width, height, text){
 		if(!this.mouseOver){drawText(ctx, drawX, drawY, this.width, 24, this.text, "Arial", 24, this.textColor, 1);}
 		else{drawText(ctx, drawX, drawY, this.width, 24, this.text, "Arial", 24, this.textHoverColor, 1);}
 		ctx.textBaseline = "alphabetic";
+		}
 	};
 }
 /****************************************************************************
@@ -108,9 +111,12 @@ var playerName;
 var isMatched = false;
 var matchId;
 
+var attempts = 0;
+var potentialMatchId;
+var isDeciding = false;
+
 var playerColor = Math.round(randomRange(0, 5));
 var playerShape = Math.round(randomRange(0, 5));
-
 
 var matchShape;
 var matchColor;
@@ -180,8 +186,19 @@ socket.on('potentialMatch', function(matchedPlayerID){
   //TODO
   //only 1 potential match should end up matching
   console.log('potential match request');
-  if(!isMatched){
-    socket.emit('confirmedMatch', matchedPlayerID, playerId);
+  potentialMatchId = matchedPlayerID;
+  if(!isMatched && !isDeciding){
+    //show accept and reject buttons
+    isDeciding = true;
+    acceptButton.isVisible = true;
+    acceptButton.isDisabled = false;
+
+    rejectButton.isVisible = true;
+    rejectButton.isDisabled = false;
+    //
+  }
+  else {
+    socket.emit('rejectedMatch', potentialMatchId);
   }
 });
 
@@ -195,14 +212,15 @@ socket.on('confirmedMatch', function(p1ID, p2ID){
       isMatched = true;
       matchId = p2ID;
       console.log(playerId +' matched with ' +p2ID);
+      sendCharacterInfo()
     }
     else if(p2ID === playerId){
       isMatched = true;
       matchId = p1ID;
       console.log(playerId +' matched with ' +p1ID);
+      sendCharacterInfo()
     }
   }
-  
 });
 
 socket.on('unMatch', function(p1ID, p2ID){
@@ -218,6 +236,18 @@ socket.on('unMatch', function(p1ID, p2ID){
       matchName = null;
       console.log(playerId +' unmatched ' +p2ID);
   }
+});
+
+socket.on('matchRejected', function(){
+  attempts++;
+  seekMatch();
+});
+
+socket.on('noMatchFound', function(){
+  //TODO
+  //called when no unmatched players found or all unmatched players have been tried
+  //seekMatch();
+  attempts = 0;
 });
 
 socket.on('characterInfo', function(color, shape, name){
@@ -248,7 +278,7 @@ function seekMatch(){
   //TODO
   //call this function whenever a match should be sought and keep calling it until a match is found (while ismatched === false >)
   if(!isMatched){
-      socket.emit('attemptMatch', playerId);
+      socket.emit('attemptMatch', playerId, attempts);
   }
 }
 
@@ -258,6 +288,26 @@ function endMatch(){
   if(isMatched){
     socket.emit('unMatch', playerId, matchId);
   }
+}
+
+function acceptMatch(){
+  acceptButton.isVisible = false;
+  acceptButton.isDisabled = true;
+
+  rejectButton.isVisible = false;
+  rejectButton.isDisabled = true;
+  isDeciding = false;
+  socket.emit('confirmedMatch', potentialMatchId, playerId);
+}
+
+function rejectMatch(){
+  acceptButton.isVisible = false;
+  acceptButton.isDisabled = true;
+
+  rejectButton.isVisible = false;
+  rejectButton.isDisabled = true;
+  isDeciding = false;
+  socket.emit('rejectedMatch', potentialMatchId);
 }
 
 function sendCharacterInfo(){
@@ -634,6 +684,10 @@ var keyboard;
 var previousMouse;
 var previousKeyboard;
 
+
+var acceptButton;
+var rejectButton;
+
 window.onload = function main(){
 	// Create the canvas
 	canvas = document.createElement("canvas");
@@ -676,12 +730,24 @@ function initializeWorld(){
 }
 
 function initializePlayer(){
-	var b = new TextButton(new Vector2(100, 100), 50, 50, "Test");
-	b.onClick = function(){
-		// (this refers to b)
-		// Do whatever
-	};
+	acceptButton = new TextButton(new Vector2(500, 100), 300, 100, "Yep", color.GREEN);
+	acceptButton.onClick = function(){acceptMatch()};
+	gameObjects.push(acceptButton);
+	acceptButton.isVisible = false;
+	acceptButton.isDisabled = true;
+
+	rejectButton = new TextButton(new Vector2(500, 300), 300, 100, "Nope", color.RED);
+	rejectButton.onClick = function(){rejectMatch()};
+	gameObjects.push(rejectButton);
+	rejectButton.isVisible = false;
+	rejectButton.isDisabled = true;
+
+	var b = new TextButton(new Vector2(100, 100), 300, 100, "Zoek een Match", color.BLUE);
+	b.onClick = function(){seekMatch()};
 	gameObjects.push(b);
+	var d = new TextButton(new Vector2(100, 300), 300, 100, "Stop de Match", color.BLUE);
+	d.onClick = function(){endMatch()};
+	gameObjects.push(d);
 }
 
 function run(){

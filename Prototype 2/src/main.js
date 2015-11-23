@@ -25,6 +25,10 @@ var keyboard;
 var previousMouse;
 var previousKeyboard;
 
+
+var acceptButton;
+var rejectButton;
+
 window.onload = function main(){
 	// Create the canvas
 	canvas = document.createElement("canvas");
@@ -67,12 +71,24 @@ function initializeWorld(){
 }
 
 function initializePlayer(){
-	var b = new TextButton(new Vector2(100, 100), 50, 50, "Test");
-	b.onClick = function(){
-		// (this refers to b)
-		// Do whatever
-	};
+	acceptButton = new TextButton(new Vector2(500, 100), 300, 100, "Yep", color.GREEN);
+	acceptButton.onClick = function(){acceptMatch()};
+	gameObjects.push(acceptButton);
+	acceptButton.isVisible = false;
+	acceptButton.isDisabled = true;
+
+	rejectButton = new TextButton(new Vector2(500, 300), 300, 100, "Nope", color.RED);
+	rejectButton.onClick = function(){rejectMatch()};
+	gameObjects.push(rejectButton);
+	rejectButton.isVisible = false;
+	rejectButton.isDisabled = true;
+
+	var b = new TextButton(new Vector2(100, 100), 300, 100, "Zoek een Match", color.BLUE);
+	b.onClick = function(){seekMatch()};
 	gameObjects.push(b);
+	var d = new TextButton(new Vector2(100, 300), 300, 100, "Stop de Match", color.BLUE);
+	d.onClick = function(){endMatch()};
+	gameObjects.push(d);
 }
 
 function run(){

@@ -2,7 +2,7 @@
 //	Button
 //*****************************************************************************************
 
-function TextButton(position, width, height, text){
+function TextButton(position, width, height, text, bgColor){
 	this.type = "TextButton";
 	this.isAlive = true;
 	
@@ -14,7 +14,7 @@ function TextButton(position, width, height, text){
 
 	// Graphics
 	this.depth = 0;
-	this.bgColor = color.BLUE;
+	this.bgColor = bgColor;
 	this.bgAlpha = 1;
 	this.text = text;
 	this.textColor = color.BLACK;
@@ -25,6 +25,7 @@ function TextButton(position, width, height, text){
 	this.isPressed = false;
 	this.isToggled = false;
 	this.isDisabled = false;
+	this.isVisible = true;
 
 	// Destroys the object (removes it from gameObjects)
 	this.kill = function(){
@@ -78,7 +79,8 @@ function TextButton(position, width, height, text){
 
 	// Render
 	this.render = function(lagOffset){
-		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
+		if(this.isVisible){
+					var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
 		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
 
 		// Background
@@ -90,5 +92,6 @@ function TextButton(position, width, height, text){
 		if(!this.mouseOver){drawText(ctx, drawX, drawY, this.width, 24, this.text, "Arial", 24, this.textColor, 1);}
 		else{drawText(ctx, drawX, drawY, this.width, 24, this.text, "Arial", 24, this.textHoverColor, 1);}
 		ctx.textBaseline = "alphabetic";
+		}
 	};
 }

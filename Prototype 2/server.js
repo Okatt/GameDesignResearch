@@ -78,17 +78,26 @@ io.sockets.on('connection', function (socket){
 		}
 	});
 
-	socket.on('attemptMatch', function(playerID){
+	socket.on('attemptMatch', function(playerID, attempt){
 		if(potentialMatchArray.length > 1){
-			log('attempting to match player: ' +playerID);
-			for(var i = 0; i < potentialMatchArray.length; i++){
-				if(potentialMatchArray[i] !== playerID){
-					io.sockets.socket(potentialMatchArray[i]).emit('potentialMatch', playerID);
+			log('attempting to match player: ' +playerID +' attempt: ' +attempt);
+			if(potentialMatchArray.length > attempt){
+				if(potentialMatchArray[attempt] === playerID){
+					//tried matching with himself
+					//emit matchRejected to increment attempt and try finding another match
+					io.sockets.socket(playerID).emit('matchRejected');
 				}
+				else {
+					io.sockets.socket(potentialMatchArray[attempt]).emit('potentialMatch', playerID);
+				}
+			}
+			else{
+				io.sockets.socket(playerID).emit('noMatchFound');
 			}
 		}
 		else {
 			log('not enough users are currently unmatched');
+			io.sockets.socket(playerID).emit('noMatchFound');
 		}
 		
 	});
@@ -107,6 +116,12 @@ io.sockets.on('connection', function (socket){
 		io.sockets.socket(playerID).emit('confirmedMatch', matchID, playerID);
 		//emit the match to the world
 		io.sockets.socket(worldID).emit('confirmedMatch', matchID, playerID);
+	});
+
+	socket.on('rejectedMatch', function(rejectedID){
+		//someone pressed nope, emit matchRejected to the rejected player.
+		//emit matchRejected to increment attempt and try finding another match
+		io.sockets.socket(rejectedID).emit('matchRejected');
 	});
 
 	socket.on('unMatch', function(p1ID, p2ID){
