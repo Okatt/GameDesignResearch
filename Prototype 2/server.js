@@ -15,6 +15,8 @@ var worldID;
 var playerIDArray = [];
 var potentialMatchArray = [];
 
+var expectedConfirmArray = [];
+
 var app = http.createServer(function (req, res) {
   fileServer.serve(req, res);
 }).listen(port);
@@ -141,6 +143,12 @@ io.sockets.on('connection', function (socket){
 			potentialMatchArray.push(p2ID);
 		}
 
+		for(var i = expectedConfirmArray.length; i >= 0; i--){
+				if(expectedConfirmArray[i] === p1ID || expectedConfirmArray[i] === p2ID){
+					expectedConfirmArray.splice(i, 1);
+				}
+		}
+
 		//emit the unmatch to the first person
 		io.sockets.socket(p1ID).emit('unMatch', p1ID, p2ID);
 		//emit the unmatch to the second person
@@ -155,6 +163,20 @@ io.sockets.on('connection', function (socket){
 		//TODO
 		//emit should send all parameters
 		io.sockets.socket(matchID).emit('characterInfo', color, shape, name, eyes);
+	});
+
+	socket.on('confirmedCode', function(playerID, matchID){
+		if(contains(expectedConfirmArray, playerID)){
+			io.sockets.socket(playerID).emit('codesExchanged');
+			for(var i = expectedConfirmArray.length; i >= 0; i--){
+				if(expectedConfirmArray[i] === playerID || expectedConfirmArray[i] === matchID){
+					expectedConfirmArray.splice(i, 1);
+				}
+			}
+		}
+		else {
+			expectedConfirmArray.push(matchID);
+		}
 	});
 
 	socket.on('createBaby', function(p1ID, p2ID, p1C, p1S, p2C, p2S, p1E, p2E){
