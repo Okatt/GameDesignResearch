@@ -177,7 +177,8 @@ function TextButton(position, width, height, text, bgColor){
 			//this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
 			
 			// Call the onClick function when the button is pressed
-			if(checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox()) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){  
+			if(checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox()) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+				console.log("Pressed");
 				this.isPressed = true;
 				this.onClick();
 			}
@@ -380,7 +381,7 @@ socket.on('noMatchFound', function(){
 
 socket.on('codesExchanged', function(){
     socket.emit('createBaby', matchId, playerId, matchColor, matchShape, playerColor, playerShape, matchEyes, playerEyes);
-    endMatch();
+    endMatch(); 
 });
 
 socket.on('characterInfo', function(color, shape, name, eyes){
@@ -399,7 +400,7 @@ socket.on('createBaby', function(ID, shape, color, eyes){
     if(gameObjects[i].type = "Player" && gameObjects[i].id === ID){
       gameObjects[i].addBaby(shape, color, eyes);
     }
-  };   
+  }
 });
 
 socket.on('ipaddr', function(ip){
@@ -762,7 +763,7 @@ function initializeInputListeners(){
 		}		
 	}, false);
 
-	document.addEventListener('mouseup', function(e){
+	canvas.addEventListener('mouseup', function(e){
 		switch(e.button){
 			case 0:
 				//console.log("Mouse up at x: "+mouse.x+" y: "+mouse.y);
@@ -782,21 +783,27 @@ function initializeInputListeners(){
 		var rect = canvas.getBoundingClientRect();
 		var x = e.clientX || e.pageX;
     	var y = e.clientY || e.pageY;
-    	mouse.x = x-rect.left-4; // 4px border
-    	mouse.y = y-rect.top-4;
+    	mouse.x = x-rect.left;
+    	mouse.y = y-rect.top;
 	}, false);
 
-	// document.addEventListener('touchstart', function(e){
-	//     var t = e.changedTouches[0] // reference first touch point (ie: first finger)
-	//     var x = parseInt(t.clientX);
-	//     var y = parseInt(t.clientY);
-	//     e.preventDefault();
-	//     mouse.touchX = x; // 4px border
-	//    	mouse.touchY = y;
-	//    	mouse.touched = true;
+	canvas.addEventListener('touchstart', function(e){
+	    var t = e.changedTouches[0] // reference first touch point (ie: first finger)
+	    var x = parseInt(t.clientX);
+	    var y = parseInt(t.clientY);
+	    e.preventDefault();
+	    mouse.x = x; // 4px border
+	   	mouse.y = y;
+	   	mouse.buttonState.leftClick = true;
 
-	//    	console.log("touched at "+x+"   "+y);
-	//  }, false)
+	   	console.log("touched at "+x+"   "+y);
+	 }, false);
+
+	canvas.addEventListener('touchend', function(e){
+	    mouse.buttonState.leftClick = false;
+	    e.preventDefault();
+	    console.log("release touch");
+	 }, false);
 
 	// Keyboard event listeners
 	document.addEventListener('keydown', function(e){

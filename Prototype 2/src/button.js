@@ -70,7 +70,8 @@ function TextButton(position, width, height, text, bgColor){
 			//this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
 			
 			// Call the onClick function when the button is pressed
-			if(checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox()) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){  
+			if(checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox()) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+				console.log("Pressed");
 				this.isPressed = true;
 				this.onClick();
 			}

@@ -176,7 +176,7 @@ socket.on('noMatchFound', function(){
 
 socket.on('codesExchanged', function(){
     socket.emit('createBaby', matchId, playerId, matchColor, matchShape, playerColor, playerShape, matchEyes, playerEyes);
-    endMatch();
+    endMatch(); 
 });
 
 socket.on('characterInfo', function(color, shape, name, eyes){
@@ -195,7 +195,7 @@ socket.on('createBaby', function(ID, shape, color, eyes){
     if(gameObjects[i].type = "Player" && gameObjects[i].id === ID){
       gameObjects[i].addBaby(shape, color, eyes);
     }
-  };   
+  }
 });
 
 socket.on('ipaddr', function(ip){
