@@ -84,9 +84,9 @@ function initializeWorld(){
 }
 
 function initializePlayer(){
-	var p = new Player(playerId, new Vector2(canvas.width/2-150, canvas.height/2), playerShape, playerColor, playerEyes);
-	p.state = "AVATAR";
-	gameObjects.push(p);
+	playerAvatar = new Player(playerId, new Vector2(canvas.width/2-150, canvas.height/2), playerShape, playerColor, playerEyes);
+	playerAvatar.state = "AVATAR";
+	gameObjects.push(playerAvatar);
 
 	acceptButton = new TextButton(new Vector2(500, 100), 300, 100, "Yep", color.GREEN);
 	acceptButton.onClick = function(){acceptMatch()};
@@ -200,10 +200,12 @@ function render(lagOffset){
 		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.GROUND, 1);
 
 		// Name
-		ctx.font = "36px Arial";
-		ctx.fillStyle = "#FFFFFF";
-		ctx.textAlign = "center";
-		ctx.fillText(playerName, canvas.width/2, 100);
+		if(playerName !== undefined){
+			ctx.font = "36px Arial";
+			ctx.fillStyle = "#FFFFFF";
+			ctx.textAlign = "center";
+			ctx.fillText(playerName, canvas.width/2, 100);
+		}
 
 		// Render all game objects
 		for(var ob = 0; ob < gameObjects.length; ob++){

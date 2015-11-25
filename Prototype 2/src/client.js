@@ -22,11 +22,13 @@ var isSeeking = false;
 var playerColor = Math.floor(randomRange(0, 4.99));
 var playerShape = Math.floor(randomRange(0, 3.99));
 var playerEyes = Math.floor(randomRange(0, 2.99))+1;
+var playerAvatar;
 
 var matchShape;
 var matchColor;
 var matchName;
 var matchEyes;
+var matchAvatar;
 
 var link;
 
@@ -50,6 +52,7 @@ socket.on('joined', function (room, clientId) {
   isWorld = false;
   playerId = clientId;
   playerName = prompt('Voer je naam in: ');
+  socket.emit('newPlayer', playerId, playerColor, playerShape, playerEyes);
   initializePlayer();
 });
 
@@ -141,11 +144,7 @@ socket.on('unMatch', function(p1ID, p2ID){
     //move both players with p1ID and p2ID away from eachother
   }
   else if(p1ID === playerId || p2ID === playerId){
-      for (var i = 0; i < gameObjects.length; i++) {
-        if(gameObjects[i].id !== undefined && gameObjects[i].id === matchId){
-          gameObjects[i].kill();
-        }
-      }
+      matchAvatar.kill();
 
       makeBabyButton.isVisible = false;
       makeBabyButton.isDisabled = true;
@@ -185,17 +184,23 @@ socket.on('characterInfo', function(color, shape, name, eyes){
   matchName = name;
   matchEyes = eyes;
 
-  var p = new Player(matchId, new Vector2(canvas.width/2+150, canvas.height/2), matchShape, matchColor, matchEyes);
-  p.state = "AVATAR";
-  gameObjects.push(p);
+  matchAvatar = new Player(matchId, new Vector2(canvas.width/2+150, canvas.height/2), matchShape, matchColor, matchEyes);
+  matchAvatar.state = "AVATAR";
+  gameObjects.push(matchAvatar);
 });
 
 socket.on('createBaby', function(ID, shape, color, eyes){
-  for (var i = 0; i < gameObjects.length; i++) {
-    if(gameObjects[i].type = "Player" && gameObjects[i].id === ID){
-      gameObjects[i].addBaby(shape, color, eyes);
+  if(isWorld){
+    for (var i = 0; i < gameObjects.length; i++) {
+      if(gameObjects[i].type = "Player" && gameObjects[i].id === ID){
+        gameObjects[i].addBaby(shape, color, eyes);
+      }
     }
   }
+  else {
+    playerAvatar.addBaby(shape, color, eyes);
+  }
+
 });
 
 socket.on('ipaddr', function(ip){

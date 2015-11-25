@@ -80,8 +80,10 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 
 		this.depth = canvas.height-this.position.y;
 
-		if(this.isFollowing){ this.follow(); }
-		this.avoidObstacles();
+		if(isWorld){
+			if(this.isFollowing){ this.follow(); }
+			this.avoidObstacles();
+		}
 	}
 
 	this.render = function(lagOffset){
