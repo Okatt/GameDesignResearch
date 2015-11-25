@@ -31,6 +31,7 @@ function Player(id, position, shape, color, eyes){
 	this.babies = [];
 
 	this.timer = 0;
+	this.eyeTimer = 0;
 
 	this.kill = function(){
 		this.isAlive = false;
@@ -58,6 +59,13 @@ function Player(id, position, shape, color, eyes){
 		// Timer
 		this.timer -= UPDATE_DURATION/1000;
 		if(this.timer < 0){this.timer = 0;}
+
+		this.eyeTimer -= UPDATE_DURATION/1000;
+		if(this.eyeTimer < 0){this.eyeTimer = 0;}
+
+		if(this.eyeTimer === 0){
+			this.eyeTimer = randomRange(3, 8);
+		}
 
 		this.depth = canvas.height-this.position.y;
 
@@ -104,16 +112,19 @@ function Player(id, position, shape, color, eyes){
 		this.body.draw(ctx, drawX, drawY);
 
 		// Eyes
-		if(this.eyes === 1){ drawCircle(ctx, drawX, drawY-50, 25, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-50+randomRange(0, 2), 22, true, "#323232", 1); }
-		else if(this.eyes === 2){ 
-			drawCircle(ctx, drawX-22, drawY-50, 20, true, "#FFFFFF", 1); drawCircle(ctx, drawX-22+randomRange(0, 2), drawY-50+randomRange(0, 2), 17, true, "#323232", 1);
-			drawCircle(ctx, drawX+22, drawY-50, 20, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-50+randomRange(0, 2), 17, true, "#323232", 1);
+		if(this.eyeTimer >= 0.1){
+			if(this.eyes === 1){ drawCircle(ctx, drawX, drawY-50, 25, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-50+randomRange(0, 2), 22, true, "#323232", 1); }
+			else if(this.eyes === 2){ 
+				drawCircle(ctx, drawX-22, drawY-50, 20, true, "#FFFFFF", 1); drawCircle(ctx, drawX-22+randomRange(0, 2), drawY-50+randomRange(0, 2), 17, true, "#323232", 1);
+				drawCircle(ctx, drawX+22, drawY-50, 20, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-50+randomRange(0, 2), 17, true, "#323232", 1);
+			}
+			else{
+				drawCircle(ctx, drawX, drawY-74, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-74+randomRange(0, 2), 15, true, "#323232", 1);
+				drawCircle(ctx, drawX-22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX-22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
+				drawCircle(ctx, drawX+22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
+			}
 		}
-		else{
-			drawCircle(ctx, drawX, drawY-74, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-74+randomRange(0, 2), 15, true, "#323232", 1);
-			drawCircle(ctx, drawX-22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX-22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
-			drawCircle(ctx, drawX+22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
-		}		
+
 
 		// Hitbox (debug)
 		//var h = this.getHitbox();

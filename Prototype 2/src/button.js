@@ -67,10 +67,10 @@ function TextButton(position, width, height, text, bgColor){
 		// Check if the button is not disabled
 		if(!this.isDisabled){
 			// Check if the mouse is hovering over the button
-			this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
+			//this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
 			
 			// Call the onClick function when the button is pressed
-			if(this.mouseOver && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+			if(checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox()) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){  
 				this.isPressed = true;
 				this.onClick();
 			}

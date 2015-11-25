@@ -167,6 +167,8 @@ io.sockets.on('connection', function (socket){
 		 var eyes = chooseOne(p1E, p2E);
 		io.sockets.socket(worldID).emit('createBaby', p1ID, shape, color, eyes);
 		io.sockets.socket(worldID).emit('createBaby', p2ID, shape, color, eyes);
+		io.sockets.socket(p1ID).emit('createBaby', p1ID, shape, color, eyes);
+		io.sockets.socket(p2ID).emit('createBaby', p2ID, shape, color, eyes);
 	});
 
     socket.on('ipaddr', function () {

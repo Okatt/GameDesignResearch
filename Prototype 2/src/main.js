@@ -84,6 +84,10 @@ function initializeWorld(){
 }
 
 function initializePlayer(){
+	var p = new Player(playerId, new Vector2(canvas.width/2-150, canvas.height/2), playerShape, playerColor, playerEyes);
+	p.state = "AVATAR";
+	gameObjects.push(p);
+
 	acceptButton = new TextButton(new Vector2(500, 100), 300, 100, "Yep", color.GREEN);
 	acceptButton.onClick = function(){acceptMatch()};
 	gameObjects.push(acceptButton);
@@ -176,6 +180,16 @@ function render(lagOffset){
 		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.SKY, 1);
 		drawRectangle(ctx, 0, canvas.height*0.3, canvas.width, canvas.height*0.7, true, color.GROUND, 1);
 
+		// link
+		ctx.font = "28px Arial";
+		ctx.fillStyle = "#FFFFFF";
+		ctx.textAlign = "center";
+		ctx.fillText("JOIN THE PARTY AT", canvas.width/2, 30);
+		ctx.font = "36px Arial";
+		ctx.fillStyle = "#FFFFFF";
+		ctx.textAlign = "center";
+		ctx.fillText(link+":"+2013, canvas.width/2, 66);
+
 		// Render all game objects
 		for (var ob = 0; ob < gameObjects.length; ob++){
 			gameObjects[ob].render(lagOffset);
@@ -183,7 +197,13 @@ function render(lagOffset){
 	//draw for clients
 	}else{
 		// Background
-		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.WHITE, 1);
+		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.GROUND, 1);
+
+		// Name
+		ctx.font = "36px Arial";
+		ctx.fillStyle = "#FFFFFF";
+		ctx.textAlign = "center";
+		ctx.fillText(playerName, canvas.width/2, 100);
 
 		// Render all game objects
 		for(var ob = 0; ob < gameObjects.length; ob++){

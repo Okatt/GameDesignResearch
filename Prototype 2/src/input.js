@@ -62,6 +62,18 @@ function initializeInputListeners(){
     	mouse.y = y-rect.top-4;
 	}, false);
 
+	// document.addEventListener('touchstart', function(e){
+	//     var t = e.changedTouches[0] // reference first touch point (ie: first finger)
+	//     var x = parseInt(t.clientX);
+	//     var y = parseInt(t.clientY);
+	//     e.preventDefault();
+	//     mouse.touchX = x; // 4px border
+	//    	mouse.touchY = y;
+	//    	mouse.touched = true;
+
+	//    	console.log("touched at "+x+"   "+y);
+	//  }, false)
+
 	// Keyboard event listeners
 	document.addEventListener('keydown', function(e){
 		// e.keyCode

@@ -28,6 +28,8 @@ var matchColor;
 var matchName;
 var matchEyes;
 
+var link;
+
 
 /****************************************************************************
  * Signaling server 
@@ -139,6 +141,12 @@ socket.on('unMatch', function(p1ID, p2ID){
     //move both players with p1ID and p2ID away from eachother
   }
   else if(p1ID === playerId || p2ID === playerId){
+      for (var i = 0; i < gameObjects.length; i++) {
+        if(gameObjects[i].id !== undefined && gameObjects[i].id === matchId){
+          gameObjects[i].kill();
+        }
+      }
+
       makeBabyButton.isVisible = false;
       makeBabyButton.isDisabled = true;
       isMatched = false;
@@ -171,6 +179,10 @@ socket.on('characterInfo', function(color, shape, name, eyes){
   matchShape = shape;
   matchName = name;
   matchEyes = eyes;
+
+  var p = new Player(matchId, new Vector2(canvas.width/2+150, canvas.height/2), matchShape, matchColor, matchEyes);
+  p.state = "AVATAR";
+  gameObjects.push(p);
 });
 
 socket.on('createBaby', function(ID, shape, color, eyes){
@@ -179,6 +191,10 @@ socket.on('createBaby', function(ID, shape, color, eyes){
       gameObjects[i].addBaby(shape, color, eyes);
     }
   };   
+});
+
+socket.on('ipaddr', function(ip){
+  link = ip;
 });
 
 // Send message to signaling server

@@ -24,6 +24,8 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 	this.isSolid = false;
 	this.isDynamic = true;
 
+	this.eyeTimer = 0;
+
 	this.kill = function(){
 		this.isAlive = false;
 	}
@@ -69,6 +71,13 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 	}
 
 	this.update = function(){
+		this.eyeTimer -= UPDATE_DURATION/1000;
+		if(this.eyeTimer < 0){this.eyeTimer = 0;}
+
+		if(this.eyeTimer === 0){
+			this.eyeTimer = randomRange(3, 8);
+		}
+
 		this.depth = canvas.height-this.position.y;
 
 		if(this.isFollowing){ this.follow(); }
@@ -82,15 +91,17 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 		// Body
 		this.body.draw(ctx, drawX, drawY);
 
-		if(this.eyes === 1){ drawCircle(ctx, drawX, drawY-26, 14, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-26+randomRange(0, 2), 11, true, "#323232", 1); }
-		else if(this.eyes === 2){ 
-			drawCircle(ctx, drawX-10, drawY-24, 10, true, "#FFFFFF", 1); drawCircle(ctx, drawX-10+randomRange(0, 2), drawY-24+randomRange(0, 2), 7, true, "#323232", 1);
-			drawCircle(ctx, drawX+10, drawY-24, 10, true, "#FFFFFF", 1); drawCircle(ctx, drawX+10+randomRange(0, 2), drawY-24+randomRange(0, 2), 7, true, "#323232", 1);
-		}
-		else{
-			drawCircle(ctx, drawX, drawY-38, 8, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-38+randomRange(0, 2), 5, true, "#323232", 1);
-			drawCircle(ctx, drawX-10, drawY-20, 8, true, "#FFFFFF", 1); drawCircle(ctx, drawX-10+randomRange(0, 2), drawY-20+randomRange(0, 2), 5, true, "#323232", 1);
-			drawCircle(ctx, drawX+10, drawY-20, 8, true, "#FFFFFF", 1); drawCircle(ctx, drawX+10+randomRange(0, 2), drawY-20+randomRange(0, 2), 5, true, "#323232", 1);
+		if(this.eyeTimer >= 0.1){
+			if(this.eyes === 1){ drawCircle(ctx, drawX, drawY-26, 14, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-26+randomRange(0, 2), 11, true, "#323232", 1); }
+			else if(this.eyes === 2){ 
+				drawCircle(ctx, drawX-10, drawY-24, 10, true, "#FFFFFF", 1); drawCircle(ctx, drawX-10+randomRange(0, 2), drawY-24+randomRange(0, 2), 7, true, "#323232", 1);
+				drawCircle(ctx, drawX+10, drawY-24, 10, true, "#FFFFFF", 1); drawCircle(ctx, drawX+10+randomRange(0, 2), drawY-24+randomRange(0, 2), 7, true, "#323232", 1);
+			}
+			else{
+				drawCircle(ctx, drawX, drawY-38, 8, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-38+randomRange(0, 2), 5, true, "#323232", 1);
+				drawCircle(ctx, drawX-10, drawY-20, 8, true, "#FFFFFF", 1); drawCircle(ctx, drawX-10+randomRange(0, 2), drawY-20+randomRange(0, 2), 5, true, "#323232", 1);
+				drawCircle(ctx, drawX+10, drawY-20, 8, true, "#FFFFFF", 1); drawCircle(ctx, drawX+10+randomRange(0, 2), drawY-20+randomRange(0, 2), 5, true, "#323232", 1);
+			}
 		}
 	}
 }
@@ -163,10 +174,10 @@ function TextButton(position, width, height, text, bgColor){
 		// Check if the button is not disabled
 		if(!this.isDisabled){
 			// Check if the mouse is hovering over the button
-			this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
+			//this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
 			
 			// Call the onClick function when the button is pressed
-			if(this.mouseOver && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+			if(checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox()) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){  
 				this.isPressed = true;
 				this.onClick();
 			}
@@ -220,6 +231,8 @@ var matchShape;
 var matchColor;
 var matchName;
 var matchEyes;
+
+var link;
 
 
 /****************************************************************************
@@ -332,6 +345,12 @@ socket.on('unMatch', function(p1ID, p2ID){
     //move both players with p1ID and p2ID away from eachother
   }
   else if(p1ID === playerId || p2ID === playerId){
+      for (var i = 0; i < gameObjects.length; i++) {
+        if(gameObjects[i].id !== undefined && gameObjects[i].id === matchId){
+          gameObjects[i].kill();
+        }
+      }
+
       makeBabyButton.isVisible = false;
       makeBabyButton.isDisabled = true;
       isMatched = false;
@@ -364,6 +383,10 @@ socket.on('characterInfo', function(color, shape, name, eyes){
   matchShape = shape;
   matchName = name;
   matchEyes = eyes;
+
+  var p = new Player(matchId, new Vector2(canvas.width/2+150, canvas.height/2), matchShape, matchColor, matchEyes);
+  p.state = "AVATAR";
+  gameObjects.push(p);
 });
 
 socket.on('createBaby', function(ID, shape, color, eyes){
@@ -372,6 +395,10 @@ socket.on('createBaby', function(ID, shape, color, eyes){
       gameObjects[i].addBaby(shape, color, eyes);
     }
   };   
+});
+
+socket.on('ipaddr', function(ip){
+  link = ip;
 });
 
 // Send message to signaling server
@@ -755,6 +782,18 @@ function initializeInputListeners(){
     	mouse.y = y-rect.top-4;
 	}, false);
 
+	// document.addEventListener('touchstart', function(e){
+	//     var t = e.changedTouches[0] // reference first touch point (ie: first finger)
+	//     var x = parseInt(t.clientX);
+	//     var y = parseInt(t.clientY);
+	//     e.preventDefault();
+	//     mouse.touchX = x; // 4px border
+	//    	mouse.touchY = y;
+	//    	mouse.touched = true;
+
+	//    	console.log("touched at "+x+"   "+y);
+	//  }, false)
+
 	// Keyboard event listeners
 	document.addEventListener('keydown', function(e){
 		// e.keyCode
@@ -865,6 +904,10 @@ function initializeWorld(){
 }
 
 function initializePlayer(){
+	var p = new Player(playerId, new Vector2(canvas.width/2-150, canvas.height/2), playerShape, playerColor, playerEyes);
+	p.state = "AVATAR";
+	gameObjects.push(p);
+
 	acceptButton = new TextButton(new Vector2(500, 100), 300, 100, "Yep", color.GREEN);
 	acceptButton.onClick = function(){acceptMatch()};
 	gameObjects.push(acceptButton);
@@ -957,6 +1000,16 @@ function render(lagOffset){
 		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.SKY, 1);
 		drawRectangle(ctx, 0, canvas.height*0.3, canvas.width, canvas.height*0.7, true, color.GROUND, 1);
 
+		// link
+		ctx.font = "28px Arial";
+		ctx.fillStyle = "#FFFFFF";
+		ctx.textAlign = "center";
+		ctx.fillText("JOIN THE PARTY AT", canvas.width/2, 30);
+		ctx.font = "36px Arial";
+		ctx.fillStyle = "#FFFFFF";
+		ctx.textAlign = "center";
+		ctx.fillText(link+":"+2013, canvas.width/2, 66);
+
 		// Render all game objects
 		for (var ob = 0; ob < gameObjects.length; ob++){
 			gameObjects[ob].render(lagOffset);
@@ -964,7 +1017,13 @@ function render(lagOffset){
 	//draw for clients
 	}else{
 		// Background
-		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.WHITE, 1);
+		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.GROUND, 1);
+
+		// Name
+		ctx.font = "36px Arial";
+		ctx.fillStyle = "#FFFFFF";
+		ctx.textAlign = "center";
+		ctx.fillText(playerName, canvas.width/2, 100);
 
 		// Render all game objects
 		for(var ob = 0; ob < gameObjects.length; ob++){
@@ -1181,6 +1240,7 @@ function Player(id, position, shape, color, eyes){
 	this.babies = [];
 
 	this.timer = 0;
+	this.eyeTimer = 0;
 
 	this.kill = function(){
 		this.isAlive = false;
@@ -1208,6 +1268,13 @@ function Player(id, position, shape, color, eyes){
 		// Timer
 		this.timer -= UPDATE_DURATION/1000;
 		if(this.timer < 0){this.timer = 0;}
+
+		this.eyeTimer -= UPDATE_DURATION/1000;
+		if(this.eyeTimer < 0){this.eyeTimer = 0;}
+
+		if(this.eyeTimer === 0){
+			this.eyeTimer = randomRange(3, 8);
+		}
 
 		this.depth = canvas.height-this.position.y;
 
@@ -1254,16 +1321,19 @@ function Player(id, position, shape, color, eyes){
 		this.body.draw(ctx, drawX, drawY);
 
 		// Eyes
-		if(this.eyes === 1){ drawCircle(ctx, drawX, drawY-50, 25, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-50+randomRange(0, 2), 22, true, "#323232", 1); }
-		else if(this.eyes === 2){ 
-			drawCircle(ctx, drawX-22, drawY-50, 20, true, "#FFFFFF", 1); drawCircle(ctx, drawX-22+randomRange(0, 2), drawY-50+randomRange(0, 2), 17, true, "#323232", 1);
-			drawCircle(ctx, drawX+22, drawY-50, 20, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-50+randomRange(0, 2), 17, true, "#323232", 1);
+		if(this.eyeTimer >= 0.1){
+			if(this.eyes === 1){ drawCircle(ctx, drawX, drawY-50, 25, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-50+randomRange(0, 2), 22, true, "#323232", 1); }
+			else if(this.eyes === 2){ 
+				drawCircle(ctx, drawX-22, drawY-50, 20, true, "#FFFFFF", 1); drawCircle(ctx, drawX-22+randomRange(0, 2), drawY-50+randomRange(0, 2), 17, true, "#323232", 1);
+				drawCircle(ctx, drawX+22, drawY-50, 20, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-50+randomRange(0, 2), 17, true, "#323232", 1);
+			}
+			else{
+				drawCircle(ctx, drawX, drawY-74, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-74+randomRange(0, 2), 15, true, "#323232", 1);
+				drawCircle(ctx, drawX-22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX-22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
+				drawCircle(ctx, drawX+22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
+			}
 		}
-		else{
-			drawCircle(ctx, drawX, drawY-74, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-74+randomRange(0, 2), 15, true, "#323232", 1);
-			drawCircle(ctx, drawX-22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX-22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
-			drawCircle(ctx, drawX+22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
-		}		
+
 
 		// Hitbox (debug)
 		//var h = this.getHitbox();
