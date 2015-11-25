@@ -378,6 +378,11 @@ socket.on('noMatchFound', function(){
   attempts = 0;
 });
 
+socket.on('codesExchanged', function(){
+    socket.emit('createBaby', matchId, playerId, matchColor, matchShape, playerColor, playerShape, matchEyes, playerEyes);
+    endMatch();
+});
+
 socket.on('characterInfo', function(color, shape, name, eyes){
   matchColor = color;
   matchShape = shape;
@@ -468,9 +473,8 @@ function confirmCode(){
   //TODO
   //change to socket.emit and check if both entered the correct code maybe?
   if(input === matchName){
-    console.log('baby made');
-    socket.emit('createBaby', matchId, playerId, matchColor, matchShape, playerColor, playerShape, matchEyes, playerEyes);
-    endMatch();
+    console.log('correct name entered');
+    socket.emit('confirmedCode', playerId, matchId);
   }
   else {
     console.log('wrong name');
