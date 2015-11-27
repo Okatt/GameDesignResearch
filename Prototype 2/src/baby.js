@@ -25,6 +25,7 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 	this.isDynamic = true;
 
 	this.eyeTimer = 0;
+	this.phoneTimer = 0;
 
 	this.kill = function(){
 		this.isAlive = false;
@@ -72,6 +73,8 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 
 	this.update = function(){
 		this.eyeTimer -= UPDATE_DURATION/1000;
+		this.phoneTimer += UPDATE_DURATION/1000;
+
 		if(this.eyeTimer < 0){this.eyeTimer = 0;}
 
 		if(this.eyeTimer === 0){
@@ -83,6 +86,11 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 		if(isWorld){
 			if(this.isFollowing){ this.follow(); }
 			this.avoidObstacles();
+		}
+		else if(this.phoneTimer >= 3){
+			if(this.isFollowing){ this.follow(); }
+			//this.avoidObstacles();
+			this.phoneTimer = 0;
 		}
 	}
 

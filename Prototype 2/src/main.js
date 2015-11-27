@@ -6,7 +6,7 @@
 //*****************************************************************************************
 
 // Constants
-var UPS = 60;						// updates/second
+var UPS = 30;						// updates/second
 var UPDATE_DURATION = 1000/UPS;		// The duration of a single update in ms
 
 // Logic
