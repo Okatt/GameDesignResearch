@@ -246,6 +246,7 @@ var matchEyes;
 var matchAvatar;
 
 var link;
+var clientStatus = 'Connecting to world';
 
 
 /****************************************************************************
@@ -266,13 +267,15 @@ socket.on('joined', function (room, clientId) {
   console.log('This peer has joined room', room, 'with client ID', clientId);
   isWorld = false;
   playerId = clientId;
-  playerName = prompt('Voer je naam in: ');
   socket.emit('newPlayer', playerId, playerColor, playerShape, playerEyes);
+  //TODO client status
+  clientStatus = 'Welcome to the game!';
   initializePlayer();
 });
 
 socket.on('full', function (room) {
   alert('Room "' + room + '" is full. We will create a new room for you.');
+  clientStatus = 'Sorry, the game is full!';
   window.location.hash = '';
   window.location.reload();
 });
@@ -282,11 +285,24 @@ socket.on('log', function (array) {
 });
 
 socket.on('playerLeft', function(id){
-  for(var i = 0; i < gameObjects.length; i++){
-    if(gameObjects[i].id !== undefined && gameObjects[i].id === id){
-      gameObjects[i].kill();
+  if(isWorld){
+    for(var i = 0; i < gameObjects.length; i++){
+      if(gameObjects[i].id !== undefined && gameObjects[i].id === id){
+        gameObjects[i].kill();
+      }
     }
   }
+  else {
+    if(id === potentialMatchId){
+      clientStatus = 'De andere speler heeft het spel verlaten';
+      rejectMatch();
+    } 
+    else if(id === matchId){
+      clientStatus = 'De andere speler heeft het spel verlaten';
+      endMatch();
+    }
+  }
+  
 });
 
 socket.on('message', function (message){
@@ -295,6 +311,16 @@ socket.on('message', function (message){
 });
 
 socket.on('newPlayer', function(newPlayerID, shape, color, eyes){
+  //TODO REMOVE THIS CODE!!!
+  var p2 = undefined;
+
+  for(var i = 0; i < gameObjects.length; i++){
+    if(gameObjects[i].type === "Player" && gameObjects[i].matched === false){
+      p2 = gameObjects[i];
+    }
+  }
+
+
   console.log('New player joined the game with ID: ' +newPlayerID +' color: ' +color +' shape: ' +shape);
   randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
   //ADDED:
@@ -306,27 +332,31 @@ socket.on('newPlayer', function(newPlayerID, shape, color, eyes){
     player.previousPos = player.position.clone();
   }
   gameObjects.push(player);
+
+
+  //TODO REMOVE THIS CODE!!
+  if(p2 !== undefined){
+      worldSeekMatch(player, p2);
+  }
 });
 
-socket.on('potentialMatch', function(matchedPlayerID){
-  //TODO
-  //only 1 potential match should end up matching
-  console.log('potential match request');
-  if(!isMatched && !isDeciding && !isSeeking){
-    //show accept and reject buttons
-    potentialMatchId = matchedPlayerID;
-    isDeciding = true;
-    acceptButton.isVisible = true;
-    acceptButton.isDisabled = false;
+socket.on('matchRequest', function(mID, mShape, mColor, mEyes){
+  matchColor = mColor;
+  matchShape = mShape;
+  matchEyes = mEyes;
+  potentialMatchId = mID;
 
-    rejectButton.isVisible = true;
-    rejectButton.isDisabled = false;
-    //
-  }
-  else {
-    console.log('already matched, seeking or deciding')
-    socket.emit('rejectedMatch', matchedPlayerID);
-  }
+  matchAvatar = new Player(potentialMatchId, new Vector2(500, canvas.height/2), matchShape, matchColor, matchEyes);
+  matchAvatar.state = "AVATAR";
+  gameObjects.push(matchAvatar);
+
+  clientStatus = 'Wil jij met deze persoon spelen?';
+
+  acceptButton.isVisible = true;
+  acceptButton.isDisabled = false;
+
+  rejectButton.isVisible = true;
+  rejectButton.isDisabled = false;
 });
 
 socket.on('confirmedMatch', function(p1ID, p2ID){
@@ -348,15 +378,18 @@ socket.on('confirmedMatch', function(p1ID, p2ID){
     else if(p2ID === playerId){
       matchId = p1ID;
     }
-
+    clientStatus = 'De match is gemaakt!';
     sendCharacterInfo();
   }
 });
 
 socket.on('unMatch', function(p1ID, p2ID){
   if(isWorld){
-    //TODO
-    //move both players with p1ID and p2ID away from eachother
+     for (var ob = 0; ob < gameObjects.length; ob++){
+      if(gameObjects[ob].type === "Player" && (gameObjects[ob].id === p1ID || gameObjects[ob].id === p2ID)){
+        gameObjects[ob].matched = false;
+      }
+    }
   }
   else if(p1ID === playerId || p2ID === playerId){
       matchAvatar.kill();
@@ -370,38 +403,33 @@ socket.on('unMatch', function(p1ID, p2ID){
       matchName = null;
       matchEyes = null;
       console.log(playerId +' unmatched ' +p2ID);
+      clientStatus = 'De match is klaar';
   }
 });
 
-socket.on('matchRejected', function(){
-  isSeeking = false;
-  attempts++;
-  seekMatch();
-});
+socket.on('matchRejected', function(rejectedID, playerID){
+  if(isWorld){
+    for (var ob = 0; ob < gameObjects.length; ob++){
+      if(gameObjects[ob].type === "Player" && (gameObjects[ob].id === rejectedID || gameObjects[ob].id === playerID)){
+        gameObjects[ob].matched = false;
+      }
+    }
+  }
+  else {
+    acceptButton.isVisible = false;
+    acceptButton.isDisabled = true;
 
-socket.on('noMatchFound', function(){
-  //TODO
-  //called when no unmatched players found or all unmatched players have been tried
-  //seekMatch();
-  console.log('no match found');
-  isSeeking = false;
-  attempts = 0;
+    rejectButton.isVisible = false;
+    rejectButton.isDisabled = true;
+
+    matchAvatar.kill();
+    clientStatus = 'De match was geen success';
+  }
 });
 
 socket.on('codesExchanged', function(){
     socket.emit('createBaby', matchId, playerId, matchColor, matchShape, playerColor, playerShape, matchEyes, playerEyes);
     endMatch(); 
-});
-
-socket.on('characterInfo', function(color, shape, name, eyes){
-  matchColor = color;
-  matchShape = shape;
-  matchName = name;
-  matchEyes = eyes;
-
-  matchAvatar = new Player(matchId, new Vector2(canvas.width/2+150, canvas.height/2), matchShape, matchColor, matchEyes);
-  matchAvatar.state = "AVATAR";
-  gameObjects.push(matchAvatar);
 });
 
 socket.on('createBaby', function(ID, shape, color, eyes){
@@ -440,13 +468,16 @@ if(location.hostname.match(/localhost|127\.0\.0/)){socket.emit('ipaddr');}
 //**************************************************************************** 
 // Aux functions, mostly UI-related
 //****************************************************************************
-function seekMatch(){
-  //TODO
-  //call this function whenever a match should be sought and keep calling it until a match is found (while ismatched === false >)
-  if(!isMatched && !isDeciding && !isSeeking){
-      isSeeking = true;
-      socket.emit('attemptMatch', playerId, attempts);
-  }
+
+function worldSeekMatch(p1, p2){
+  //p1 and p2 should be game objects!!
+  //emit the ids and attributes of the players so the server can match them
+  socket.emit('attemptMatch', p1.id, p1.shape, p1.color, p1.eyes, p2.id, p2.shape, p2.color, p2.eyes);
+
+  //set them to matched temporarily so they dont get matched again while deciding
+  p1.matched = true;
+  p2.matched = true;
+
 }
 
 function endMatch(){
@@ -463,8 +494,8 @@ function acceptMatch(){
 
   rejectButton.isVisible = false;
   rejectButton.isDisabled = true;
-  isDeciding = false;
-  socket.emit('confirmedMatch', potentialMatchId, playerId);
+
+  socket.emit('acceptedMatch', playerId, potentialMatchId);
 }
 
 function rejectMatch(){
@@ -473,8 +504,8 @@ function rejectMatch(){
 
   rejectButton.isVisible = false;
   rejectButton.isDisabled = true;
-  isDeciding = false;
-  socket.emit('rejectedMatch', potentialMatchId);
+
+  socket.emit('rejectedMatch', playerId, potentialMatchId);
 }
 
 function sendCharacterInfo(){
@@ -485,10 +516,11 @@ function sendCharacterInfo(){
 
 function confirmCode(){
   var input;
-  input = prompt('Ga naar de deur en voer de speler naam van je partner in: ');
+  clientStatus = 'Zoek elkaar in het echt en kies een naam voor jullie creatie, pas als jullie samen een naam weten is die af!';
+  input = prompt('Kies een naam voor jullie creatie: ');
   //TODO
   //change to socket.emit and check if both entered the correct code maybe?
-  if(input === matchName){
+  if(input === 'test'){
     console.log('correct name entered');
     socket.emit('confirmedCode', playerId, matchId);
   }
@@ -930,17 +962,17 @@ function initializeWorld(){
 }
 
 function initializePlayer(){
-	playerAvatar = new Player(playerId, new Vector2(canvas.width/2-150, canvas.height/2), playerShape, playerColor, playerEyes);
+	playerAvatar = new Player(playerId, new Vector2(100, canvas.height/2), playerShape, playerColor, playerEyes);
 	playerAvatar.state = "AVATAR";
 	gameObjects.push(playerAvatar);
 
-	acceptButton = new TextButton(new Vector2(500, 100), 300, 100, "Yep", color.GREEN);
+	acceptButton = new TextButton(new Vector2(100, 100), 300, 100, "Yep", color.GREEN);
 	acceptButton.onClick = function(){acceptMatch()};
 	gameObjects.push(acceptButton);
 	acceptButton.isVisible = false;
 	acceptButton.isDisabled = true;
 
-	rejectButton = new TextButton(new Vector2(500, 300), 300, 100, "Nope", color.RED);
+	rejectButton = new TextButton(new Vector2(500, 100), 300, 100, "Nope", color.RED);
 	rejectButton.onClick = function(){rejectMatch()};
 	gameObjects.push(rejectButton);
 	rejectButton.isVisible = false;
@@ -951,13 +983,6 @@ function initializePlayer(){
 	gameObjects.push(makeBabyButton);
 	makeBabyButton.isVisible = false;
 	makeBabyButton.isDisabled = true;
-
-	var b = new TextButton(new Vector2(100, 100), 300, 100, "Zoek een Match", color.BLUE);
-	b.onClick = function(){seekMatch()};
-	gameObjects.push(b);
-	var d = new TextButton(new Vector2(100, 300), 300, 100, "Stop de Match", color.BLUE);
-	d.onClick = function(){endMatch()};
-	gameObjects.push(d);
 }
 
 function run(){
@@ -1046,12 +1071,10 @@ function render(lagOffset){
 		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.GROUND, 1);
 
 		// Name
-		if(playerName !== undefined){
-			ctx.font = "36px Arial";
-			ctx.fillStyle = "#FFFFFF";
-			ctx.textAlign = "center";
-			ctx.fillText(playerName, canvas.width/2, 100);
-		}
+		ctx.font = "36px Arial";
+		ctx.fillStyle = "#000000";
+		ctx.textAlign = "center";
+		ctx.fillText(clientStatus, 250, 100);
 
 		// Render all game objects
 		for(var ob = 0; ob < gameObjects.length; ob++){

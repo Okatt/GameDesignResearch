@@ -84,17 +84,17 @@ function initializeWorld(){
 }
 
 function initializePlayer(){
-	playerAvatar = new Player(playerId, new Vector2(canvas.width/2-150, canvas.height/2), playerShape, playerColor, playerEyes);
+	playerAvatar = new Player(playerId, new Vector2(100, canvas.height/2), playerShape, playerColor, playerEyes);
 	playerAvatar.state = "AVATAR";
 	gameObjects.push(playerAvatar);
 
-	acceptButton = new TextButton(new Vector2(500, 100), 300, 100, "Yep", color.GREEN);
+	acceptButton = new TextButton(new Vector2(100, 100), 300, 100, "Yep", color.GREEN);
 	acceptButton.onClick = function(){acceptMatch()};
 	gameObjects.push(acceptButton);
 	acceptButton.isVisible = false;
 	acceptButton.isDisabled = true;
 
-	rejectButton = new TextButton(new Vector2(500, 300), 300, 100, "Nope", color.RED);
+	rejectButton = new TextButton(new Vector2(500, 100), 300, 100, "Nope", color.RED);
 	rejectButton.onClick = function(){rejectMatch()};
 	gameObjects.push(rejectButton);
 	rejectButton.isVisible = false;
@@ -105,13 +105,6 @@ function initializePlayer(){
 	gameObjects.push(makeBabyButton);
 	makeBabyButton.isVisible = false;
 	makeBabyButton.isDisabled = true;
-
-	var b = new TextButton(new Vector2(100, 100), 300, 100, "Zoek een Match", color.BLUE);
-	b.onClick = function(){seekMatch()};
-	gameObjects.push(b);
-	var d = new TextButton(new Vector2(100, 300), 300, 100, "Stop de Match", color.BLUE);
-	d.onClick = function(){endMatch()};
-	gameObjects.push(d);
 }
 
 function run(){
@@ -200,12 +193,10 @@ function render(lagOffset){
 		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.GROUND, 1);
 
 		// Name
-		if(playerName !== undefined){
-			ctx.font = "36px Arial";
-			ctx.fillStyle = "#FFFFFF";
-			ctx.textAlign = "center";
-			ctx.fillText(playerName, canvas.width/2, 100);
-		}
+		ctx.font = "36px Arial";
+		ctx.fillStyle = "#000000";
+		ctx.textAlign = "center";
+		ctx.fillText(clientStatus, 250, 100);
 
 		// Render all game objects
 		for(var ob = 0; ob < gameObjects.length; ob++){

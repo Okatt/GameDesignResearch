@@ -13,9 +13,9 @@ var port = 2013;
 var worldID;
 
 var playerIDArray = [];
-var potentialMatchArray = [];
 
 var expectedConfirmArray = [];
+var expectedAcceptArray = [];
 
 var app = http.createServer(function (req, res) {
   fileServer.serve(req, res);
@@ -51,12 +51,7 @@ io.sockets.on('connection', function (socket){
 				break;
 			}
 		}
-		for(var i = 0; i < potentialMatchArray.length; i++){
-			if(potentialMatchArray[i] === socket.id){
-				potentialMatchArray.splice(i, 1);
-				break;
-			}
-		}
+		socket.broadcast.emit('playerLeft', socket.id);
 		io.sockets.socket(worldID).emit('playerLeft', socket.id);
 	});
 
@@ -81,70 +76,51 @@ io.sockets.on('connection', function (socket){
 			socket.join(room);
             socket.emit('joined', room, socket.id);
             playerIDArray.push(socket.id);
-            potentialMatchArray.push(socket.id);
-            }
+        }
 	});
 
 	socket.on('newPlayer', function(id, color, shape, eyes){
 		io.sockets.socket(worldID).emit('newPlayer', id, shape, color, eyes);
 	});
 
-	socket.on('attemptMatch', function(playerID, attempt){
-		if(potentialMatchArray.length > 1){
-			log('attempting to match player: ' +playerID +' attempt: ' +attempt);
-			if(potentialMatchArray.length > attempt){
-				if(potentialMatchArray[attempt] === playerID){
-					//tried matching with himself
-					//emit matchRejected to increment attempt and try finding another match
-					io.sockets.socket(playerID).emit('matchRejected');
+	socket.on('attemptMatch', function(p1id, p1shape, p1color, p1eyes, p2id, p2shape, p2color, p2eyes){
+		io.sockets.socket(p1id).emit('matchRequest', p2id, p2shape, p2color, p2eyes);
+		io.sockets.socket(p2id).emit('matchRequest', p1id, p1shape, p1color, p1eyes);
+	});
+
+	socket.on('acceptedMatch', function(playerID, matchID){
+		if(contains(expectedAcceptArray, playerID)){
+			
+			io.sockets.socket(matchID).emit('confirmedMatch', matchID, playerID);
+			io.sockets.socket(playerID).emit('confirmedMatch', matchID, playerID);
+			io.sockets.socket(worldID).emit('confirmedMatch', matchID, playerID);
+
+			for(var i = expectedAcceptArray.length; i >= 0; i--){
+				if(expectedAcceptArray[i] === playerID || expectedAcceptArray[i] === matchID){
+					expectedAcceptArray.splice(i, 1);
 				}
-				else {
-					io.sockets.socket(potentialMatchArray[attempt]).emit('potentialMatch', playerID);
-				}
-			}
-			else{
-				log('no users accepted you or are currently untmatched');
-				io.sockets.socket(playerID).emit('noMatchFound');
 			}
 		}
 		else {
-			log('not enough users are currently unmatched');
-			io.sockets.socket(playerID).emit('noMatchFound');
+			expectedAcceptArray.push(matchID);
 		}
-		
 	});
 
-	socket.on('confirmedMatch', function(matchID, playerID){
-		log('matched ' +matchID +' with ' +playerID);
-		for(var i = potentialMatchArray.length-1; i >= 0; i--){
-			if(potentialMatchArray[i] === matchID || potentialMatchArray[i] === playerID){
-				potentialMatchArray.splice(i, 1);
+	socket.on('rejectedMatch', function(playerID, matchID){
+		for(var i = expectedAcceptArray.length; i >= 0; i--){
+			if(expectedAcceptArray[i] === playerID || expectedAcceptArray[i] === matchID){
+				expectedAcceptArray.splice(i, 1);
 			}
 		}
-
-		//emit the match to the first person
-		io.sockets.socket(matchID).emit('confirmedMatch', matchID, playerID);
-		//emit the match to the second person
-		io.sockets.socket(playerID).emit('confirmedMatch', matchID, playerID);
-		//emit the match to the world
-		io.sockets.socket(worldID).emit('confirmedMatch', matchID, playerID);
-	});
-
-	socket.on('rejectedMatch', function(rejectedID){
 		//someone pressed nope, emit matchRejected to the rejected player.
 		//emit matchRejected to increment attempt and try finding another match
-		io.sockets.socket(rejectedID).emit('matchRejected');
+		io.sockets.socket(matchID).emit('matchRejected', matchID, playerID);
+		io.sockets.socket(playerID).emit('matchRejected', matchID, playerID);
+		io.sockets.socket(worldID).emit('matchRejected', matchID, playerID);
 	});
 
 	socket.on('unMatch', function(p1ID, p2ID){
 		log('unmatched ' +p1ID +' and ' +p2ID);
-
-		if(!contains(potentialMatchArray, p1ID)){
-			potentialMatchArray.push(p1ID);
-		}
-		if(!contains(potentialMatchArray, p2ID)){
-			potentialMatchArray.push(p2ID);
-		}
 
 		for(var i = expectedConfirmArray.length; i >= 0; i--){
 				if(expectedConfirmArray[i] === p1ID || expectedConfirmArray[i] === p2ID){
