@@ -430,7 +430,7 @@ socket.on('matchRejected', function(rejectedID, playerID){
 });
 
 socket.on('checkNames', function(playerID, name){
-  if(name === babyName){
+  if(name.toLowerCase() === babyName.toLowerCase()){
     socket.emit('namesMatch', playerID);
   }
 });
