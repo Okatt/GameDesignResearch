@@ -247,6 +247,8 @@ var matchAvatar;
 
 var link;
 var clientStatus = 'Connecting to world';
+var babyName;
+var matchBabyName;
 
 
 /****************************************************************************
@@ -427,6 +429,12 @@ socket.on('matchRejected', function(rejectedID, playerID){
   }
 });
 
+socket.on('checkNames', function(playerID, name){
+  if(name === babyName){
+    socket.emit('namesMatch', playerID);
+  }
+});
+
 socket.on('codesExchanged', function(){
     socket.emit('createBaby', matchId, playerId, matchColor, matchShape, playerColor, playerShape, matchEyes, playerEyes);
     endMatch(); 
@@ -515,18 +523,9 @@ function sendCharacterInfo(){
 }
 
 function confirmCode(){
-  var input;
   clientStatus = 'Zoek elkaar in het echt en kies een naam voor jullie creatie, pas als jullie samen een naam weten is die af!';
-  input = prompt('Kies een naam voor jullie creatie: ');
-  //TODO
-  //change to socket.emit and check if both entered the correct code maybe?
-  if(input === 'test'){
-    console.log('correct name entered');
-    socket.emit('confirmedCode', playerId, matchId);
-  }
-  else {
-    console.log('wrong name');
-  }
+  babyName = prompt('Kies een naam voor jullie creatie: ');
+  socket.emit('enteredName', playerId, matchId, babyName);
 }
 
 function logError(err) {
@@ -978,7 +977,7 @@ function initializePlayer(){
 	rejectButton.isVisible = false;
 	rejectButton.isDisabled = true;
 
-	makeBabyButton = new TextButton(new Vector2(300, 450), 300, 100, "COMBINE DNA", color.DARK_GREY);
+	makeBabyButton = new TextButton(new Vector2(300, 450), 300, 100, "BENOEM DE CREATIE", color.DARK_GREY);
 	makeBabyButton.onClick = function(){confirmCode()};
 	gameObjects.push(makeBabyButton);
 	makeBabyButton.isVisible = false;

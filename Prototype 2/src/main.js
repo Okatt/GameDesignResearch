@@ -100,7 +100,7 @@ function initializePlayer(){
 	rejectButton.isVisible = false;
 	rejectButton.isDisabled = true;
 
-	makeBabyButton = new TextButton(new Vector2(300, 450), 300, 100, "COMBINE DNA", color.DARK_GREY);
+	makeBabyButton = new TextButton(new Vector2(300, 450), 300, 100, "BENOEM DE CREATIE", color.DARK_GREY);
 	makeBabyButton.onClick = function(){confirmCode()};
 	gameObjects.push(makeBabyButton);
 	makeBabyButton.isVisible = false;
