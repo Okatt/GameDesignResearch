@@ -98,16 +98,6 @@ socket.on('message', function (message){
 });
 
 socket.on('newPlayer', function(newPlayerID, shape, color, eyes){
-  //TODO REMOVE THIS CODE!!!
-  var p2 = undefined;
-
-  for(var i = 0; i < gameObjects.length; i++){
-    if(gameObjects[i].type === "Player" && gameObjects[i].matched === false){
-      p2 = gameObjects[i];
-    }
-  }
-
-
   console.log('New player joined the game with ID: ' +newPlayerID +' color: ' +color +' shape: ' +shape);
   randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
   //ADDED:
@@ -119,12 +109,6 @@ socket.on('newPlayer', function(newPlayerID, shape, color, eyes){
     player.previousPos = player.position.clone();
   }
   gameObjects.push(player);
-
-
-  //TODO REMOVE THIS CODE!!
-  if(p2 !== undefined){
-      worldSeekMatch(player, p2);
-  }
 });
 
 socket.on('matchRequest', function(mID, mShape, mColor, mEyes){
@@ -133,7 +117,7 @@ socket.on('matchRequest', function(mID, mShape, mColor, mEyes){
   matchEyes = mEyes;
   potentialMatchId = mID;
 
-  matchAvatar = new Player(potentialMatchId, new Vector2(500, canvas.height/2), matchShape, matchColor, matchEyes);
+  matchAvatar = new Player(potentialMatchId, new Vector2(2*(canvas.width/3), canvas.height/2), matchShape, matchColor, matchEyes);
   matchAvatar.state = "AVATAR";
   gameObjects.push(matchAvatar);
 
@@ -165,7 +149,7 @@ socket.on('confirmedMatch', function(p1ID, p2ID){
     else if(p2ID === playerId){
       matchId = p1ID;
     }
-    clientStatus = 'De match is gemaakt!';
+    clientStatus = 'Zoek elkaar en kies een naam voor jullie creatie. Jullie moeten dezelfde naam invoeren om de creatie te krijgen.';
     sendCharacterInfo();
   }
 });
@@ -175,6 +159,7 @@ socket.on('unMatch', function(p1ID, p2ID){
      for (var ob = 0; ob < gameObjects.length; ob++){
       if(gameObjects[ob].type === "Player" && (gameObjects[ob].id === p1ID || gameObjects[ob].id === p2ID)){
         gameObjects[ob].matched = false;
+        gameObjects[ob].withoutMatchTime = 0;
       }
     }
   }
@@ -199,6 +184,7 @@ socket.on('matchRejected', function(rejectedID, playerID){
     for (var ob = 0; ob < gameObjects.length; ob++){
       if(gameObjects[ob].type === "Player" && (gameObjects[ob].id === rejectedID || gameObjects[ob].id === playerID)){
         gameObjects[ob].matched = false;
+        gameObjects[ob].withoutMatchTime = 0;
       }
     }
   }
@@ -282,6 +268,8 @@ function endMatch(){
 }
 
 function acceptMatch(){
+  clientStatus = "Waiting for other player...";
+
   acceptButton.isVisible = false;
   acceptButton.isDisabled = true;
 
@@ -308,7 +296,6 @@ function sendCharacterInfo(){
 }
 
 function confirmCode(){
-  clientStatus = 'Zoek elkaar in het echt en kies een naam voor jullie creatie, pas als jullie samen een naam weten is die af!';
   babyName = prompt('Kies een naam voor jullie creatie: ');
   socket.emit('enteredName', playerId, matchId, babyName);
 }

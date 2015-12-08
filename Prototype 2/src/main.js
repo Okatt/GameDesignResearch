@@ -62,45 +62,26 @@ function initializeWorld(){
 	gameObjects.push( new Prop(new Vector2(200, 370), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
 	gameObjects.push( new Prop(new Vector2(560, 340), 90, 40, new Sprite(spritesheet_environment, 400, 0, 400, 400, new Vector2(196, 366))) );
 	gameObjects.push( new Prop(new Vector2(canvas.width - 250, 380), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
-
-	//Test players
-	// for (var i = 0; i < 4; i++) {
-	// 	randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
-	// 	player = new Player(i, randomPosition, 0, 0);
-
-	// 	// Spawn the player in an empty space
-	// 	while(checkCollision(player) || checkOutOfBounds(player)){
-	// 		player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
-	// 		player.previousPos = player.position.clone();
-	// 	}
- // 			gameObjects.push(player);
- // 			player.addBaby(0, 0, 1);
- // 			player.addBaby(1, 4, 1);
- // 			player.addBaby(2, 2, 2);
- // 			player.addBaby(3, 3, 2);
- // 			player.addBaby(0, 0, 3);
- // 			player.addBaby(1, 1, 3);
-	// }
 }
 
 function initializePlayer(){
-	playerAvatar = new Player(playerId, new Vector2(100, canvas.height/2), playerShape, playerColor, playerEyes);
+	playerAvatar = new Player(playerId, new Vector2(canvas.width/3, canvas.height/2), playerShape, playerColor, playerEyes);
 	playerAvatar.state = "AVATAR";
 	gameObjects.push(playerAvatar);
 
-	acceptButton = new TextButton(new Vector2(100, 100), 300, 100, "Yep", color.GREEN);
+	acceptButton = new TextButton(new Vector2(canvas.width/3, 300), 300, 100, "Yep", color.GREEN);
 	acceptButton.onClick = function(){acceptMatch()};
 	gameObjects.push(acceptButton);
 	acceptButton.isVisible = false;
 	acceptButton.isDisabled = true;
 
-	rejectButton = new TextButton(new Vector2(500, 100), 300, 100, "Nope", color.RED);
+	rejectButton = new TextButton(new Vector2(2*(canvas.width/3), 300), 300, 100, "Nope", color.RED);
 	rejectButton.onClick = function(){rejectMatch()};
 	gameObjects.push(rejectButton);
 	rejectButton.isVisible = false;
 	rejectButton.isDisabled = true;
 
-	makeBabyButton = new TextButton(new Vector2(300, 450), 300, 100, "BENOEM DE CREATIE", color.DARK_GREY);
+	makeBabyButton = new TextButton(new Vector2(canvas.width/2, canvas.height-150), 300, 100, "BENOEM DE CREATIE", color.DARK_GREY);
 	makeBabyButton.onClick = function(){confirmCode()};
 	gameObjects.push(makeBabyButton);
 	makeBabyButton.isVisible = false;
@@ -196,7 +177,7 @@ function render(lagOffset){
 		ctx.font = "36px Arial";
 		ctx.fillStyle = "#000000";
 		ctx.textAlign = "center";
-		ctx.fillText(clientStatus, 250, 100);
+		ctx.fillText(clientStatus, canvas.width/2, 100);
 
 		// Render all game objects
 		for(var ob = 0; ob < gameObjects.length; ob++){

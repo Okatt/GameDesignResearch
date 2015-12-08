@@ -25,6 +25,7 @@ function Player(id, position, shape, color, eyes){
 	// Data
 	this.id = id;
 	this.matched = false;
+	this.withoutMatchTime = 0;	// the time that has elapsed since the last match, in seconds. (used for match making)
 	this.isSolid = true;
 	this.isDynamic = true;
 	this.state = "IDLE"; // IDLE, MOVING
@@ -55,6 +56,17 @@ function Player(id, position, shape, color, eyes){
 		gameObjects.push(b);
 	}
 
+	this.findMatch = function(){
+		var bestMatch = false;
+		for (var i = 0; i < gameObjects.length; i++) {
+			if(gameObjects[i].type === "Player" && gameObjects[i].id !== this.id && !gameObjects[i].matched){
+				if(!bestMatch){ bestMatch = gameObjects[i];	}
+				else if(gameObjects[i].withoutMatchTime > bestMatch.withoutMatchTime){ bestMatch = gameObjects[i]; }
+			}
+		}
+		if(bestMatch){ worldSeekMatch(this, bestMatch); }
+	}
+
 	this.update = function(){
 		// Timer
 		this.timer -= UPDATE_DURATION/1000;
@@ -66,6 +78,14 @@ function Player(id, position, shape, color, eyes){
 		if(this.eyeTimer === 0){
 			this.eyeTimer = randomRange(3, 8);
 		}
+
+		if(isWorld){
+			// Update the time since the last match up.
+			this.withoutMatchTime += UPDATE_DURATION/1000;
+			if(!this.matched && this.withoutMatchTime > 8){
+				this.findMatch();
+			}
+		}		
 
 		this.depth = canvas.height-this.position.y;
 
@@ -111,6 +131,12 @@ function Player(id, position, shape, color, eyes){
 		// Body
 		this.body.draw(ctx, drawX, drawY);
 
+		// Debug
+		ctx.textAlign = "center";
+		ctx.textBaseline = "middle";
+		drawText(ctx, drawX, drawY-200, this.width, 24, this.withoutMatchTime+" sec", "Arial", 24, "#323232", 1);
+		ctx.textBaseline = "alphabetic";
+
 		// Eyes
 		if(this.eyeTimer >= 0.1){
 			if(this.eyes === 1){ drawCircle(ctx, drawX, drawY-50, 25, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-50+randomRange(0, 2), 22, true, "#323232", 1); }
@@ -124,7 +150,6 @@ function Player(id, position, shape, color, eyes){
 				drawCircle(ctx, drawX+22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
 			}
 		}
-
 
 		// Hitbox (debug)
 		//var h = this.getHitbox();
