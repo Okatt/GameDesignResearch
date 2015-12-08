@@ -228,7 +228,7 @@ socket.on('codesExchanged', function(){
 socket.on('createBaby', function(ID, shape, color, eyes){
   if(isWorld){
     for (var i = 0; i < gameObjects.length; i++) {
-      if(gameObjects[i].type = "Player" && gameObjects[i].id === ID){
+      if(gameObjects[i].type === "Player" && gameObjects[i].id === ID){
         gameObjects[i].addBaby(shape, color, eyes);
       }
     }
