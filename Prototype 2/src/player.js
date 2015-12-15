@@ -31,6 +31,8 @@ function Player(id, position, shape, color, eyes){
 	this.state = "IDLE"; // IDLE, MOVING
 	this.babies = [];
 
+	this.emoteButtons = [];
+
 	this.timer = 0;
 	this.eyeTimer = 0;
 
@@ -43,6 +45,30 @@ function Player(id, position, shape, color, eyes){
 
 	this.getHitbox = function(){
 		return new AABB(this.position.x - this.width/2, this.position.y - this.height/2, this.width, this.height);
+	}
+
+	// Open the emotes menu
+	this.openEmotes = function(){
+		var emotes = 6;
+		var nextPos;
+		for (var i = 0; i < emotes; i++) {
+
+			nextPos = new Vector2(0, -160);
+			var r = i*(360/emotes);							
+			nextPos.rotate(r);
+
+			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-60+nextPos.y), 50, "Test", "#FFFFFF");
+			this.emoteButtons.push(b);
+			gameObjects.push(b);
+		}
+	}
+
+	// Close the emotes menu
+	this.closeEmotes = function(){
+		for (var i = 0; i < this.emoteButtons.length; i++) {
+			this.emoteButtons[i].kill();
+		}
+		this.emoteButtons = [];
 	}
 
 	// TODO clean up
@@ -118,6 +144,16 @@ function Player(id, position, shape, color, eyes){
 				if(this.velocity.length() > 3){this.velocity.normalize(); this.velocity.multiply(3);}
 
 				break;
+			case "AVATAR":
+			// TODO
+				var hitbox = new AABB(this.position.x-60, this.position.y-120, 120, 120); // Hitbox for click detection
+
+				if(checkPointvsAABB(new Vector2(mouse.x, mouse.y), hitbox) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+					console.log("player pressed");
+					if(this.emoteButtons.length === 0){ this.openEmotes(); }
+					else{ this.closeEmotes(); }
+				}
+				break;
 			default:
 				console.log("Err - State evaluation error: "+this.state+" is not a valid state. Reference: "+this);
 				break;
@@ -132,10 +168,10 @@ function Player(id, position, shape, color, eyes){
 		this.body.draw(ctx, drawX, drawY);
 
 		// Debug
-		ctx.textAlign = "center";
-		ctx.textBaseline = "middle";
-		drawText(ctx, drawX, drawY-200, this.width, 24, this.withoutMatchTime+" sec", "Arial", 24, "#323232", 1);
-		ctx.textBaseline = "alphabetic";
+		// ctx.textAlign = "center";
+		// ctx.textBaseline = "middle";
+		// drawText(ctx, drawX, drawY-200, this.width, 24, this.withoutMatchTime+" sec", "Arial", 24, "#323232", 1);
+		// ctx.textBaseline = "alphabetic";
 
 		// Eyes
 		if(this.eyeTimer >= 0.1){
