@@ -56,7 +56,6 @@ function TextButton(position, width, height, text, bgColor){
 
 	// onClick gets called when the button is pressed (it sets isPressed on true for easier communication with other objects)
 	this.onClick = function(){
-
 	};
 
 	// Update
@@ -98,7 +97,7 @@ function TextButton(position, width, height, text, bgColor){
 }
 
 
-function BubbleButton(position, radius, text, bgColor){
+function BubbleButton(position, radius, emoteIndex, bgColor){
 	this.type = "BubbleButton";
 	this.isAlive = true;
 	
@@ -111,9 +110,9 @@ function BubbleButton(position, radius, text, bgColor){
 	this.depth = 0;
 	this.bgColor = bgColor;
 	this.bgAlpha = 1;
-	this.text = text;
-	this.textColor = color.BLACK;
-	this.textHoverColor = color.BLACK;
+
+	this.emoteIndex = emoteIndex;
+	this.emote = new Sprite(spritesheet_emotes, this.emoteIndex*125, 0, 125, 125);
 
 	// State
 	this.mouseOver = false;
@@ -151,7 +150,7 @@ function BubbleButton(position, radius, text, bgColor){
 
 	// onClick gets called when the button is pressed (it sets isPressed on true for easier communication with other objects)
 	this.onClick = function(){
-
+		socket.emit('pressedEmote', this.emoteIndex, playerId);
 	};
 
 	// Update
@@ -182,12 +181,8 @@ function BubbleButton(position, radius, text, bgColor){
 		// Background
 		drawCircle(ctx, drawX, drawY, this.radius, true, this.bgColor, this.bgAlpha);
 
-		// Text
-		ctx.textAlign = "center";
-		ctx.textBaseline = "middle";
-		if(!this.mouseOver){drawText(ctx, drawX, drawY, this.width, 24, this.text, "Arial", 24, this.textColor, 1);}
-		else{drawText(ctx, drawX, drawY, this.width, 24, this.text, "Arial", 24, this.textHoverColor, 1);}
-		ctx.textBaseline = "alphabetic";
-		}
+		//emote
+		this.emote.draw(ctx, drawX, drawY);
 	};
+}
 }

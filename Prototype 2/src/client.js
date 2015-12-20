@@ -211,6 +211,20 @@ socket.on('codesExchanged', function(){
     endMatch(); 
 });
 
+socket.on('displayEmote', function(emoteID, playerID){
+  if(isWorld){
+    for (var i = 0; i < gameObjects.length; i++) {
+      if(gameObjects[i].type === "Player" && gameObjects[i].id === playerID){
+        gameObjects[i].displayEmote(emoteID);
+      }
+    }
+  }
+  else if(playerID === playerId) {
+    playerAvatar.displayEmote(emoteID);
+  }
+});
+
+
 socket.on('createBaby', function(ID, shape, color, eyes){
   if(isWorld){
     for (var i = 0; i < gameObjects.length; i++) {

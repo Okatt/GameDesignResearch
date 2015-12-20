@@ -33,6 +33,11 @@ function Player(id, position, shape, color, eyes){
 
 	this.emoteButtons = [];
 
+	this.drawEmote = false;
+	this.emoteTimer = 0;
+	this.emoteIndex;
+	this.emoteSprite;
+
 	this.timer = 0;
 	this.eyeTimer = 0;
 
@@ -57,7 +62,7 @@ function Player(id, position, shape, color, eyes){
 			var r = i*(360/emotes);							
 			nextPos.rotate(r);
 
-			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-60+nextPos.y), 50, "Test", "#FFFFFF");
+			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-60+nextPos.y), 50, i, "#FFFFFF");
 			this.emoteButtons.push(b);
 			gameObjects.push(b);
 		}
@@ -69,6 +74,14 @@ function Player(id, position, shape, color, eyes){
 			this.emoteButtons[i].kill();
 		}
 		this.emoteButtons = [];
+	}
+
+	this.displayEmote = function(emoteID){
+		this.emoteTimer = 2;
+		this.emoteIndex = emoteID;
+		this.emoteSprite = new Sprite(spritesheet_emotes, this.emoteIndex*125, 0, 125, 125);
+		this.drawEmote = true;
+		this.closeEmotes();
 	}
 
 	// TODO clean up
@@ -104,6 +117,9 @@ function Player(id, position, shape, color, eyes){
 		if(this.eyeTimer === 0){
 			this.eyeTimer = randomRange(3, 8);
 		}
+
+		if(this.drawEmote){this.emoteTimer -= UPDATE_DURATION/1000;}
+		if(this.emoteTimer < 0){this.drawEmote = false;}
 
 		if(isWorld){
 			// Update the time since the last match up.
@@ -185,6 +201,10 @@ function Player(id, position, shape, color, eyes){
 				drawCircle(ctx, drawX-22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX-22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
 				drawCircle(ctx, drawX+22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
 			}
+		}
+
+		if(this.drawEmote){
+			this.emoteSprite.draw(ctx, drawX, drawY-150);
 		}
 
 		// Hitbox (debug)

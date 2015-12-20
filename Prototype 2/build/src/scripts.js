@@ -173,7 +173,6 @@ function TextButton(position, width, height, text, bgColor){
 
 	// onClick gets called when the button is pressed (it sets isPressed on true for easier communication with other objects)
 	this.onClick = function(){
-
 	};
 
 	// Update
@@ -215,7 +214,7 @@ function TextButton(position, width, height, text, bgColor){
 }
 
 
-function BubbleButton(position, radius, text, bgColor){
+function BubbleButton(position, radius, emoteIndex, bgColor){
 	this.type = "BubbleButton";
 	this.isAlive = true;
 	
@@ -228,9 +227,9 @@ function BubbleButton(position, radius, text, bgColor){
 	this.depth = 0;
 	this.bgColor = bgColor;
 	this.bgAlpha = 1;
-	this.text = text;
-	this.textColor = color.BLACK;
-	this.textHoverColor = color.BLACK;
+
+	this.emoteIndex = emoteIndex;
+	this.emote = new Sprite(spritesheet_emotes, this.emoteIndex*125, 0, 125, 125);
 
 	// State
 	this.mouseOver = false;
@@ -268,7 +267,7 @@ function BubbleButton(position, radius, text, bgColor){
 
 	// onClick gets called when the button is pressed (it sets isPressed on true for easier communication with other objects)
 	this.onClick = function(){
-
+		socket.emit('pressedEmote', this.emoteIndex, playerId);
 	};
 
 	// Update
@@ -299,14 +298,10 @@ function BubbleButton(position, radius, text, bgColor){
 		// Background
 		drawCircle(ctx, drawX, drawY, this.radius, true, this.bgColor, this.bgAlpha);
 
-		// Text
-		ctx.textAlign = "center";
-		ctx.textBaseline = "middle";
-		if(!this.mouseOver){drawText(ctx, drawX, drawY, this.width, 24, this.text, "Arial", 24, this.textColor, 1);}
-		else{drawText(ctx, drawX, drawY, this.width, 24, this.text, "Arial", 24, this.textHoverColor, 1);}
-		ctx.textBaseline = "alphabetic";
-		}
+		//emote
+		this.emote.draw(ctx, drawX, drawY);
 	};
+}
 }
 /****************************************************************************
  * Initial setup
@@ -520,6 +515,20 @@ socket.on('codesExchanged', function(){
     socket.emit('createBaby', matchId, playerId, matchColor, matchShape, playerColor, playerShape, matchEyes, playerEyes);
     endMatch(); 
 });
+
+socket.on('displayEmote', function(emoteID, playerID){
+  if(isWorld){
+    for (var i = 0; i < gameObjects.length; i++) {
+      if(gameObjects[i].type === "Player" && gameObjects[i].id === playerID){
+        gameObjects[i].displayEmote(emoteID);
+      }
+    }
+  }
+  else if(playerID === playerId) {
+    playerAvatar.displayEmote(emoteID);
+  }
+});
+
 
 socket.on('createBaby', function(ID, shape, color, eyes){
   if(isWorld){
@@ -1355,6 +1364,11 @@ function Player(id, position, shape, color, eyes){
 
 	this.emoteButtons = [];
 
+	this.drawEmote = false;
+	this.emoteTimer = 0;
+	this.emoteIndex;
+	this.emoteSprite;
+
 	this.timer = 0;
 	this.eyeTimer = 0;
 
@@ -1379,7 +1393,7 @@ function Player(id, position, shape, color, eyes){
 			var r = i*(360/emotes);							
 			nextPos.rotate(r);
 
-			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-60+nextPos.y), 50, "Test", "#FFFFFF");
+			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-60+nextPos.y), 50, i, "#FFFFFF");
 			this.emoteButtons.push(b);
 			gameObjects.push(b);
 		}
@@ -1391,6 +1405,14 @@ function Player(id, position, shape, color, eyes){
 			this.emoteButtons[i].kill();
 		}
 		this.emoteButtons = [];
+	}
+
+	this.displayEmote = function(emoteID){
+		this.emoteTimer = 2;
+		this.emoteIndex = emoteID;
+		this.emoteSprite = new Sprite(spritesheet_emotes, this.emoteIndex*125, 0, 125, 125);
+		this.drawEmote = true;
+		this.closeEmotes();
 	}
 
 	// TODO clean up
@@ -1426,6 +1448,9 @@ function Player(id, position, shape, color, eyes){
 		if(this.eyeTimer === 0){
 			this.eyeTimer = randomRange(3, 8);
 		}
+
+		if(this.drawEmote){this.emoteTimer -= UPDATE_DURATION/1000;}
+		if(this.emoteTimer < 0){this.drawEmote = false;}
 
 		if(isWorld){
 			// Update the time since the last match up.
@@ -1507,6 +1532,10 @@ function Player(id, position, shape, color, eyes){
 				drawCircle(ctx, drawX-22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX-22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
 				drawCircle(ctx, drawX+22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
 			}
+		}
+
+		if(this.drawEmote){
+			this.emoteSprite.draw(ctx, drawX, drawY-150);
 		}
 
 		// Hitbox (debug)
