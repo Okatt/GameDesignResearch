@@ -27,6 +27,11 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 	this.eyeTimer = 0;
 	this.phoneTimer = 0;
 
+	this.drawEmote = false;
+	this.emoteTimer = 0;
+	this.emoteIndex;
+	this.emoteSprite;
+
 	this.kill = function(){
 		this.isAlive = false;
 	}
@@ -71,6 +76,17 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 		}
 	}
 
+	this.displayEmote = function(emoteID){
+		this.emoteTimer = 2;
+		this.emoteIndex = emoteID;
+		//change emoteindex * 125 to new width of spritesheet/6
+		this.emoteSprite = new Sprite(spritesheet_emotes_small, this.emoteIndex*125, 0, 125, 125);
+		this.drawEmote = true;
+		for (var i = 0; i < this.babies.length; i++) {
+			this.babies[i].displayEmote();
+		}
+	}
+
 	this.update = function(){
 		this.eyeTimer -= UPDATE_DURATION/1000;
 		this.phoneTimer += UPDATE_DURATION/1000;
@@ -80,6 +96,9 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 		if(this.eyeTimer === 0){
 			this.eyeTimer = randomRange(3, 8);
 		}
+
+		if(this.drawEmote){this.emoteTimer -= UPDATE_DURATION/1000;}
+		if(this.emoteTimer < 0){this.drawEmote = false;}
 
 		this.depth = canvas.height-this.position.y;
 
@@ -112,6 +131,10 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 				drawCircle(ctx, drawX-10, drawY-20, 8, true, "#FFFFFF", 1); drawCircle(ctx, drawX-10+randomRange(0, 2), drawY-20+randomRange(0, 2), 5, true, "#323232", 1);
 				drawCircle(ctx, drawX+10, drawY-20, 8, true, "#FFFFFF", 1); drawCircle(ctx, drawX+10+randomRange(0, 2), drawY-20+randomRange(0, 2), 5, true, "#323232", 1);
 			}
+		}
+
+		if(this.drawEmote){
+			this.emoteSprite.draw(ctx, drawX, drawY-150);
 		}
 	}
 }
@@ -525,11 +548,9 @@ socket.on('displayEmote', function(emoteID, playerID, matchID){
     }
   }
   else if(playerID === playerId) {
-    console.log('i pressed an emote');
     playerAvatar.displayEmote(emoteID);
   }
   else if(matchID === playerId){
-    console.log('my match pressed an emote');
     matchAvatar.displayEmote(emoteID);
   }
 });
@@ -1418,6 +1439,9 @@ function Player(id, position, shape, color, eyes){
 		this.emoteSprite = new Sprite(spritesheet_emotes, this.emoteIndex*125, 0, 125, 125);
 		this.drawEmote = true;
 		this.closeEmotes();
+		for (var i = 0; i < this.babies.length; i++) {
+			this.babies[i].displayEmote(emoteID);
+		}
 	}
 
 	// TODO clean up

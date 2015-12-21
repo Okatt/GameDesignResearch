@@ -82,6 +82,9 @@ function Player(id, position, shape, color, eyes){
 		this.emoteSprite = new Sprite(spritesheet_emotes, this.emoteIndex*125, 0, 125, 125);
 		this.drawEmote = true;
 		this.closeEmotes();
+		for (var i = 0; i < this.babies.length; i++) {
+			this.babies[i].displayEmote(emoteID);
+		}
 	}
 
 	// TODO clean up

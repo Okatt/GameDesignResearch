@@ -220,11 +220,9 @@ socket.on('displayEmote', function(emoteID, playerID, matchID){
     }
   }
   else if(playerID === playerId) {
-    console.log('i pressed an emote');
     playerAvatar.displayEmote(emoteID);
   }
   else if(matchID === playerId){
-    console.log('my match pressed an emote');
     matchAvatar.displayEmote(emoteID);
   }
 });
