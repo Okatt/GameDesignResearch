@@ -162,7 +162,7 @@ function render(lagOffset){
 		ctx.font = "36px Arial";
 		ctx.fillStyle = "#FFFFFF";
 		ctx.textAlign = "center";
-		ctx.fillText(link+":"+2013, canvas.width/2, 66);
+		ctx.fillText("polygonpals.tk", canvas.width/2, 66);
 
 		// Render all game objects
 		for (var ob = 0; ob < gameObjects.length; ob++){

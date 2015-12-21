@@ -144,10 +144,12 @@ io.sockets.on('connection', function (socket){
 		io.sockets.socket(playerID).emit('codesExchanged');
 	});
 
-	socket.on('pressedEmote', function(emoteID, playerID){
-		log('player ' +playerID +' pressed emote #' +emoteID);
-		io.sockets.socket(playerID).emit('displayEmote', emoteID, playerID);
-		io.sockets.socket(worldID).emit('displayEmote', emoteID, playerID);
+	socket.on('pressedEmote', function(emoteID, playerID, matchID){
+		log('player ' +playerID +' pressed emote #' +emoteID +' their match is: ' +matchID);
+		io.sockets.socket(playerID).emit('displayEmote', emoteID, playerID, matchID);
+		io.sockets.socket(worldID).emit('displayEmote', emoteID, playerID, matchID);
+		io.sockets.socket(matchID).emit('displayEmote', emoteID, playerID, matchID);
+
 	});
 
 	socket.on('createBaby', function(p1ID, p2ID, p1C, p1S, p2C, p2S, p1E, p2E){

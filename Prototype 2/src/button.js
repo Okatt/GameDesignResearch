@@ -150,7 +150,7 @@ function BubbleButton(position, radius, emoteIndex, bgColor){
 
 	// onClick gets called when the button is pressed (it sets isPressed on true for easier communication with other objects)
 	this.onClick = function(){
-		socket.emit('pressedEmote', this.emoteIndex, playerId);
+		socket.emit('pressedEmote', this.emoteIndex, playerId, matchId);
 	};
 
 	// Update

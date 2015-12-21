@@ -267,7 +267,7 @@ function BubbleButton(position, radius, emoteIndex, bgColor){
 
 	// onClick gets called when the button is pressed (it sets isPressed on true for easier communication with other objects)
 	this.onClick = function(){
-		socket.emit('pressedEmote', this.emoteIndex, playerId);
+		socket.emit('pressedEmote', this.emoteIndex, playerId, matchId);
 	};
 
 	// Update
@@ -516,7 +516,7 @@ socket.on('codesExchanged', function(){
     endMatch(); 
 });
 
-socket.on('displayEmote', function(emoteID, playerID){
+socket.on('displayEmote', function(emoteID, playerID, matchID){
   if(isWorld){
     for (var i = 0; i < gameObjects.length; i++) {
       if(gameObjects[i].type === "Player" && gameObjects[i].id === playerID){
@@ -525,7 +525,12 @@ socket.on('displayEmote', function(emoteID, playerID){
     }
   }
   else if(playerID === playerId) {
+    console.log('i pressed an emote');
     playerAvatar.displayEmote(emoteID);
+  }
+  else if(matchID === playerId){
+    console.log('my match pressed an emote');
+    matchAvatar.displayEmote(emoteID);
   }
 });
 
@@ -1130,7 +1135,7 @@ function render(lagOffset){
 		ctx.font = "36px Arial";
 		ctx.fillStyle = "#FFFFFF";
 		ctx.textAlign = "center";
-		ctx.fillText(link+":"+2013, canvas.width/2, 66);
+		ctx.fillText("polygonpals.tk", canvas.width/2, 66);
 
 		// Render all game objects
 		for (var ob = 0; ob < gameObjects.length; ob++){

@@ -211,7 +211,7 @@ socket.on('codesExchanged', function(){
     endMatch(); 
 });
 
-socket.on('displayEmote', function(emoteID, playerID){
+socket.on('displayEmote', function(emoteID, playerID, matchID){
   if(isWorld){
     for (var i = 0; i < gameObjects.length; i++) {
       if(gameObjects[i].type === "Player" && gameObjects[i].id === playerID){
@@ -220,7 +220,12 @@ socket.on('displayEmote', function(emoteID, playerID){
     }
   }
   else if(playerID === playerId) {
+    console.log('i pressed an emote');
     playerAvatar.displayEmote(emoteID);
+  }
+  else if(matchID === playerId){
+    console.log('my match pressed an emote');
+    matchAvatar.displayEmote(emoteID);
   }
 });
 
