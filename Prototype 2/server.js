@@ -87,6 +87,10 @@ io.sockets.on('connection', function (socket){
 		io.sockets.socket(p2id).emit('matchRequest', p1id, p1shape, p1color, p1eyes);
 	});
 
+	socket.on('emitBaby', function(id, shape, color, eyes){
+		io.sockets.socket(id).emit('emitBaby', shape, color, eyes);
+	});
+
 	socket.on('acceptedMatch', function(playerID, matchID){
 		if(contains(expectedAcceptArray, playerID)){
 			

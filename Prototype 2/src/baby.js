@@ -17,6 +17,8 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 	// Graphics
 	this.depth = canvas.height-this.position.y;
 	this.eyes = eyes;
+	this.shape = shapeIndex;
+	this.color = colorIndex;
 	this.body = new Sprite(spritesheet_characters_s, shapeIndex*60, colorIndex*60, 60, 60, new Vector2(30, 60));
 	
 	// Data
@@ -81,9 +83,6 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 		//change emoteindex * 125 to new width of spritesheet/6
 		this.emoteSprite = new Sprite(spritesheet_emotes_small, this.emoteIndex*125, 0, 125, 125);
 		this.drawEmote = true;
-		for (var i = 0; i < this.babies.length; i++) {
-			this.babies[i].displayEmote();
-		}
 	}
 
 	this.update = function(){

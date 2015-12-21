@@ -17,6 +17,8 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 	// Graphics
 	this.depth = canvas.height-this.position.y;
 	this.eyes = eyes;
+	this.shape = shapeIndex;
+	this.color = colorIndex;
 	this.body = new Sprite(spritesheet_characters_s, shapeIndex*60, colorIndex*60, 60, 60, new Vector2(30, 60));
 	
 	// Data
@@ -81,9 +83,6 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 		//change emoteindex * 125 to new width of spritesheet/6
 		this.emoteSprite = new Sprite(spritesheet_emotes_small, this.emoteIndex*125, 0, 125, 125);
 		this.drawEmote = true;
-		for (var i = 0; i < this.babies.length; i++) {
-			this.babies[i].displayEmote();
-		}
 	}
 
 	this.update = function(){
@@ -430,6 +429,16 @@ socket.on('newPlayer', function(newPlayerID, shape, color, eyes){
   gameObjects.push(player);
 });
 
+socket.on('emitBaby', function(shape, color, eyes){
+  var pos = matchAvatar.position.clone();
+  var offset = new Vector2(0, -60);
+  offset.rotate(randomRange(0, 359));
+  var baby = new Baby(new Vector2(pos.x+offset.x, pos.y+offset.y), matchAvatar, shape, color, eyes);
+  matchAvatar.babies.push(baby);
+  gameObjects.push(baby);
+});
+
+
 socket.on('matchRequest', function(mID, mShape, mColor, mEyes){
   matchColor = mColor;
   matchShape = mShape;
@@ -583,11 +592,18 @@ if(location.hostname.match(/localhost|127\.0\.0/)){socket.emit('ipaddr');}
 //**************************************************************************** 
 // Aux functions, mostly UI-related
 //****************************************************************************
-
+// Convert array to object
 function worldSeekMatch(p1, p2){
   //p1 and p2 should be game objects!!
   //emit the ids and attributes of the players so the server can match them
   socket.emit('attemptMatch', p1.id, p1.shape, p1.color, p1.eyes, p2.id, p2.shape, p2.color, p2.eyes);
+
+  for(var i = 0; i < p1.babies.length; i++){
+    socket.emit('emitBaby', p2.id, p1.babies[i].shape, p1.babies[i].color, p1.babies[i].eyes);
+  }
+  for(var i = 0; i < p2.babies.length; i++){
+    socket.emit('emitBaby', p1.id, p2.babies[i].shape, p2.babies[i].color, p2.babies[i].eyes);
+  }
 
   //set them to matched temporarily so they dont get matched again while deciding
   p1.matched = true;
