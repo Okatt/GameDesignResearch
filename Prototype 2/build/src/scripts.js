@@ -81,7 +81,7 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 		this.emoteTimer = 2;
 		this.emoteIndex = emoteID;
 		//change emoteindex * 125 to new width of spritesheet/6
-		this.emoteSprite = new Sprite(spritesheet_emotes_small, this.emoteIndex*125, 0, 125, 125);
+		this.emoteSprite = new Sprite(spritesheet_emotes_small, this.emoteIndex*60, 0, 60, 75, new Vector2(30, 35));
 		this.drawEmote = true;
 	}
 
@@ -124,7 +124,7 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 		}
 
 		if(this.drawEmote){
-			this.emoteSprite.draw(ctx, drawX, drawY-150);
+			this.emoteSprite.draw(ctx, drawX, drawY-70);
 		}
 	}
 }
@@ -242,7 +242,7 @@ function BubbleButton(position, radius, emoteIndex, bgColor){
 	this.bgAlpha = 1;
 
 	this.emoteIndex = emoteIndex;
-	this.emote = new Sprite(spritesheet_emotes, this.emoteIndex*125, 0, 125, 125);
+	this.emote = new Sprite(spritesheet_emotes, this.emoteIndex*120, 0, 120, 150, new Vector2(60, 70));
 
 	// State
 	this.mouseOver = false;
@@ -1443,7 +1443,8 @@ function Player(id, position, shape, color, eyes){
 	this.displayEmote = function(emoteID){
 		this.emoteTimer = 2;
 		this.emoteIndex = emoteID;
-		this.emoteSprite = new Sprite(spritesheet_emotes, this.emoteIndex*125, 0, 125, 125);
+		console.log("emote"+this.emoteIndex);
+		this.emoteSprite = new Sprite(spritesheet_emotes, this.emoteIndex*120, 0, 120, 150, new Vector2(60, 70));
 		this.drawEmote = true;
 		this.closeEmotes();
 		for (var i = 0; i < this.babies.length; i++) {

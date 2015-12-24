@@ -112,7 +112,7 @@ function BubbleButton(position, radius, emoteIndex, bgColor){
 	this.bgAlpha = 1;
 
 	this.emoteIndex = emoteIndex;
-	this.emote = new Sprite(spritesheet_emotes, this.emoteIndex*125, 0, 125, 125);
+	this.emote = new Sprite(spritesheet_emotes, this.emoteIndex*120, 0, 120, 150, new Vector2(60, 70));
 
 	// State
 	this.mouseOver = false;

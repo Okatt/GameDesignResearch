@@ -79,7 +79,8 @@ function Player(id, position, shape, color, eyes){
 	this.displayEmote = function(emoteID){
 		this.emoteTimer = 2;
 		this.emoteIndex = emoteID;
-		this.emoteSprite = new Sprite(spritesheet_emotes, this.emoteIndex*125, 0, 125, 125);
+		console.log("emote"+this.emoteIndex);
+		this.emoteSprite = new Sprite(spritesheet_emotes, this.emoteIndex*120, 0, 120, 150, new Vector2(60, 70));
 		this.drawEmote = true;
 		this.closeEmotes();
 		for (var i = 0; i < this.babies.length; i++) {
