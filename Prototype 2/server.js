@@ -56,7 +56,7 @@ io.sockets.on('connection', function (socket){
 			}
 		}
 		socket.broadcast.emit('playerLeft', socket.id);
-		io.sockets.socket(worldID).emit('playerLeft', socket.id);
+		//io.sockets.socket(worldID).emit('playerLeft', socket.id);
 		log('# of players: ' +players +' # of interactions ' +interactions +' # of shares ' +shares);
 	});
 

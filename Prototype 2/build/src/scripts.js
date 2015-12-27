@@ -130,7 +130,15 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 		}
 
 		if(this.hasCrown){
-			crownSpriteSmall.draw(ctx, drawX, drawY-55);
+			if(this.eyes === 1){
+				crownSpriteSmall.draw(ctx, drawX, drawY-40);
+			}
+			else if(this.eyes === 2){
+				crownSpriteSmall.draw(ctx, drawX, drawY-43);
+			}
+			else {
+				crownSpriteSmall.draw(ctx, drawX, drawY-57);
+			}
 		}
 	}
 }
@@ -397,33 +405,18 @@ socket.on('log', function (array) {
 
 socket.on('playerLeft', function(id){
   if(isWorld){
+    var hadCrown = false, crownID;
     for(var i = 0; i < gameObjects.length; i++){
-      if(gameObjects[i].id !== undefined && gameObjects[i].id === id){
-        if(gameObjects[i].hasCrown){
-          var highestBabyCount = 0;
-
-          for (var i = 0; i < gameObjects.length; i++) {
-            if(gameObjects[i].type === "Player"){
-              if(highestBabyCount < gameObjects[i].babies.length){
-                highestBabyCount = gameObjects[i].babies.length;
-              }
-            }
-          }
-          for(var i = 0; i < gameObjects.length; i++){
-            if(gameObjects[i].type === "Player"){
-              if(gameObjects[i].babies.length === highestBabyCount){
-                gameObjects[i].getCrown();
-              }
-              else if(gameObjects[i].hasCrown){
-                gameObjects[i].loseCrown();
-              }
-            }
-          }
-        }
-        gameObjects[i].kill();
+      if(gameObjects[i].type === "Player" && gameObjects[i].id === id){
+        if(gameObjects[i].hasCrown){console.log('hadCrown'); hadCrown = true; crownID = gameObjects[i].id;}
+          gameObjects[i].kill();
       }
     }
-  }
+    if(hadCrown){
+      checkCrown(crownID);
+    }
+  }//if(isWorld) ends here
+
   else {
     if(id === potentialMatchId){
       clientStatus = 'De andere speler heeft het spel verlaten';
@@ -594,21 +587,9 @@ socket.on('createBaby', function(ID, shape, color, eyes){
         if(gameObjects[i].id === ID){
           gameObjects[i].addBaby(shape, color, eyes);
         }
-        if(highestBabyCount < gameObjects[i].babies.length){
-          highestBabyCount = gameObjects[i].babies.length;
-        }
       }
     }
-    for(var i = 0; i < gameObjects.length; i++){
-      if(gameObjects[i].type === "Player"){
-        if(gameObjects[i].babies.length === highestBabyCount){
-          gameObjects[i].getCrown();
-        }
-        else if(gameObjects[i].hasCrown){
-          gameObjects[i].loseCrown();
-        }
-      }
-    }
+    checkCrown();
   }
   else {
     playerAvatar.addBaby(shape, color, eyes);
@@ -717,6 +698,30 @@ function confirmCode(){
 
 function share(){
   socket.emit('shared', playerId);
+}
+
+function checkCrown(exclude){
+
+  var excludeID = exclude || null;
+  var highestBabyCount = 0;
+
+  for (var i = 0; i < gameObjects.length; i++) {
+    if(gameObjects[i].type === "Player" && gameObjects[i].id !== excludeID){
+      if(highestBabyCount < gameObjects[i].babies.length){
+         highestBabyCount = gameObjects[i].babies.length;
+       }
+    }
+  }
+  for(var i = 0; i < gameObjects.length; i++){
+    if(gameObjects[i].type === "Player"){
+      if(gameObjects[i].babies.length === highestBabyCount){
+        gameObjects[i].getCrown();
+      }
+      else if(gameObjects[i].hasCrown){
+        gameObjects[i].loseCrown();
+      }
+    }
+  }
 }
 
 function logError(err) {
@@ -1533,7 +1538,10 @@ function Player(id, position, shape, color, eyes){
 		if(this.state !== "AVATAR"){
 			socket.emit('getCrown', this.id);
 			if(matchId !== null){
-				socket.emit('matchGotCrown', matchId);
+				socket.emit('matchGotCrown', this.id);
+			}
+			else if(potentialMatchId !== null){
+				socket.emit('matchGotCrown', this.id);
 			}
 		}
 		this.hasCrown = true;
@@ -1546,7 +1554,10 @@ function Player(id, position, shape, color, eyes){
 		if(this.state !== "AVATAR"){
 			socket.emit('loseCrown', this.id);
 			if(matchId !== null){
-				socket.emit('matchLostCrown', matchId);
+				socket.emit('matchLostCrown', this.id);
+			}
+			else if(potentialMatchId !== null){
+				socket.emit('matchLostCrown', this.id);
 			}
 		}
 		this.hasCrown = false;
@@ -1682,7 +1693,15 @@ function Player(id, position, shape, color, eyes){
 		}
 
 		if(this.hasCrown){
-			crownSprite.draw(ctx, drawX, drawY-125);
+			if(this.eyes === 1){
+				crownSprite.draw(ctx, drawX, drawY-83);
+			}
+			else if(this.eyes === 2){
+				crownSprite.draw(ctx, drawX, drawY-93);
+			}
+			else {
+				crownSprite.draw(ctx, drawX, drawY-103);
+			}
 		}
 
 		// Hitbox (debug)

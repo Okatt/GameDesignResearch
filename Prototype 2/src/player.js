@@ -93,7 +93,10 @@ function Player(id, position, shape, color, eyes){
 		if(this.state !== "AVATAR"){
 			socket.emit('getCrown', this.id);
 			if(matchId !== null){
-				socket.emit('matchGotCrown', matchId);
+				socket.emit('matchGotCrown', this.id);
+			}
+			else if(potentialMatchId !== null){
+				socket.emit('matchGotCrown', this.id);
 			}
 		}
 		this.hasCrown = true;
@@ -106,7 +109,10 @@ function Player(id, position, shape, color, eyes){
 		if(this.state !== "AVATAR"){
 			socket.emit('loseCrown', this.id);
 			if(matchId !== null){
-				socket.emit('matchLostCrown', matchId);
+				socket.emit('matchLostCrown', this.id);
+			}
+			else if(potentialMatchId !== null){
+				socket.emit('matchLostCrown', this.id);
 			}
 		}
 		this.hasCrown = false;
@@ -242,7 +248,15 @@ function Player(id, position, shape, color, eyes){
 		}
 
 		if(this.hasCrown){
-			crownSprite.draw(ctx, drawX, drawY-125);
+			if(this.eyes === 1){
+				crownSprite.draw(ctx, drawX, drawY-83);
+			}
+			else if(this.eyes === 2){
+				crownSprite.draw(ctx, drawX, drawY-93);
+			}
+			else {
+				crownSprite.draw(ctx, drawX, drawY-103);
+			}
 		}
 
 		// Hitbox (debug)

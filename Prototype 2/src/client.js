@@ -73,33 +73,18 @@ socket.on('log', function (array) {
 
 socket.on('playerLeft', function(id){
   if(isWorld){
+    var hadCrown = false, crownID;
     for(var i = 0; i < gameObjects.length; i++){
-      if(gameObjects[i].id !== undefined && gameObjects[i].id === id){
-        if(gameObjects[i].hasCrown){
-          var highestBabyCount = 0;
-
-          for (var i = 0; i < gameObjects.length; i++) {
-            if(gameObjects[i].type === "Player"){
-              if(highestBabyCount < gameObjects[i].babies.length){
-                highestBabyCount = gameObjects[i].babies.length;
-              }
-            }
-          }
-          for(var i = 0; i < gameObjects.length; i++){
-            if(gameObjects[i].type === "Player"){
-              if(gameObjects[i].babies.length === highestBabyCount){
-                gameObjects[i].getCrown();
-              }
-              else if(gameObjects[i].hasCrown){
-                gameObjects[i].loseCrown();
-              }
-            }
-          }
-        }
-        gameObjects[i].kill();
+      if(gameObjects[i].type === "Player" && gameObjects[i].id === id){
+        if(gameObjects[i].hasCrown){console.log('hadCrown'); hadCrown = true; crownID = gameObjects[i].id;}
+          gameObjects[i].kill();
       }
     }
-  }
+    if(hadCrown){
+      checkCrown(crownID);
+    }
+  }//if(isWorld) ends here
+
   else {
     if(id === potentialMatchId){
       clientStatus = 'De andere speler heeft het spel verlaten';
@@ -270,21 +255,9 @@ socket.on('createBaby', function(ID, shape, color, eyes){
         if(gameObjects[i].id === ID){
           gameObjects[i].addBaby(shape, color, eyes);
         }
-        if(highestBabyCount < gameObjects[i].babies.length){
-          highestBabyCount = gameObjects[i].babies.length;
-        }
       }
     }
-    for(var i = 0; i < gameObjects.length; i++){
-      if(gameObjects[i].type === "Player"){
-        if(gameObjects[i].babies.length === highestBabyCount){
-          gameObjects[i].getCrown();
-        }
-        else if(gameObjects[i].hasCrown){
-          gameObjects[i].loseCrown();
-        }
-      }
-    }
+    checkCrown();
   }
   else {
     playerAvatar.addBaby(shape, color, eyes);
@@ -393,6 +366,30 @@ function confirmCode(){
 
 function share(){
   socket.emit('shared', playerId);
+}
+
+function checkCrown(exclude){
+
+  var excludeID = exclude || null;
+  var highestBabyCount = 0;
+
+  for (var i = 0; i < gameObjects.length; i++) {
+    if(gameObjects[i].type === "Player" && gameObjects[i].id !== excludeID){
+      if(highestBabyCount < gameObjects[i].babies.length){
+         highestBabyCount = gameObjects[i].babies.length;
+       }
+    }
+  }
+  for(var i = 0; i < gameObjects.length; i++){
+    if(gameObjects[i].type === "Player"){
+      if(gameObjects[i].babies.length === highestBabyCount){
+        gameObjects[i].getCrown();
+      }
+      else if(gameObjects[i].hasCrown){
+        gameObjects[i].loseCrown();
+      }
+    }
+  }
 }
 
 function logError(err) {
