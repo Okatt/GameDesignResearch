@@ -89,13 +89,13 @@ io.sockets.on('connection', function (socket){
 		io.sockets.socket(worldID).emit('newPlayer', id, shape, color, eyes);
 	});
 
-	socket.on('attemptMatch', function(p1id, p1shape, p1color, p1eyes, p2id, p2shape, p2color, p2eyes){
-		io.sockets.socket(p1id).emit('matchRequest', p2id, p2shape, p2color, p2eyes);
-		io.sockets.socket(p2id).emit('matchRequest', p1id, p1shape, p1color, p1eyes);
+	socket.on('attemptMatch', function(p1id, p1shape, p1color, p1eyes, p2id, p2shape, p2color, p2eyes, p1crown, p2crown){
+		io.sockets.socket(p1id).emit('matchRequest', p2id, p2shape, p2color, p2eyes, p2crown);
+		io.sockets.socket(p2id).emit('matchRequest', p1id, p1shape, p1color, p1eyes, p1crown);
 	});
 
-	socket.on('emitBaby', function(id, shape, color, eyes){
-		io.sockets.socket(id).emit('emitBaby', shape, color, eyes);
+	socket.on('emitBaby', function(id, shape, color, eyes, hasCrown){
+		io.sockets.socket(id).emit('emitBaby', shape, color, eyes, hasCrown);
 	});
 
 	socket.on('acceptedMatch', function(playerID, matchID){
@@ -183,6 +183,22 @@ io.sockets.on('connection', function (socket){
 			sharedArray.push(playerID);
 			shares++;
 		}
+	});
+
+	socket.on('loseCrown', function(playerID){
+		io.sockets.socket(playerID).emit('loseCrown');
+	});
+
+	socket.on('getCrown', function(playerID){
+		io.sockets.socket(playerID).emit('getCrown');
+	});
+
+	socket.on('matchLostCrown', function(matchID){
+		io.sockets.socket(matchID).emit('matchLostCrown');
+	});
+
+	socket.on('matchGotCrown', function(matchID){
+		io.sockets.socket(matchID).emit('matchGotCrown');
 	});
 
     socket.on('ipaddr', function () {

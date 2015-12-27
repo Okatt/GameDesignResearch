@@ -75,6 +75,27 @@ socket.on('playerLeft', function(id){
   if(isWorld){
     for(var i = 0; i < gameObjects.length; i++){
       if(gameObjects[i].id !== undefined && gameObjects[i].id === id){
+        if(gameObjects[i].hasCrown){
+          var highestBabyCount = 0;
+
+          for (var i = 0; i < gameObjects.length; i++) {
+            if(gameObjects[i].type === "Player"){
+              if(highestBabyCount < gameObjects[i].babies.length){
+                highestBabyCount = gameObjects[i].babies.length;
+              }
+            }
+          }
+          for(var i = 0; i < gameObjects.length; i++){
+            if(gameObjects[i].type === "Player"){
+              if(gameObjects[i].babies.length === highestBabyCount){
+                gameObjects[i].getCrown();
+              }
+              else if(gameObjects[i].hasCrown){
+                gameObjects[i].loseCrown();
+              }
+            }
+          }
+        }
         gameObjects[i].kill();
       }
     }
@@ -111,17 +132,18 @@ socket.on('newPlayer', function(newPlayerID, shape, color, eyes){
   gameObjects.push(player);
 });
 
-socket.on('emitBaby', function(shape, color, eyes){
+socket.on('emitBaby', function(shape, color, eyes, crown){
   var pos = matchAvatar.position.clone();
   var offset = new Vector2(0, -60);
   offset.rotate(randomRange(0, 359));
   var baby = new Baby(new Vector2(pos.x+offset.x, pos.y+offset.y), matchAvatar, shape, color, eyes);
+  baby.hasCrown = crown;
   matchAvatar.babies.push(baby);
   gameObjects.push(baby);
 });
 
 
-socket.on('matchRequest', function(mID, mShape, mColor, mEyes){
+socket.on('matchRequest', function(mID, mShape, mColor, mEyes, mCrown){
   matchColor = mColor;
   matchShape = mShape;
   matchEyes = mEyes;
@@ -129,6 +151,7 @@ socket.on('matchRequest', function(mID, mShape, mColor, mEyes){
 
   matchAvatar = new Player(potentialMatchId, new Vector2(2*(canvas.width/3), canvas.height/2), matchShape, matchColor, matchEyes);
   matchAvatar.state = "AVATAR";
+  matchAvatar.hasCrown = mCrown;
   gameObjects.push(matchAvatar);
 
   clientStatus = 'Wil jij met deze persoon spelen?';
@@ -218,7 +241,7 @@ socket.on('checkNames', function(playerID, name){
 
 socket.on('codesExchanged', function(){
     socket.emit('createBaby', matchId, playerId, matchColor, matchShape, playerColor, playerShape, matchEyes, playerEyes);
-    endMatch(); 
+    endMatch();
 });
 
 socket.on('displayEmote', function(emoteID, playerID, matchID){
@@ -240,16 +263,50 @@ socket.on('displayEmote', function(emoteID, playerID, matchID){
 
 socket.on('createBaby', function(ID, shape, color, eyes){
   if(isWorld){
+    var highestBabyCount = 0;
+
     for (var i = 0; i < gameObjects.length; i++) {
-      if(gameObjects[i].type === "Player" && gameObjects[i].id === ID){
-        gameObjects[i].addBaby(shape, color, eyes);
+      if(gameObjects[i].type === "Player"){
+        if(gameObjects[i].id === ID){
+          gameObjects[i].addBaby(shape, color, eyes);
+        }
+        if(highestBabyCount < gameObjects[i].babies.length){
+          highestBabyCount = gameObjects[i].babies.length;
+        }
+      }
+    }
+    for(var i = 0; i < gameObjects.length; i++){
+      if(gameObjects[i].type === "Player"){
+        if(gameObjects[i].babies.length === highestBabyCount){
+          gameObjects[i].getCrown();
+        }
+        else if(gameObjects[i].hasCrown){
+          gameObjects[i].loseCrown();
+        }
       }
     }
   }
   else {
     playerAvatar.addBaby(shape, color, eyes);
+    babyName = null;
   }
 
+});
+
+socket.on('loseCrown', function(){
+  playerAvatar.loseCrown();
+});
+
+socket.on('getCrown', function(){
+  playerAvatar.getCrown();
+});
+
+socket.on('matchLostCrown', function(){
+  matchAvatar.loseCrown();
+});
+
+socket.on('matchGotCrown', function(){
+  matchAvatar.getCrown();
 });
 
 socket.on('ipaddr', function(ip){
@@ -278,13 +335,13 @@ if(location.hostname.match(/localhost|127\.0\.0/)){socket.emit('ipaddr');}
 function worldSeekMatch(p1, p2){
   //p1 and p2 should be game objects!!
   //emit the ids and attributes of the players so the server can match them
-  socket.emit('attemptMatch', p1.id, p1.shape, p1.color, p1.eyes, p2.id, p2.shape, p2.color, p2.eyes);
+  socket.emit('attemptMatch', p1.id, p1.shape, p1.color, p1.eyes, p2.id, p2.shape, p2.color, p2.eyes, p1.hasCrown, p2.hasCrown);
 
   for(var i = 0; i < p1.babies.length; i++){
-    socket.emit('emitBaby', p2.id, p1.babies[i].shape, p1.babies[i].color, p1.babies[i].eyes);
+    socket.emit('emitBaby', p2.id, p1.babies[i].shape, p1.babies[i].color, p1.babies[i].eyes, p1.babies[i].hasCrown);
   }
   for(var i = 0; i < p2.babies.length; i++){
-    socket.emit('emitBaby', p1.id, p2.babies[i].shape, p2.babies[i].color, p2.babies[i].eyes);
+    socket.emit('emitBaby', p1.id, p2.babies[i].shape, p2.babies[i].color, p2.babies[i].eyes, p2.babies[i].hasCrown);
   }
 
   //set them to matched temporarily so they dont get matched again while deciding

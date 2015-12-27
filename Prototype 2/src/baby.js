@@ -33,6 +33,8 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 	this.emoteIndex;
 	this.emoteSprite;
 
+	this.hasCrown = false;
+
 	this.kill = function(){
 		this.isAlive = false;
 	}
@@ -125,6 +127,10 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 
 		if(this.drawEmote){
 			this.emoteSprite.draw(ctx, drawX, drawY-70);
+		}
+
+		if(this.hasCrown){
+			crownSpriteSmall.draw(ctx, drawX, drawY-55);
 		}
 	}
 }

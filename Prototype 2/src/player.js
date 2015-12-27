@@ -41,6 +41,8 @@ function Player(id, position, shape, color, eyes){
 	this.timer = 0;
 	this.eyeTimer = 0;
 
+	this.hasCrown = false;
+
 	this.kill = function(){
 		this.isAlive = false;
 		for (var i = 0; i < this.babies.length; i++) {
@@ -79,12 +81,37 @@ function Player(id, position, shape, color, eyes){
 	this.displayEmote = function(emoteID){
 		this.emoteTimer = 2;
 		this.emoteIndex = emoteID;
-		console.log("emote"+this.emoteIndex);
 		this.emoteSprite = new Sprite(spritesheet_emotes, this.emoteIndex*120, 0, 120, 150, new Vector2(60, 70));
 		this.drawEmote = true;
 		this.closeEmotes();
 		for (var i = 0; i < this.babies.length; i++) {
 			this.babies[i].displayEmote(emoteID);
+		}
+	}
+
+	this.getCrown = function(){
+		if(this.state !== "AVATAR"){
+			socket.emit('getCrown', this.id);
+			if(matchId !== null){
+				socket.emit('matchGotCrown', matchId);
+			}
+		}
+		this.hasCrown = true;
+		for (var i = 0; i < this.babies.length; i++) {
+			this.babies[i].hasCrown = true;
+		}
+	}
+
+	this.loseCrown = function(){
+		if(this.state !== "AVATAR"){
+			socket.emit('loseCrown', this.id);
+			if(matchId !== null){
+				socket.emit('matchLostCrown', matchId);
+			}
+		}
+		this.hasCrown = false;
+		for (var i = 0; i < this.babies.length; i++) {
+			this.babies[i].hasCrown = false;
 		}
 	}
 
@@ -212,6 +239,10 @@ function Player(id, position, shape, color, eyes){
 
 		if(this.drawEmote){
 			this.emoteSprite.draw(ctx, drawX, drawY-150);
+		}
+
+		if(this.hasCrown){
+			crownSprite.draw(ctx, drawX, drawY-125);
 		}
 
 		// Hitbox (debug)

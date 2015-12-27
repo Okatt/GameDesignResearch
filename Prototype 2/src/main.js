@@ -30,6 +30,11 @@ var acceptButton;
 var rejectButton;
 var makeBabyButton;
 
+
+//change dimensions for new crown sprite
+var crownSprite = new Sprite(spritesheet_crown, 0, 0, 75, 56);
+var crownSpriteSmall = new Sprite(spritesheet_crown_small, 0, 0, 38, 28);
+
 window.onload = function main(){
 	// Create the canvas
 	canvas = document.createElement("canvas");
@@ -69,13 +74,13 @@ function initializePlayer(){
 	playerAvatar.state = "AVATAR";
 	gameObjects.push(playerAvatar);
 
-	acceptButton = new TextButton(new Vector2(canvas.width/3, 300), 300, 100, "Yep", color.GREEN);
+	acceptButton = new TextButton(new Vector2(canvas.width/3, 175), 300, 100, "Yep", color.GREEN);
 	acceptButton.onClick = function(){acceptMatch()};
 	gameObjects.push(acceptButton);
 	acceptButton.isVisible = false;
 	acceptButton.isDisabled = true;
 
-	rejectButton = new TextButton(new Vector2(2*(canvas.width/3), 300), 300, 100, "Nope", color.RED);
+	rejectButton = new TextButton(new Vector2(2*(canvas.width/3), 175), 300, 100, "Nope", color.RED);
 	rejectButton.onClick = function(){rejectMatch()};
 	gameObjects.push(rejectButton);
 	rejectButton.isVisible = false;
