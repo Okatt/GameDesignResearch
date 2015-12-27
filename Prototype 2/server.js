@@ -16,6 +16,11 @@ var playerIDArray = [];
 
 var expectedAcceptArray = [];
 
+var shares = 0;
+var sharedArray = [];
+var players = 0;
+var interactions = 0;
+
 var app = http.createServer(function (req, res) {
   fileServer.serve(req, res);
 }).listen(port);
@@ -52,6 +57,7 @@ io.sockets.on('connection', function (socket){
 		}
 		socket.broadcast.emit('playerLeft', socket.id);
 		io.sockets.socket(worldID).emit('playerLeft', socket.id);
+		log('# of players: ' +players +' # of interactions ' +interactions +' # of shares ' +shares);
 	});
 
 	socket.on('message', function (message) {
@@ -75,6 +81,7 @@ io.sockets.on('connection', function (socket){
 			socket.join(room);
             socket.emit('joined', room, socket.id);
             playerIDArray.push(socket.id);
+            players++;
         }
 	});
 
@@ -168,6 +175,14 @@ io.sockets.on('connection', function (socket){
 		io.sockets.socket(worldID).emit('createBaby', p2ID, shape, color, eyes);
 		io.sockets.socket(p1ID).emit('createBaby', p1ID, shape, color, eyes);
 		io.sockets.socket(p2ID).emit('createBaby', p2ID, shape, color, eyes);
+		interactions++;
+	});
+
+	socket.on('shared', function(playerID){
+		if(contains(sharedArray, playerID) === false){
+			sharedArray.push(playerID);
+			shares++;
+		}
 	});
 
     socket.on('ipaddr', function () {

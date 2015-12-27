@@ -86,6 +86,10 @@ function initializePlayer(){
 	gameObjects.push(makeBabyButton);
 	makeBabyButton.isVisible = false;
 	makeBabyButton.isDisabled = true;
+
+	shareButton = new TextButton(new Vector2(canvas.width/2, canvas.height - 50), 100, 50, "SHARE", color.BLUE);
+	shareButton.onClick = function(){share()};
+	gameObjects.push(shareButton);
 }
 
 function run(){

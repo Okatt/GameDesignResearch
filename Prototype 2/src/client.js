@@ -334,6 +334,10 @@ function confirmCode(){
   socket.emit('enteredName', playerId, matchId, babyName);
 }
 
+function share(){
+  socket.emit('shared', playerId);
+}
+
 function logError(err) {
     console.log(err.toString(), err);
 }

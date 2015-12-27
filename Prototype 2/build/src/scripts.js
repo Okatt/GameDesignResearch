@@ -652,6 +652,10 @@ function confirmCode(){
   socket.emit('enteredName', playerId, matchId, babyName);
 }
 
+function share(){
+  socket.emit('shared', playerId);
+}
+
 function logError(err) {
     console.log(err.toString(), err);
 }
@@ -1087,6 +1091,10 @@ function initializePlayer(){
 	gameObjects.push(makeBabyButton);
 	makeBabyButton.isVisible = false;
 	makeBabyButton.isDisabled = true;
+
+	shareButton = new TextButton(new Vector2(canvas.width/2, canvas.height - 50), 100, 50, "SHARE", color.BLUE);
+	shareButton.onClick = function(){share()};
+	gameObjects.push(shareButton);
 }
 
 function run(){
