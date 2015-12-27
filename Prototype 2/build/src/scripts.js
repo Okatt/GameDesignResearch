@@ -1530,13 +1530,16 @@ function Player(id, position, shape, color, eyes){
 				break;
 			case "AVATAR":
 			// TODO
-				var hitbox = new AABB(this.position.x-60, this.position.y-120, 120, 120); // Hitbox for click detection
+				if(this.id === playerId){
+					var hitbox = new AABB(this.position.x-60, this.position.y-120, 120, 120); // Hitbox for click detection
 
-				if(checkPointvsAABB(new Vector2(mouse.x, mouse.y), hitbox) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+					if(checkPointvsAABB(new Vector2(mouse.x, mouse.y), hitbox) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
 					console.log("player pressed");
 					if(this.emoteButtons.length === 0){ this.openEmotes(); }
 					else{ this.closeEmotes(); }
 				}
+				}
+
 				break;
 			default:
 				console.log("Err - State evaluation error: "+this.state+" is not a valid state. Reference: "+this);
