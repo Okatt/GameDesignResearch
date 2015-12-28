@@ -330,6 +330,94 @@ function BubbleButton(position, radius, emoteIndex, bgColor){
 	};
 }
 }
+
+function MemoryButton(position, width, height, type, value, bgColor){
+	this.type = "BubbleButton";
+	this.isAlive = true;
+	
+	// Positioning
+	this.position = position;
+	this.previousPos = this.position.clone();
+	this.width = width;
+	this.height = height;
+
+	//variables
+	this.type = type;
+	this.value = value;
+
+	// Graphics
+	this.depth = 0;
+	this.bgColor = bgColor;
+	this.bgAlpha = 1;
+
+	// State
+	this.mouseOver = false;
+	this.isPressed = false;
+	this.isToggled = false;
+	this.isDisabled = false;
+	this.isVisible = true;
+
+	// Destroys the object (removes it from gameObjects)
+	this.kill = function(){
+		this.unfocus();
+		this.isAlive = false;
+	};
+
+	// Returns the hitbox
+	this.getHitbox = function(){
+		return new CC(this.position.x, this.position.y, this.radius);
+	};
+
+	// Focus	
+	this.focus = function(){
+		if(!this.isFocused){
+			focus(this);
+			this.isFocused = true;
+		}
+	};
+
+	// Remove focus
+	this.unfocus = function(){
+		if(this.isFocused){
+			unfocus(this);
+			this.isFocused = false;
+		}
+	};
+
+	// onClick gets called when the button is pressed (it sets isPressed on true for easier communication with other objects)
+	this.onClick = function(){
+	};
+
+	// Update
+	this.update = function(){
+		this.mouseOver = false;
+		this.isPressed = false;
+
+		// Check if the button is not disabled
+		if(!this.isDisabled){
+			// Check if the mouse is hovering over the button
+			//this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
+			
+			// Call the onClick function when the button is pressed
+			if(checkPointvsCC(new Vector2(mouse.x, mouse.y), this.getHitbox()) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+				console.log("Pressed");
+				this.isPressed = true;
+				this.onClick();
+			}
+		}
+	};
+
+	// Render
+	this.render = function(lagOffset){
+		if(this.isVisible){
+			var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
+			var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+
+		// Background
+		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, this.bgColor, this.bgAlpha);
+		}
+	};
+}
 /****************************************************************************
  * Initial setup
  ****************************************************************************/
@@ -366,6 +454,8 @@ var link;
 var clientStatus = 'Connecting to world';
 var babyName;
 var matchBabyName;
+
+var memoryTiles = [];
 
 
 /****************************************************************************
@@ -493,6 +583,11 @@ socket.on('confirmedMatch', function(p1ID, p2ID){
     isMatched = true;
     console.log(p1ID +' matched with ' +p2ID);
 
+
+    //move avatars down for memory board to fit.
+    playerAvatar.position.y += 200;
+    matchAvatar.position.y += 200;
+
     if(p1ID === playerId){
       matchId = p2ID;
     }
@@ -500,7 +595,9 @@ socket.on('confirmedMatch', function(p1ID, p2ID){
       matchId = p1ID;
     }
     clientStatus = 'Zoek elkaar en kies een naam voor jullie creatie. Jullie moeten dezelfde naam invoeren om de creatie te krijgen.';
-    sendCharacterInfo();
+
+    //start the memory game
+    startMemory();
   }
 });
 
@@ -514,6 +611,15 @@ socket.on('unMatch', function(p1ID, p2ID){
     }
   }
   else if(p1ID === playerId || p2ID === playerId){
+
+      //move avatars back up
+      playerAvatar.position.y -= 200;
+      matchAvatar.position.y -= 200;
+
+      //remove the memory board if the match ended early or something
+      endMemory();
+
+
       matchAvatar.kill();
 
       makeBabyButton.isVisible = false;
@@ -685,12 +791,6 @@ function rejectMatch(){
   socket.emit('rejectedMatch', playerId, potentialMatchId);
 }
 
-function sendCharacterInfo(){
-  //TODO
-  //emit all the variables (color, shape, eyes, feet etc.)
-  socket.emit('characterInfo', matchId, playerColor, playerShape, playerName, playerEyes);
-}
-
 function confirmCode(){
   babyName = prompt('Kies een naam voor jullie creatie: ');
   socket.emit('enteredName', playerId, matchId, babyName);
@@ -722,6 +822,25 @@ function checkCrown(exclude){
       }
     }
   }
+}
+
+function startMemory(){
+  for (var i = 0; i < 3; i++) {
+    for(var j = 0; j < 4; j++){
+
+      //TODO: every button should contain a type (eyes, color, shape) and a value (playerColor, matchColor, playerEyes etc.)
+      var b = new MemoryButton(new Vector2(((canvas.width/2) - 150) +j* 100, ((canvas.height/2)-200) + i*100), 50, 50, 'color', playerColor, "#FFFFFF");
+      memoryTiles.push(b);
+      gameObjects.push(b);
+      }
+    }
+}
+
+function endMemory(){
+  for (var i = 0; i < memoryTiles.length; i++) {
+      memoryTiles[i].kill();
+    }
+    memoryTiles = [];
 }
 
 function logError(err) {
@@ -1140,6 +1259,15 @@ function initializeWorld(){
 	gameObjects.push( new Prop(new Vector2(200, 370), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
 	gameObjects.push( new Prop(new Vector2(560, 340), 90, 40, new Sprite(spritesheet_environment, 400, 0, 400, 400, new Vector2(196, 366))) );
 	gameObjects.push( new Prop(new Vector2(canvas.width - 250, 380), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+	
+	backgroundMusic = background_music;
+
+	backgroundMusic.addEventListener('ended', function() {
+    this.currentTime = 0;
+    this.play();
+	}, false);
+
+	backgroundMusic.play();
 }
 
 function initializePlayer(){

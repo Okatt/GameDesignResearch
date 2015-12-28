@@ -139,14 +139,6 @@ io.sockets.on('connection', function (socket){
 		io.sockets.socket(worldID).emit('unMatch', p1ID, p2ID);
 	});
 
-	//TODO
-	//function should take all parameters (shape, color, eyes, feet etc.)
-	socket.on('characterInfo', function(matchID, color, shape, name, eyes){
-		//TODO
-		//emit should send all parameters
-		io.sockets.socket(matchID).emit('characterInfo', color, shape, name, eyes);
-	});
-
 	socket.on('enteredName', function(playerID, matchID, babyName){
 		io.sockets.socket(matchID).emit('checkNames', playerID, babyName);
 	});

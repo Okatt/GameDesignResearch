@@ -71,8 +71,8 @@ function initializeWorld(){
 	backgroundMusic = background_music;
 
 	backgroundMusic.addEventListener('ended', function() {
-    this.currentTime = 0;
-    this.play();
+    	this.currentTime = 0;
+    	this.play();
 	}, false);
 
 	backgroundMusic.play();

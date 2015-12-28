@@ -35,6 +35,8 @@ var clientStatus = 'Connecting to world';
 var babyName;
 var matchBabyName;
 
+var memoryTiles = [];
+
 
 /****************************************************************************
  * Signaling server 
@@ -161,6 +163,11 @@ socket.on('confirmedMatch', function(p1ID, p2ID){
     isMatched = true;
     console.log(p1ID +' matched with ' +p2ID);
 
+
+    //move avatars down for memory board to fit.
+    playerAvatar.position.y += 200;
+    matchAvatar.position.y += 200;
+
     if(p1ID === playerId){
       matchId = p2ID;
     }
@@ -168,7 +175,9 @@ socket.on('confirmedMatch', function(p1ID, p2ID){
       matchId = p1ID;
     }
     clientStatus = 'Zoek elkaar en kies een naam voor jullie creatie. Jullie moeten dezelfde naam invoeren om de creatie te krijgen.';
-    sendCharacterInfo();
+
+    //start the memory game
+    startMemory();
   }
 });
 
@@ -182,6 +191,15 @@ socket.on('unMatch', function(p1ID, p2ID){
     }
   }
   else if(p1ID === playerId || p2ID === playerId){
+
+      //move avatars back up
+      playerAvatar.position.y -= 200;
+      matchAvatar.position.y -= 200;
+
+      //remove the memory board if the match ended early or something
+      endMemory();
+
+
       matchAvatar.kill();
 
       makeBabyButton.isVisible = false;
@@ -353,12 +371,6 @@ function rejectMatch(){
   socket.emit('rejectedMatch', playerId, potentialMatchId);
 }
 
-function sendCharacterInfo(){
-  //TODO
-  //emit all the variables (color, shape, eyes, feet etc.)
-  socket.emit('characterInfo', matchId, playerColor, playerShape, playerName, playerEyes);
-}
-
 function confirmCode(){
   babyName = prompt('Kies een naam voor jullie creatie: ');
   socket.emit('enteredName', playerId, matchId, babyName);
@@ -390,6 +402,25 @@ function checkCrown(exclude){
       }
     }
   }
+}
+
+function startMemory(){
+  for (var i = 0; i < 3; i++) {
+    for(var j = 0; j < 4; j++){
+
+      //TODO: every button should contain a type (eyes, color, shape) and a value (playerColor, matchColor, playerEyes etc.)
+      var b = new MemoryButton(new Vector2(((canvas.width/2) - 150) +j* 100, ((canvas.height/2)-200) + i*100), 50, 50, 'color', playerColor, "#FFFFFF");
+      memoryTiles.push(b);
+      gameObjects.push(b);
+      }
+    }
+}
+
+function endMemory(){
+  for (var i = 0; i < memoryTiles.length; i++) {
+      memoryTiles[i].kill();
+    }
+    memoryTiles = [];
 }
 
 function logError(err) {
