@@ -67,6 +67,15 @@ function initializeWorld(){
 	gameObjects.push( new Prop(new Vector2(200, 370), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
 	gameObjects.push( new Prop(new Vector2(560, 340), 90, 40, new Sprite(spritesheet_environment, 400, 0, 400, 400, new Vector2(196, 366))) );
 	gameObjects.push( new Prop(new Vector2(canvas.width - 250, 380), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+	
+	backgroundMusic = background_music;
+
+	backgroundMusic.addEventListener('ended', function() {
+    this.currentTime = 0;
+    this.play();
+	}, false);
+
+	backgroundMusic.play();
 }
 
 function initializePlayer(){
