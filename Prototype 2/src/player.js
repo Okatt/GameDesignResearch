@@ -249,13 +249,13 @@ function Player(id, position, shape, color, eyes){
 
 		if(this.hasCrown){
 			if(this.eyes === 1){
-				crownSprite.draw(ctx, drawX, drawY-83);
+				crownSprite.draw(ctx, drawX+2, drawY-120);
 			}
 			else if(this.eyes === 2){
-				crownSprite.draw(ctx, drawX, drawY-93);
+				crownSprite.draw(ctx, drawX+2, drawY-120);
 			}
 			else {
-				crownSprite.draw(ctx, drawX, drawY-103);
+				crownSprite.draw(ctx, drawX+2, drawY-130);
 			}
 		}
 

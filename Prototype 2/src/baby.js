@@ -131,13 +131,13 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 
 		if(this.hasCrown){
 			if(this.eyes === 1){
-				crownSpriteSmall.draw(ctx, drawX, drawY-40);
+				crownSpriteSmall.draw(ctx, drawX, drawY-55);
 			}
 			else if(this.eyes === 2){
-				crownSpriteSmall.draw(ctx, drawX, drawY-43);
+				crownSpriteSmall.draw(ctx, drawX, drawY-55);
 			}
 			else {
-				crownSpriteSmall.draw(ctx, drawX, drawY-57);
+				crownSpriteSmall.draw(ctx, drawX, drawY-65);
 			}
 		}
 	}

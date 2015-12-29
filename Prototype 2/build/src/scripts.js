@@ -131,13 +131,13 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 
 		if(this.hasCrown){
 			if(this.eyes === 1){
-				crownSpriteSmall.draw(ctx, drawX, drawY-40);
+				crownSpriteSmall.draw(ctx, drawX, drawY-55);
 			}
 			else if(this.eyes === 2){
-				crownSpriteSmall.draw(ctx, drawX, drawY-43);
+				crownSpriteSmall.draw(ctx, drawX, drawY-55);
 			}
 			else {
-				crownSpriteSmall.draw(ctx, drawX, drawY-57);
+				crownSpriteSmall.draw(ctx, drawX, drawY-65);
 			}
 		}
 	}
@@ -1104,8 +1104,8 @@ var rejectButton;
 var makeBabyButton;
 
 //change dimensions for new crown sprite
-var crownSprite = new Sprite(spritesheet_crown, 0, 0, 75, 56);
-var crownSpriteSmall = new Sprite(spritesheet_crown_small, 0, 0, 38, 28);
+var crownSprite = new Sprite(spritesheet_crown, 0, 0, 140, 140);
+var crownSpriteSmall = new Sprite(spritesheet_crown_small, 0, 0, 70, 70);
 
 window.onload = function main(){
 	//Run
@@ -1139,6 +1139,15 @@ function initializeWorld(){
 	gameObjects.push( new Prop(new Vector2(560, 340), 90, 40, new Sprite(spritesheet_environment, 400, 0, 400, 400, new Vector2(196, 366))) );
 	gameObjects.push( new Prop(new Vector2(canvas.width - 250, 380), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
 	
+	// Sprite testing
+	// var p = new Player(12345, new Vector2(500, 500), Math.floor(randomRange(0, 3.99)), 3, 1);
+	// p.addBaby(0, 0, 3);
+	// p.addBaby(1, 0, 3);
+	// p.addBaby(2, 0, 3);
+	// p.addBaby(3, 0, 3);
+	// p.getCrown();
+	// gameObjects.push(p);
+
 	// Even niet..
 	//backgroundMusic = background_music;
 
@@ -1704,13 +1713,13 @@ function Player(id, position, shape, color, eyes){
 
 		if(this.hasCrown){
 			if(this.eyes === 1){
-				crownSprite.draw(ctx, drawX, drawY-83);
+				crownSprite.draw(ctx, drawX+2, drawY-120);
 			}
 			else if(this.eyes === 2){
-				crownSprite.draw(ctx, drawX, drawY-93);
+				crownSprite.draw(ctx, drawX+2, drawY-120);
 			}
 			else {
-				crownSprite.draw(ctx, drawX, drawY-103);
+				crownSprite.draw(ctx, drawX+2, drawY-130);
 			}
 		}
 
