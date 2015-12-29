@@ -83,7 +83,7 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 		this.emoteTimer = 2;
 		this.emoteIndex = emoteID;
 		//change emoteindex * 125 to new width of spritesheet/6
-		this.emoteSprite = new Sprite(spritesheet_emotes_small, this.emoteIndex*60, 0, 60, 75, new Vector2(30, 35));
+		this.emoteSprite = new Sprite(spritesheet_emotes_small, this.emoteIndex*100, 0, 100, 150);
 		this.drawEmote = true;
 	}
 
