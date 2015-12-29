@@ -217,8 +217,8 @@ function Player(id, position, shape, color, eyes){
 	}
 
 	this.render = function(lagOffset){
-		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
-		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
 
 		// Body
 		this.body.draw(ctx, drawX, drawY);
@@ -261,6 +261,6 @@ function Player(id, position, shape, color, eyes){
 
 		// Hitbox (debug)
 		//var h = this.getHitbox();
-		//drawRectangle(ctx, h.x, h.y, h.width, h.height, true, color.GREEN, 0.5);
+		//drawRectangle(ctx, h.x - camera.interpolatedPos().x, h.y - camera.interpolatedPos().y, h.width, h.height, true, color.GREEN, 0.5);
 	}
 }

@@ -106,8 +106,8 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 	}
 
 	this.render = function(lagOffset){
-		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
-		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
 
 		// Body
 		this.body.draw(ctx, drawX, drawY);
@@ -738,13 +738,13 @@ function gotRemoteStream(event) {
 //*****************************************************************************************
 
 // Colors
-var color = {BLACK: "#000000", DARK_GREY: "#323232", WHITE: "#FFFFFF", GROUND: "#3FA9AB", SKY: "#CF5D5D", BLUE: "#0090FF", GREEN: "#7AFF2D", PINK: "#F319FF", RED: "#FF0000", YELLOW: "#FFFF00"};
+var color = {BLACK: "#000000", DARK_GREY: "#323232", WHITE: "#FFFFFF", GROUND: "#669D6B", SKY: "#4C3C37", BLUE: "#0090FF", GREEN: "#7AFF2D", PINK: "#F319FF", RED: "#FF0000", YELLOW: "#FFFF00"};
 var colorArray = [color.BLACK, color.DARK_GREY, color.WHITE, color.PINK, color.RED, color.YELLOW];
 
 
 // Camera
 function Camera(position){
-	this.position = position;
+	this.position = new Vector2(position.x-canvas.width/2, position.y-canvas.height/2);
 	this.previousPos = this.position.clone();
 	this.targetPos = this.position.clone();
 	this.width = canvas.width;
@@ -1091,6 +1091,7 @@ var ctx;
 var currentTime = Date.now();
 var previousTime = currentTime;
 var lag = 0;
+var camera;
 
 // Input
 var mouse;
@@ -1098,14 +1099,14 @@ var keyboard;
 var previousMouse;
 var previousKeyboard;
 
-
 var acceptButton;
 var rejectButton;
 var makeBabyButton;
 
-//change dimensions for new crown sprite
+// Sprites
 var crownSprite = new Sprite(spritesheet_crown, 0, 0, 140, 140);
 var crownSpriteSmall = new Sprite(spritesheet_crown_small, 0, 0, 70, 70);
+var grassSprite = new Sprite(spritesheet_grass, 0, 0, 2000, 300);
 
 window.onload = function main(){
 	//Run
@@ -1128,17 +1129,44 @@ function initialize(){
 	previousKeyboard = clone(keyboard);	
 
 	// Camera
-	camera = new Camera(new Vector2(-canvas.width/2, -canvas.height/2));
+	if(isWorld){0
+		camera = new Camera(new Vector2(1920/2, 1080/2-1600));
+		camera.shake(4);
+	}else{ camera = new Camera(new Vector2(1920/2, 1080/2)); }
+	camera.setTargetPosition(new Vector2(1920/2, 1080/2));
+	
 }
 
 function initializeWorld(){
 	initialize();
 
-	// Props
-	gameObjects.push( new Prop(new Vector2(200, 370), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
-	gameObjects.push( new Prop(new Vector2(560, 340), 90, 40, new Sprite(spritesheet_environment, 400, 0, 400, 400, new Vector2(196, 366))) );
-	gameObjects.push( new Prop(new Vector2(canvas.width - 250, 380), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
-	
+	// Trees
+	gameObjects.push( new Prop(new Vector2(50, 446), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(314, 370), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(640, 340), 90, 40, new Sprite(spritesheet_environment, 400, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(1530, 380), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(1900, 446), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+
+	// Bushes
+	gameObjects.push( new Prop(new Vector2(780, 335), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(284, 400), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(90, 470), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(70, 780), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(130, 850), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(100, 970), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(340, 1030), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(700, 800), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1800, 940), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1720, 980), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1830, 740), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1645, 470), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1720, 510), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+
+	// Stones
+	gameObjects.push( new Prop(new Vector2(800, 780), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
+	gameObjects.push( new Prop(new Vector2(1750, 450), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
+	gameObjects.push( new Prop(new Vector2(1700, 920), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
+
 	// Sprite testing
 	// var p = new Player(12345, new Vector2(500, 500), Math.floor(randomRange(0, 3.99)), 3, 1);
 	// p.addBaby(0, 0, 3);
@@ -1253,29 +1281,29 @@ function render(lagOffset){
 	if(isWorld){
 		// Background
 		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.SKY, 1);
-		drawRectangle(ctx, 0, canvas.height*0.3, canvas.width, canvas.height*0.7, true, color.GROUND, 1);
-
-		// link
-		ctx.font = "28px Arial";
-		ctx.fillStyle = "#FFFFFF";
-		ctx.textAlign = "center";
-		ctx.fillText("JOIN THE PARTY AT", canvas.width/2, 30);
-		ctx.font = "36px Arial";
-		ctx.fillStyle = "#FFFFFF";
-		ctx.textAlign = "center";
-		ctx.fillText("polygonpals.tk", canvas.width/2, 66);
+		drawRectangle(ctx, -camera.interpolatedPos().x, 300-camera.interpolatedPos().y, 2000, 1000, true, color.GROUND, 1);
+		grassSprite.draw(ctx, 1920/2 -camera.interpolatedPos().x, 300-camera.interpolatedPos().y);
 
 		// Render all game objects
 		for (var ob = 0; ob < gameObjects.length; ob++){
 			gameObjects[ob].render(lagOffset);
 		}
+
+		// Text bar (TODO scrolling announcements)
+		drawRectangle(ctx, 0, canvas.height-40, canvas.width, 40, true, color.BLACK, 0.3);
+		// link
+		ctx.font = "28px Righteous";
+		ctx.fillStyle = "#FFFFFF";
+		ctx.textAlign = "center";
+		ctx.fillText("JOIN THE PARTY AT   polygonpals.tk", canvas.width/2, canvas.height-10);
+
 	//draw for clients
 	}else{
 		// Background
 		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.GROUND, 1);
 
 		// Name
-		ctx.font = "36px Arial";
+		ctx.font = "36px Righteous";
 		ctx.fillStyle = "#000000";
 		ctx.textAlign = "center";
 		ctx.fillText(clientStatus, canvas.width/2, 100);
@@ -1424,7 +1452,7 @@ function checkOutOfBounds(object, offset){
 	var hitbox = new AABB(object.position.x + offset.x - object.width/2, object.position.y + offset.y - object.height/2, object.width, object.height);
 
 	// Check if the new hitbox is within the bounds
-	return (hitbox.x < 0 || hitbox.x + hitbox.width > canvas.width || hitbox.y < canvas.height*0.3 || hitbox.y + hitbox.height > canvas.height);
+	return (hitbox.x < 0 || hitbox.x + hitbox.width > canvas.width || hitbox.y < 1080-310 || hitbox.y + hitbox.height > canvas.height);
 }
 
 // Collision Circle
@@ -1681,8 +1709,8 @@ function Player(id, position, shape, color, eyes){
 	}
 
 	this.render = function(lagOffset){
-		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
-		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
 
 		// Body
 		this.body.draw(ctx, drawX, drawY);
@@ -1725,7 +1753,7 @@ function Player(id, position, shape, color, eyes){
 
 		// Hitbox (debug)
 		//var h = this.getHitbox();
-		//drawRectangle(ctx, h.x, h.y, h.width, h.height, true, color.GREEN, 0.5);
+		//drawRectangle(ctx, h.x - camera.interpolatedPos().x, h.y - camera.interpolatedPos().y, h.width, h.height, true, color.GREEN, 0.5);
 	}
 }
 //*****************************************************************************************
@@ -1747,7 +1775,8 @@ function Prop(position, width, height, sprite){
 	this.sprite = sprite;
 	
 	// Data
-	this.isSolid = true;
+	if(this.width > 0 && this.height > 0){ this.isSolid = true;}
+	else{this.isSolid = false;}	
 	this.isDynamic = false;
 
 	this.kill = function(){
@@ -1759,19 +1788,19 @@ function Prop(position, width, height, sprite){
 	}
 
 	this.update = function(){
-
+		this.previousPos = this.position.clone();
 	}
 
 	this.render = function(lagOffset){
-		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
-		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
 
 		// Render
 		this.sprite.draw(ctx, drawX, drawY);
 
 		// Hitbox (debug)
 		//var h = this.getHitbox();
-		//drawRectangle(ctx, h.x, h.y, h.width, h.height, true, color.GREEN, 0.5);
+		//drawRectangle(ctx, h.x - camera.interpolatedPos().x, h.y - camera.interpolatedPos().y, h.width, h.height, true, color.GREEN, 0.5);
 	}
 }
 //*****************************************************************************************

@@ -18,12 +18,31 @@
         </style>
     </head>
     <body class='body' oncontextmenu="return false">
+        <link href='https://fonts.googleapis.com/css?family=Righteous' rel='stylesheet' type='text/css'>
+        <script type="text/javascript">
+              WebFontConfig = {
+                google: { families: [ 'Righteous::latin' ] }
+              };
+              (function() {
+                var wf = document.createElement('script');
+                wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
+                  '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+                wf.type = 'text/javascript';
+                wf.async = 'true';
+                var s = document.getElementsByTagName('script')[0];
+                s.parentNode.insertBefore(wf, s);
+              })();
+        </script>
+
         <script>
             // Undo dubble click selection
             document.ondblclick = function(evt){
                 if (window.getSelection){ window.getSelection().removeAllRanges(); }
                 else if (document.selection){ document.selection.empty(); }
             };
+
+            var spritesheet_grass = new Image();
+            spritesheet_grass.src = "build/res/img/spritesheet_grass.png";
 
             var spritesheet_environment = new Image();
             spritesheet_environment.src = "build/res/img/spritesheet_environment.png";

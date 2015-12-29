@@ -17,7 +17,8 @@ function Prop(position, width, height, sprite){
 	this.sprite = sprite;
 	
 	// Data
-	this.isSolid = true;
+	if(this.width > 0 && this.height > 0){ this.isSolid = true;}
+	else{this.isSolid = false;}	
 	this.isDynamic = false;
 
 	this.kill = function(){
@@ -29,18 +30,18 @@ function Prop(position, width, height, sprite){
 	}
 
 	this.update = function(){
-
+		this.previousPos = this.position.clone();
 	}
 
 	this.render = function(lagOffset){
-		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
-		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
 
 		// Render
 		this.sprite.draw(ctx, drawX, drawY);
 
 		// Hitbox (debug)
 		//var h = this.getHitbox();
-		//drawRectangle(ctx, h.x, h.y, h.width, h.height, true, color.GREEN, 0.5);
+		//drawRectangle(ctx, h.x - camera.interpolatedPos().x, h.y - camera.interpolatedPos().y, h.width, h.height, true, color.GREEN, 0.5);
 	}
 }
