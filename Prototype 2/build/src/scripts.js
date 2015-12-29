@@ -1103,12 +1103,16 @@ var acceptButton;
 var rejectButton;
 var makeBabyButton;
 
-
 //change dimensions for new crown sprite
 var crownSprite = new Sprite(spritesheet_crown, 0, 0, 75, 56);
 var crownSpriteSmall = new Sprite(spritesheet_crown_small, 0, 0, 38, 28);
 
 window.onload = function main(){
+	//Run
+	run();
+};
+
+function initialize(){
 	// Create the canvas
 	canvas = document.createElement("canvas");
 	canvas.width = self.innerWidth - 10;
@@ -1116,14 +1120,6 @@ window.onload = function main(){
 	ctx = canvas.getContext("2d");
 	document.body.appendChild(canvas);
 
-	// Initialize
-	initialize();
-
-	//Run
-	run();
-};
-
-function initialize(){
 	// Input
 	mouse = new Mouse();
 	keyboard = new Keyboard();
@@ -1136,22 +1132,27 @@ function initialize(){
 }
 
 function initializeWorld(){
+	initialize();
+
 	// Props
 	gameObjects.push( new Prop(new Vector2(200, 370), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
 	gameObjects.push( new Prop(new Vector2(560, 340), 90, 40, new Sprite(spritesheet_environment, 400, 0, 400, 400, new Vector2(196, 366))) );
 	gameObjects.push( new Prop(new Vector2(canvas.width - 250, 380), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
 	
-	backgroundMusic = background_music;
+	// Even niet..
+	//backgroundMusic = background_music;
 
-	backgroundMusic.addEventListener('ended', function() {
-    	this.currentTime = 0;
-    	this.play();
-	}, false);
+	// backgroundMusic.addEventListener('ended', function() {
+ 	// 	  this.currentTime = 0;
+ 	//    this.play();
+	// }, false);
 
-	backgroundMusic.play();
+	//backgroundMusic.play();
 }
 
 function initializePlayer(){
+	initialize();
+
 	playerAvatar = new Player(playerId, new Vector2(canvas.width/3, canvas.height/2), playerShape, playerColor, playerEyes);
 	playerAvatar.state = "AVATAR";
 	gameObjects.push(playerAvatar);
