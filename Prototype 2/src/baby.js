@@ -125,10 +125,6 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 			}
 		}
 
-		if(this.drawEmote){
-			this.emoteSprite.draw(ctx, drawX, drawY-70);
-		}
-
 		if(this.hasCrown){
 			if(this.eyes === 1){
 				crownSpriteSmall.draw(ctx, drawX, drawY-55);
@@ -139,6 +135,10 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 			else {
 				crownSpriteSmall.draw(ctx, drawX, drawY-65);
 			}
+		}
+
+		if(this.drawEmote){
+			this.emoteSprite.draw(ctx, drawX, drawY-100);
 		}
 	}
 }

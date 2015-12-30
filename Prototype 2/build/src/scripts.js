@@ -125,10 +125,6 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 			}
 		}
 
-		if(this.drawEmote){
-			this.emoteSprite.draw(ctx, drawX, drawY-70);
-		}
-
 		if(this.hasCrown){
 			if(this.eyes === 1){
 				crownSpriteSmall.draw(ctx, drawX, drawY-55);
@@ -139,6 +135,10 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 			else {
 				crownSpriteSmall.draw(ctx, drawX, drawY-65);
 			}
+		}
+
+		if(this.drawEmote){
+			this.emoteSprite.draw(ctx, drawX, drawY-100);
 		}
 	}
 }
@@ -1735,10 +1735,6 @@ function Player(id, position, shape, color, eyes){
 			}
 		}
 
-		if(this.drawEmote){
-			this.emoteSprite.draw(ctx, drawX, drawY-150);
-		}
-
 		if(this.hasCrown){
 			if(this.eyes === 1){
 				crownSprite.draw(ctx, drawX+2, drawY-120);
@@ -1749,6 +1745,10 @@ function Player(id, position, shape, color, eyes){
 			else {
 				crownSprite.draw(ctx, drawX+2, drawY-130);
 			}
+		}
+
+		if(this.drawEmote){
+			this.emoteSprite.draw(ctx, drawX, drawY-200);
 		}
 
 		// Hitbox (debug)

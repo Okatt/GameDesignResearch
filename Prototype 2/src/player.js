@@ -243,10 +243,6 @@ function Player(id, position, shape, color, eyes){
 			}
 		}
 
-		if(this.drawEmote){
-			this.emoteSprite.draw(ctx, drawX, drawY-150);
-		}
-
 		if(this.hasCrown){
 			if(this.eyes === 1){
 				crownSprite.draw(ctx, drawX+2, drawY-120);
@@ -257,6 +253,10 @@ function Player(id, position, shape, color, eyes){
 			else {
 				crownSprite.draw(ctx, drawX+2, drawY-130);
 			}
+		}
+
+		if(this.drawEmote){
+			this.emoteSprite.draw(ctx, drawX, drawY-200);
 		}
 
 		// Hitbox (debug)
