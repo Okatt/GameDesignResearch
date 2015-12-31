@@ -327,12 +327,12 @@ function BubbleButton(position, radius, emoteIndex, bgColor){
 
 		//emote
 		this.emote.draw(ctx, drawX, drawY);
+		}
 	};
 }
-}
 
-function MemoryButton(position, width, height, type, value, bgColor){
-	this.type = "BubbleButton";
+function MemoryButton(position, width, height, index, value, number, bgColor){
+	this.type = "MemoryButton";
 	this.isAlive = true;
 	
 	// Positioning
@@ -342,8 +342,9 @@ function MemoryButton(position, width, height, type, value, bgColor){
 	this.height = height;
 
 	//variables
-	this.type = type;
+	this.index = index;
 	this.value = value;
+	this.number = number;
 
 	// Graphics
 	this.depth = 0;
@@ -356,6 +357,10 @@ function MemoryButton(position, width, height, type, value, bgColor){
 	this.isToggled = false;
 	this.isDisabled = false;
 	this.isVisible = true;
+	this.isRevealed = false;
+
+	//sprite
+	this.card = new Sprite(memory_cards, 100*this.value, 100*this.index, 100, 100);
 
 	// Destroys the object (removes it from gameObjects)
 	this.kill = function(){
@@ -365,7 +370,7 @@ function MemoryButton(position, width, height, type, value, bgColor){
 
 	// Returns the hitbox
 	this.getHitbox = function(){
-		return new CC(this.position.x, this.position.y, this.radius);
+		return new AABB(this.position.x-this.width/2, this.position.y-this.height/2, this.width, this.height);
 	};
 
 	// Focus	
@@ -386,6 +391,16 @@ function MemoryButton(position, width, height, type, value, bgColor){
 
 	// onClick gets called when the button is pressed (it sets isPressed on true for easier communication with other objects)
 	this.onClick = function(){
+		this.isRevealed = true;
+		socket.emit('tileFlipped', matchId, this.number);
+	};
+
+	this.reveal = function(){
+		this.isRevealed = true;
+	};
+
+	this.unReveal = function(){
+		this.isRevealed = false;
 	};
 
 	// Update
@@ -394,12 +409,12 @@ function MemoryButton(position, width, height, type, value, bgColor){
 		this.isPressed = false;
 
 		// Check if the button is not disabled
-		if(!this.isDisabled){
+		if(!this.isDisabled && !this.isRevealed){
 			// Check if the mouse is hovering over the button
 			//this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
 			
 			// Call the onClick function when the button is pressed
-			if(checkPointvsCC(new Vector2(mouse.x, mouse.y), this.getHitbox()) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+			if(checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox()) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
 				console.log("Pressed");
 				this.isPressed = true;
 				this.onClick();
@@ -413,8 +428,12 @@ function MemoryButton(position, width, height, type, value, bgColor){
 			var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
 			var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
 
-		// Background
-		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, this.bgColor, this.bgAlpha);
+			// Background
+			drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, this.bgColor, this.bgAlpha);
+
+			if(this.isRevealed){
+				this.card.draw(ctx, drawX, drawY);
+			}
 		}
 	};
 }
@@ -581,6 +600,7 @@ socket.on('confirmedMatch', function(p1ID, p2ID){
     isDeciding = false;
     isSeeking = false;
     isMatched = true;
+    potentialMatchId = null;
     console.log(p1ID +' matched with ' +p2ID);
 
 
@@ -611,7 +631,6 @@ socket.on('unMatch', function(p1ID, p2ID){
     }
   }
   else if(p1ID === playerId || p2ID === playerId){
-
       //move avatars back up
       playerAvatar.position.y -= 200;
       matchAvatar.position.y -= 200;
@@ -720,6 +739,31 @@ socket.on('matchGotCrown', function(){
   matchAvatar.getCrown();
 });
 
+socket.on('tileFlipped', function(number){
+  for (var i = 0; i < memoryTiles.length; i++) {
+      if(memoryTiles[i].number === number){
+        memoryTiles[i].reveal();
+      }
+    }
+});
+
+socket.on('memoryCard', function(memoryTile, buttonID){
+    if(buttonID >= 8){
+      var b = new MemoryButton(new Vector2(((canvas.width/2)-200) + ((buttonID-8)*125), ((canvas.height/2)-250) + 2*125), 100, 100, memoryTile.index, memoryTile.value, buttonID, "#FFFFFF");
+    }
+    else if(buttonID >= 4){
+      var b = new MemoryButton(new Vector2(((canvas.width/2)-200) + ((buttonID-4)*125), ((canvas.height/2)-250) + 125), 100, 100, memoryTile.index, memoryTile.value, buttonID, "#FFFFFF");
+    }
+    else {
+      var b = new MemoryButton(new Vector2(((canvas.width/2)-200) + (buttonID*125), ((canvas.height/2)-250)), 100, 100, memoryTile.index, memoryTile.value, buttonID, "#FFFFFF");
+    }
+    
+    b.isVisible = false;
+    b.isDisabled = true;       
+    memoryTiles.push(b);
+    gameObjects.push(b);
+});
+
 socket.on('ipaddr', function(ip){
   link = ip;
 });
@@ -825,15 +869,11 @@ function checkCrown(exclude){
 }
 
 function startMemory(){
-  for (var i = 0; i < 3; i++) {
-    for(var j = 0; j < 4; j++){
-
-      //TODO: every button should contain a type (eyes, color, shape) and a value (playerColor, matchColor, playerEyes etc.)
-      var b = new MemoryButton(new Vector2(((canvas.width/2) - 150) +j* 100, ((canvas.height/2)-200) + i*100), 50, 50, 'color', playerColor, "#FFFFFF");
-      memoryTiles.push(b);
-      gameObjects.push(b);
-      }
-    }
+  for (var i = 0; i < memoryTiles.length; i++) {
+      memoryTiles[i].isVisible = true;
+      memoryTiles[i].isDisabled = false;
+      
+    } 
 }
 
 function endMemory(){

@@ -35,6 +35,37 @@ io.sockets.on('connection', function (socket){
     }
     	return false;
 	}
+
+	function fillArray(pshape, pcolor, peyes, mshape, mcolor, meyes){
+		var tempArray = [];
+		for(var j = 0; j < 2; j++){
+			for(var i = 0; i < 6; i++){
+				tempArray.push(arguments[i]);
+			}
+		}
+
+		return randomizeArray(tempArray);
+	}
+
+	function randomizeArray(array){
+		var currentIndex = array.length, temporaryValue, randomIndex;
+
+  		// While there remain elements to shuffle...
+  		while (0 !== currentIndex) {
+
+    		// Pick a remaining element...
+    		randomIndex = Math.floor(Math.random() * currentIndex);
+    		currentIndex -= 1;
+
+    		// And swap it with the current element.
+    		temporaryValue = array[currentIndex];
+    		array[currentIndex] = array[randomIndex];
+   		 	array[randomIndex] = temporaryValue;
+  	}
+
+  		return array;
+	}
+
     // convenience function to log server messages on the client
     function log(){
 		var array = [">>> Message from server:"];
@@ -55,9 +86,8 @@ io.sockets.on('connection', function (socket){
 				break;
 			}
 		}
-		socket.broadcast.emit('playerLeft', socket.id);
-		//io.sockets.socket(worldID).emit('playerLeft', socket.id);
 		log('# of players: ' +players +' # of interactions ' +interactions +' # of shares ' +shares);
+		socket.broadcast.emit('playerLeft', socket.id);
 	});
 
 	socket.on('message', function (message) {
@@ -92,6 +122,12 @@ io.sockets.on('connection', function (socket){
 	socket.on('attemptMatch', function(p1id, p1shape, p1color, p1eyes, p2id, p2shape, p2color, p2eyes, p1crown, p2crown){
 		io.sockets.socket(p1id).emit('matchRequest', p2id, p2shape, p2color, p2eyes, p2crown);
 		io.sockets.socket(p2id).emit('matchRequest', p1id, p1shape, p1color, p1eyes, p1crown);
+
+		var memoryArray = fillArray({index: 0, value: p1shape}, {index: 1, value: p1color}, {index: 2, value: p1eyes}, {index: 0, value: p2shape}, {index: 1, value: p2color}, {index: 2, value: p2eyes});
+		for(var i = 0; i < memoryArray.length; i++){
+			io.sockets.socket(p1id).emit('memoryCard', memoryArray[i], i);
+			io.sockets.socket(p2id).emit('memoryCard', memoryArray[i], i);
+		}
 	});
 
 	socket.on('emitBaby', function(id, shape, color, eyes, hasCrown){
@@ -100,7 +136,7 @@ io.sockets.on('connection', function (socket){
 
 	socket.on('acceptedMatch', function(playerID, matchID){
 		if(contains(expectedAcceptArray, playerID)){
-			
+
 			io.sockets.socket(matchID).emit('confirmedMatch', matchID, playerID);
 			io.sockets.socket(playerID).emit('confirmedMatch', matchID, playerID);
 			io.sockets.socket(worldID).emit('confirmedMatch', matchID, playerID);
@@ -191,6 +227,10 @@ io.sockets.on('connection', function (socket){
 
 	socket.on('matchGotCrown', function(matchID){
 		io.sockets.socket(matchID).emit('matchGotCrown');
+	});
+
+	socket.on('tileFlipped', function(matchID, number){
+		io.sockets.socket(matchID).emit('tileFlipped', number);
 	});
 
     socket.on('ipaddr', function () {

@@ -161,6 +161,7 @@ socket.on('confirmedMatch', function(p1ID, p2ID){
     isDeciding = false;
     isSeeking = false;
     isMatched = true;
+    potentialMatchId = null;
     console.log(p1ID +' matched with ' +p2ID);
 
 
@@ -191,7 +192,6 @@ socket.on('unMatch', function(p1ID, p2ID){
     }
   }
   else if(p1ID === playerId || p2ID === playerId){
-
       //move avatars back up
       playerAvatar.position.y -= 200;
       matchAvatar.position.y -= 200;
@@ -300,6 +300,31 @@ socket.on('matchGotCrown', function(){
   matchAvatar.getCrown();
 });
 
+socket.on('tileFlipped', function(number){
+  for (var i = 0; i < memoryTiles.length; i++) {
+      if(memoryTiles[i].number === number){
+        memoryTiles[i].reveal();
+      }
+    }
+});
+
+socket.on('memoryCard', function(memoryTile, buttonID){
+    if(buttonID >= 8){
+      var b = new MemoryButton(new Vector2(((canvas.width/2)-200) + ((buttonID-8)*125), ((canvas.height/2)-250) + 2*125), 100, 100, memoryTile.index, memoryTile.value, buttonID, "#FFFFFF");
+    }
+    else if(buttonID >= 4){
+      var b = new MemoryButton(new Vector2(((canvas.width/2)-200) + ((buttonID-4)*125), ((canvas.height/2)-250) + 125), 100, 100, memoryTile.index, memoryTile.value, buttonID, "#FFFFFF");
+    }
+    else {
+      var b = new MemoryButton(new Vector2(((canvas.width/2)-200) + (buttonID*125), ((canvas.height/2)-250)), 100, 100, memoryTile.index, memoryTile.value, buttonID, "#FFFFFF");
+    }
+    
+    b.isVisible = false;
+    b.isDisabled = true;       
+    memoryTiles.push(b);
+    gameObjects.push(b);
+});
+
 socket.on('ipaddr', function(ip){
   link = ip;
 });
@@ -405,15 +430,11 @@ function checkCrown(exclude){
 }
 
 function startMemory(){
-  for (var i = 0; i < 3; i++) {
-    for(var j = 0; j < 4; j++){
-
-      //TODO: every button should contain a type (eyes, color, shape) and a value (playerColor, matchColor, playerEyes etc.)
-      var b = new MemoryButton(new Vector2(((canvas.width/2) - 150) +j* 100, ((canvas.height/2)-200) + i*100), 50, 50, 'color', playerColor, "#FFFFFF");
-      memoryTiles.push(b);
-      gameObjects.push(b);
-      }
-    }
+  for (var i = 0; i < memoryTiles.length; i++) {
+      memoryTiles[i].isVisible = true;
+      memoryTiles[i].isDisabled = false;
+      
+    } 
 }
 
 function endMemory(){
