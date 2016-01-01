@@ -138,7 +138,7 @@ io.sockets.on('connection', function (socket){
 		if(contains(expectedAcceptArray, playerID)){
 
 			io.sockets.socket(matchID).emit('confirmedMatch', matchID, playerID);
-			io.sockets.socket(playerID).emit('confirmedMatch', matchID, playerID);
+			io.sockets.socket(playerID).emit('confirmedMatch', matchID, playerID, true);
 			io.sockets.socket(worldID).emit('confirmedMatch', matchID, playerID);
 
 			for(var i = expectedAcceptArray.length; i >= 0; i--){
@@ -191,14 +191,7 @@ io.sockets.on('connection', function (socket){
 
 	});
 
-	socket.on('createBaby', function(p1ID, p2ID, p1C, p1S, p2C, p2S, p1E, p2E){
-
-		//p1C = player 1 color, p2S = player 2 shape etc.
-		//TODO
-		//randomly select what aspects to take (should be same for both players and should take elements from both parents)
-		 var shape = chooseOne(p1S, p2S);
-		 var color = chooseOne(p1C, p2C);
-		 var eyes = chooseOne(p1E, p2E);
+	socket.on('createBaby', function(p1ID, p2ID, shape, color, eyes){
 		io.sockets.socket(worldID).emit('createBaby', p1ID, shape, color, eyes);
 		io.sockets.socket(worldID).emit('createBaby', p2ID, shape, color, eyes);
 		io.sockets.socket(p1ID).emit('createBaby', p1ID, shape, color, eyes);
@@ -231,6 +224,24 @@ io.sockets.on('connection', function (socket){
 
 	socket.on('tileFlipped', function(matchID, number){
 		io.sockets.socket(matchID).emit('tileFlipped', number);
+	});
+	socket.on('memoryMatch', function(tile1, tile2, matchID, playerID, index){
+		io.sockets.socket(matchID).emit('memoryMatch', tile1, tile2, index);
+		io.sockets.socket(playerID).emit('memoryMatch', tile1, tile2, index);
+	});
+
+	socket.on('changeTurn', function(matchID){
+		io.sockets.socket(matchID).emit('changeTurn');
+	});
+
+	socket.on('delayedUnreveal', function(tileNumber, matchID, playerID){
+		io.sockets.socket(matchID).emit('delayedUnreveal', tileNumber);
+		io.sockets.socket(playerID).emit('delayedUnreveal', tileNumber);
+	});
+
+	socket.on('memoryBaby', function(p1ID, p2ID, shape, color, eyes){
+		io.sockets.socket(p1ID).emit('memoryBaby', p1ID, shape, color, eyes);
+		io.sockets.socket(p2ID).emit('memoryBaby', p2ID, shape, color, eyes);
 	});
 
     socket.on('ipaddr', function () {

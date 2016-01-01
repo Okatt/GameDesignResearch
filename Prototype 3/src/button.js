@@ -214,9 +214,13 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 	this.isDisabled = false;
 	this.isVisible = true;
 	this.isRevealed = false;
+	this.startURtimer = false;
+	this.unrevealTimer = 0;
+	this.mtm = false;
 
 	//sprite
 	this.card = new Sprite(memory_cards, 100*this.value, 100*this.index, 100, 100);
+	this.cardBack = new Sprite(memory_cards, 0, 100*2, 100, 100);
 
 	// Destroys the object (removes it from gameObjects)
 	this.kill = function(){
@@ -249,6 +253,10 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 	this.onClick = function(){
 		this.isRevealed = true;
 		socket.emit('tileFlipped', matchId, this.number);
+		flips++;
+		if(flips >= 2){
+			this.checkMatch();
+		}
 	};
 
 	this.reveal = function(){
@@ -259,13 +267,61 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 		this.isRevealed = false;
 	};
 
+	this.delayedUnreveal = function(){
+		this.startURtimer = true;
+		this.unrevealTimer = 1;
+	};
+
+	this.checkMatch = function(){
+		for(var i = 0; i < memoryTiles.length; i++){
+			if(memoryTiles[i].isRevealed && memoryTiles[i].number !== this.number && memoryTiles[i].index === this.index && memoryTiles[i].value === this.value){
+				socket.emit('memoryMatch', memoryTiles[i], this, matchId, playerId, this.index);
+				flips = 0;
+				return;
+			}
+		}
+		flips = 0;
+		for(var i = 0; i < memoryTiles.length; i++){
+			if(memoryTiles[i].isRevealed){
+				socket.emit('delayedUnreveal', memoryTiles[i].number, matchId, playerId);
+			}
+		}
+		turnPlayer = false;
+		socket.emit('changeTurn', matchId);
+	};
+
 	// Update
 	this.update = function(){
 		this.mouseOver = false;
 		this.isPressed = false;
 
+		if(this.startURtimer){this.unrevealTimer -= UPDATE_DURATION/1000;
+		if(this.unrevealTimer < 0){this.startURtimer = false; this.unReveal();}
+		}
+
+
+		//TODO if mtm = true, tile should ease to the middle of the screen and then call kill() when it arrives
+		if(this.mtm){
+			if(this.position.x > canvas.width/2){
+				this.position.x -= 1;
+			}
+			if(this.position.x < canvas.width/2){
+				this.position.x += 1;
+			}
+			if(this.position.y > canvas.height/2){
+				this.position.y -= 1;
+			}
+			if(this.position.y < canvas.height/2){
+				this.position.y += 1;
+			}
+		}
+
+		if(this.mtm && this.position === new Vector2(canvas.width/2, canvas.height/2)){
+			this.kill();
+		}
+
 		// Check if the button is not disabled
-		if(!this.isDisabled && !this.isRevealed){
+		if(!this.isDisabled && !this.isRevealed && turnPlayer){
 			// Check if the mouse is hovering over the button
 			//this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
 			
@@ -284,11 +340,11 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 			var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
 			var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
 
-			// Background
-			drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, this.bgColor, this.bgAlpha);
-
 			if(this.isRevealed){
 				this.card.draw(ctx, drawX, drawY);
+			}
+			else {
+				this.cardBack.draw(ctx, drawX, drawY);
 			}
 		}
 	};

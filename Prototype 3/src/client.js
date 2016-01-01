@@ -23,6 +23,7 @@ var playerColor = Math.floor(randomRange(0, 4.99));
 var playerShape = Math.floor(randomRange(0, 3.99));
 var playerEyes = Math.floor(randomRange(0, 2.99))+1;
 var playerAvatar;
+var babyAvatar;
 
 var matchShape;
 var matchColor;
@@ -36,6 +37,10 @@ var babyName;
 var matchBabyName;
 
 var memoryTiles = [];
+var matchedTiles = [];
+
+var turnPlayer = false;
+var flips = 0;
 
 
 /****************************************************************************
@@ -150,20 +155,22 @@ socket.on('matchRequest', function(mID, mShape, mColor, mEyes, mCrown){
   rejectButton.isDisabled = false;
 });
 
-socket.on('confirmedMatch', function(p1ID, p2ID){
+socket.on('confirmedMatch', function(p1ID, p2ID, firstTurn){
+
+  var turn = firstTurn || false;
+
   if(isWorld){
     //TODO
     //move both players with p1ID and p2ID together
   }
   else {
-    makeBabyButton.isVisible = true;
-    makeBabyButton.isDisabled = false;
     isDeciding = false;
     isSeeking = false;
     isMatched = true;
     potentialMatchId = null;
     console.log(p1ID +' matched with ' +p2ID);
 
+    turnPlayer = turn;
 
     //move avatars down for memory board to fit.
     playerAvatar.position.y += 200;
@@ -243,7 +250,7 @@ socket.on('checkNames', function(playerID, name){
 });
 
 socket.on('codesExchanged', function(){
-    socket.emit('createBaby', matchId, playerId, matchColor, matchShape, playerColor, playerShape, matchEyes, playerEyes);
+    socket.emit('createBaby', matchId, playerId, babyAvatar.shape, babyAvatar.color, babyAvatar.eyes);
     endMatch();
 });
 
@@ -280,6 +287,7 @@ socket.on('createBaby', function(ID, shape, color, eyes){
   else {
     playerAvatar.addBaby(shape, color, eyes);
     babyName = null;
+    babyAvatar.kill();
   }
 
 });
@@ -323,6 +331,69 @@ socket.on('memoryCard', function(memoryTile, buttonID){
     b.isDisabled = true;       
     memoryTiles.push(b);
     gameObjects.push(b);
+});
+
+socket.on('memoryMatch', function(tile1, tile2, index){
+  var t1, t2;
+
+  t1 = new MemoryButton(new Vector2(tile1.position.x, tile1.position.y), 100, 100, tile1.index, tile1.value, tile1.number, "#FFFFFF");
+  t2 = new MemoryButton(new Vector2(tile2.position.x, tile2.position.y), 100, 100, tile2.index, tile2.value, tile2.number, "#FFFFFF");
+
+  t1.isRevealed = true;
+  t2.isRevealed = true;    
+  matchedTiles.push(t1, t2);
+  gameObjects.push(t1, t2);
+
+
+  for(var i = memoryTiles.length; i >= 0; i--){
+    if(memoryTiles[i] !== undefined && (memoryTiles[i].number === tile1.number || memoryTiles[i].number === tile2.number)){
+      memoryTiles[i].kill();
+      memoryTiles.splice(i, 1);
+    }
+    else if(memoryTiles[i] !== undefined && memoryTiles[i].index === index){
+      memoryTiles[i].kill();
+      memoryTiles.splice(i, 1);
+    }
+  }
+
+  if(matchedTiles.length === 6 && turnPlayer){
+    var shape, color, eyes;
+    for(var i = 0; i < matchedTiles.length; i++){
+      if(matchedTiles[i].index === 0){
+        shape = matchedTiles[i].value;
+      }
+      if(matchedTiles[i].index === 1){
+        color = matchedTiles[i].value;
+      }
+      if(matchedTiles[i].index === 2){
+        eyes = matchedTiles[i].value;
+      }
+    }
+    socket.emit('memoryBaby', matchId, playerId, shape, color, eyes);
+  }
+});
+
+socket.on('changeTurn', function(){
+  turnPlayer = true;
+});
+
+socket.on('delayedUnreveal', function(tileNumber){
+  for(var i = memoryTiles.length; i >= 0; i--){
+    if(memoryTiles[i] !== undefined && memoryTiles[i].number === tileNumber){
+      memoryTiles[i].delayedUnreveal();
+    }
+  }
+});
+
+socket.on('memoryBaby', function(id, shape, color, eyes){
+  endMemory();
+  babyAvatar = new Baby(new Vector2(canvas.width/2, canvas.height/2), null, shape, color, eyes);
+  babyAvatar.moving = false;
+  gameObjects.push(babyAvatar);
+
+  makeBabyButton.isVisible = true;
+  makeBabyButton.isDisabled = false;
+
 });
 
 socket.on('ipaddr', function(ip){
@@ -440,8 +511,14 @@ function startMemory(){
 function endMemory(){
   for (var i = 0; i < memoryTiles.length; i++) {
       memoryTiles[i].kill();
-    }
-    memoryTiles = [];
+  }
+  memoryTiles = [];
+  console.log(matchedTiles);
+  for( var i = 0; i < matchedTiles.length; i++){
+    matchedTiles[i].mtm = true;
+  }
+  matchedTiles = [];
+  turnPlayer = false;
 }
 
 function logError(err) {

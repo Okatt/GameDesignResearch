@@ -33,6 +33,7 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 	this.emoteIndex;
 	this.emoteSprite;
 
+	this.moving = true;
 	this.hasCrown = false;
 
 	this.kill = function(){
@@ -95,14 +96,15 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 		if(this.eyeTimer === 0){
 			this.eyeTimer = randomRange(3, 8);
 		}
+		if(this.moving){
+			if(this.drawEmote){this.emoteTimer -= UPDATE_DURATION/1000;}
+			if(this.emoteTimer < 0){this.drawEmote = false;}
 
-		if(this.drawEmote){this.emoteTimer -= UPDATE_DURATION/1000;}
-		if(this.emoteTimer < 0){this.drawEmote = false;}
+			this.depth = canvas.height-this.position.y;
 
-		this.depth = canvas.height-this.position.y;
-
-		if(this.isFollowing){ this.follow(); }
-		this.avoidObstacles();
+			if(this.isFollowing){ this.follow(); }
+			this.avoidObstacles();
+		}
 	}
 
 	this.render = function(lagOffset){
