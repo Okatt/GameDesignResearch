@@ -291,6 +291,9 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 
 	// Update
 	this.update = function(){
+		// Needed for interpolation
+		this.previousPos = this.position.clone();
+
 		this.mouseOver = false;
 		this.isPressed = false;
 
@@ -298,26 +301,15 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 		if(this.unrevealTimer < 0){this.startURtimer = false; this.unReveal();}
 		}
 
-
 		//TODO if mtm = true, tile should ease to the middle of the screen and then call kill() when it arrives
 		if(this.mtm){
-			if(this.position.x > canvas.width/2){
-				this.position.x -= 1;
-			}
-			if(this.position.x < canvas.width/2){
-				this.position.x += 1;
-			}
-			if(this.position.y > canvas.height/2){
-				this.position.y -= 1;
-			}
-			if(this.position.y < canvas.height/2){
-				this.position.y += 1;
-			}
-		}
+			var d = this.position.getVectorTo(new Vector2(canvas.width/2, canvas.height/2));
 
-		if(this.mtm && this.position === new Vector2(canvas.width/2, canvas.height/2)){
-			this.kill();
-		}
+			if(d.length() >= 0.5){
+				d.multiply(0.1);
+				this.position.add(d);
+			}else{ this.kill(); }
+		}		
 
 		// Check if the button is not disabled
 		if(!this.isDisabled && !this.isRevealed && turnPlayer){
@@ -339,7 +331,7 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 			var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
 			var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
 
-			drawRectangle(ctx, drawX-this.width/2+5, drawY-this.height/2+5, this.width, this.height, true, color.BLACK, 0.3);
+			if(!this.mtm){drawRectangle(ctx, drawX-this.width/2+5, drawY-this.height/2+5, this.width, this.height, true, color.BLACK, 0.3);}
 
 			if(this.isRevealed){
 				this.card.draw(ctx, drawX, drawY);
