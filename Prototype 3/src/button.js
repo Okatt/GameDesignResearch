@@ -112,7 +112,7 @@ function BubbleButton(position, radius, emoteIndex, bgColor){
 	this.bgAlpha = 1;
 
 	this.emoteIndex = emoteIndex;
-	this.emote = new Sprite(spritesheet_emotes, this.emoteIndex*120, 0, 120, 150, new Vector2(60, 70));
+	this.emote = new Sprite(spritesheet_emotes, this.emoteIndex*200, 0, 200, 300);
 
 	// State
 	this.mouseOver = false;
@@ -175,8 +175,8 @@ function BubbleButton(position, radius, emoteIndex, bgColor){
 	// Render
 	this.render = function(lagOffset){
 		if(this.isVisible){
-					var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
-		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
 
 		// Background
 		drawCircle(ctx, drawX, drawY, this.radius, true, this.bgColor, this.bgAlpha);
@@ -286,8 +286,7 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 				socket.emit('delayedUnreveal', memoryTiles[i].number, matchId, playerId);
 			}
 		}
-		turnPlayer = false;
-		socket.emit('changeTurn', matchId);
+		socket.emit('changeTurn', playerId, matchId);
 	};
 
 	// Update
@@ -339,6 +338,8 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 		if(this.isVisible){
 			var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
 			var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+
+			drawRectangle(ctx, drawX-this.width/2+5, drawY-this.height/2+5, this.width, this.height, true, color.BLACK, 0.3);
 
 			if(this.isRevealed){
 				this.card.draw(ctx, drawX, drawY);

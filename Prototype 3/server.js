@@ -230,8 +230,9 @@ io.sockets.on('connection', function (socket){
 		io.sockets.socket(playerID).emit('memoryMatch', tile1, tile2, index);
 	});
 
-	socket.on('changeTurn', function(matchID){
-		io.sockets.socket(matchID).emit('changeTurn');
+	socket.on('changeTurn', function(playerID, matchID){
+		io.sockets.socket(matchID).emit('changeTurn', true);
+		io.sockets.socket(playerID).emit('changeTurn', false);
 	});
 
 	socket.on('delayedUnreveal', function(tileNumber, matchID, playerID){

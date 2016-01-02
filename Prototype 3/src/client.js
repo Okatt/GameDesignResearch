@@ -40,6 +40,7 @@ var memoryTiles = [];
 var matchedTiles = [];
 
 var turnPlayer = false;
+var turnPointer = false;
 var flips = 0;
 
 
@@ -141,7 +142,7 @@ socket.on('matchRequest', function(mID, mShape, mColor, mEyes, mCrown){
   matchEyes = mEyes;
   potentialMatchId = mID;
 
-  matchAvatar = new Player(potentialMatchId, new Vector2(2*(canvas.width/3), canvas.height/2), matchShape, matchColor, matchEyes);
+  matchAvatar = new Player(potentialMatchId, new Vector2(1920/2+200, 1080/2-150), matchShape, matchColor, matchEyes);
   matchAvatar.state = "AVATAR";
   matchAvatar.hasCrown = mCrown;
   gameObjects.push(matchAvatar);
@@ -172,10 +173,6 @@ socket.on('confirmedMatch', function(p1ID, p2ID, firstTurn){
 
     turnPlayer = turn;
 
-    //move avatars down for memory board to fit.
-    playerAvatar.position.y += 200;
-    matchAvatar.position.y += 200;
-
     if(p1ID === playerId){
       matchId = p2ID;
     }
@@ -199,13 +196,8 @@ socket.on('unMatch', function(p1ID, p2ID){
     }
   }
   else if(p1ID === playerId || p2ID === playerId){
-      //move avatars back up
-      playerAvatar.position.y -= 200;
-      matchAvatar.position.y -= 200;
-
       //remove the memory board if the match ended early or something
       endMemory();
-
 
       matchAvatar.kill();
 
@@ -318,13 +310,13 @@ socket.on('tileFlipped', function(number){
 
 socket.on('memoryCard', function(memoryTile, buttonID){
     if(buttonID >= 8){
-      var b = new MemoryButton(new Vector2(((canvas.width/2)-200) + ((buttonID-8)*125), ((canvas.height/2)-250) + 2*125), 100, 100, memoryTile.index, memoryTile.value, buttonID, "#FFFFFF");
+      var b = new MemoryButton(new Vector2(((canvas.width/2)-186) + ((buttonID-8)*124), ((canvas.height/2)-250) + 2*124), 100, 100, memoryTile.index, memoryTile.value, buttonID, "#FFFFFF");
     }
     else if(buttonID >= 4){
-      var b = new MemoryButton(new Vector2(((canvas.width/2)-200) + ((buttonID-4)*125), ((canvas.height/2)-250) + 125), 100, 100, memoryTile.index, memoryTile.value, buttonID, "#FFFFFF");
+      var b = new MemoryButton(new Vector2(((canvas.width/2)-186) + ((buttonID-4)*124), ((canvas.height/2)-250) + 124), 100, 100, memoryTile.index, memoryTile.value, buttonID, "#FFFFFF");
     }
     else {
-      var b = new MemoryButton(new Vector2(((canvas.width/2)-200) + (buttonID*125), ((canvas.height/2)-250)), 100, 100, memoryTile.index, memoryTile.value, buttonID, "#FFFFFF");
+      var b = new MemoryButton(new Vector2(((canvas.width/2)-186) + (buttonID*124), ((canvas.height/2)-250)), 100, 100, memoryTile.index, memoryTile.value, buttonID, "#FFFFFF");
     }
     
     b.isVisible = false;
@@ -373,8 +365,10 @@ socket.on('memoryMatch', function(tile1, tile2, index){
   }
 });
 
-socket.on('changeTurn', function(){
-  turnPlayer = true;
+socket.on('changeTurn', function(tp){
+  turnPlayer = tp;
+  if(turnPlayer){turnPointer.changeTarget(playerAvatar);}
+  else{turnPointer.changeTarget(matchAvatar);}
 });
 
 socket.on('delayedUnreveal', function(tileNumber){
@@ -504,8 +498,14 @@ function startMemory(){
   for (var i = 0; i < memoryTiles.length; i++) {
       memoryTiles[i].isVisible = true;
       memoryTiles[i].isDisabled = false;
-      
-    } 
+  }
+
+  // Move camera
+  camera.setTargetPosition(new Vector2(1920/2, 100));
+
+  // Create turn pointer
+  if(turnPlayer){ turnPointer = new Pointer(playerAvatar); gameObjects.push(turnPointer);}
+  else{turnPointer = new Pointer(matchAvatar); gameObjects.push(turnPointer);}   
 }
 
 function endMemory(){
@@ -519,6 +519,8 @@ function endMemory(){
   }
   matchedTiles = [];
   turnPlayer = false;
+  turnPointer.kill();
+  turnPointer = false;
 }
 
 function logError(err) {

@@ -175,8 +175,8 @@ function BubbleButton(position, radius, emoteIndex, bgColor){
 	// Render
 	this.render = function(lagOffset){
 		if(this.isVisible){
-					var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
-		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
 
 		// Background
 		drawCircle(ctx, drawX, drawY, this.radius, true, this.bgColor, this.bgAlpha);

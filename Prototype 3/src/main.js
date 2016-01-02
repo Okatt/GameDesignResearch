@@ -18,6 +18,7 @@ var ctx;
 var currentTime = Date.now();
 var previousTime = currentTime;
 var lag = 0;
+var camera;
 
 // Input
 var mouse;
@@ -25,15 +26,14 @@ var keyboard;
 var previousMouse;
 var previousKeyboard;
 
-
 var acceptButton;
 var rejectButton;
 var makeBabyButton;
 
-
 //change dimensions for new crown sprite
-var crownSprite = new Sprite(spritesheet_crown, 0, 0, 75, 56);
-var crownSpriteSmall = new Sprite(spritesheet_crown_small, 0, 0, 38, 28);
+var crownSprite = new Sprite(spritesheet_crown, 0, 0, 140, 140);
+var crownSpriteSmall = new Sprite(spritesheet_crown_small, 0, 0, 70, 70);
+var grassSprite = new Sprite(spritesheet_grass, 0, 0, 2000, 300);
 
 window.onload = function main(){
 	//Run
@@ -56,17 +56,52 @@ function initialize(){
 	previousKeyboard = clone(keyboard);	
 
 	// Camera
-	camera = new Camera(new Vector2(-canvas.width/2, -canvas.height/2));
+	if(isWorld){0
+		camera = new Camera(new Vector2(1920/2, 1080/2-1600));
+		camera.shake(4);
+	}else{ camera = new Camera(new Vector2(1920/2, 1080/2)); }
+	camera.setTargetPosition(new Vector2(1920/2, 1080/2));
 }
 
 function initializeWorld(){
 	initialize();
 
-	// Props
-	gameObjects.push( new Prop(new Vector2(200, 370), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
-	gameObjects.push( new Prop(new Vector2(560, 340), 90, 40, new Sprite(spritesheet_environment, 400, 0, 400, 400, new Vector2(196, 366))) );
-	gameObjects.push( new Prop(new Vector2(canvas.width - 250, 380), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
-	
+	// Trees
+	gameObjects.push( new Prop(new Vector2(50, 446), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(314, 370), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(640, 340), 90, 40, new Sprite(spritesheet_environment, 400, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(1530, 380), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(1900, 446), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+
+	// Bushes
+	gameObjects.push( new Prop(new Vector2(780, 335), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(284, 400), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(90, 470), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(70, 780), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(130, 850), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(100, 970), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(340, 1030), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(700, 800), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1800, 940), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1720, 980), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1830, 740), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1645, 470), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1720, 510), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+
+	// Stones
+	gameObjects.push( new Prop(new Vector2(800, 780), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
+	gameObjects.push( new Prop(new Vector2(1750, 450), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
+	gameObjects.push( new Prop(new Vector2(1700, 920), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
+
+	// Sprite testing
+	// var p = new Player(12345, new Vector2(500, 500), Math.floor(randomRange(0, 3.99)), 3, 1);
+	// p.addBaby(0, 0, 3);
+	// p.addBaby(1, 0, 3);
+	// p.addBaby(2, 0, 3);
+	// p.addBaby(3, 0, 3);
+	// p.getCrown();
+	// gameObjects.push(p);
+
 	// Even niet..
 	//backgroundMusic = background_music;
 
@@ -81,7 +116,34 @@ function initializeWorld(){
 function initializePlayer(){
 	initialize();
 
-	playerAvatar = new Player(playerId, new Vector2(canvas.width/3, canvas.height/2), playerShape, playerColor, playerEyes);
+	// Trees
+	gameObjects.push( new Prop(new Vector2(50, 446), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(314, 370), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+	//gameObjects.push( new Prop(new Vector2(640, 340), 90, 40, new Sprite(spritesheet_environment, 400, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(1530, 380), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(1900, 446), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+
+	// Bushes
+	//gameObjects.push( new Prop(new Vector2(780, 335), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(284, 400), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(90, 470), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(70, 780), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(130, 850), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(100, 970), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(340, 1030), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(700, 800), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1800, 940), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1720, 980), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1830, 740), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1645, 470), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1720, 510), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+
+	// Stones
+	gameObjects.push( new Prop(new Vector2(800, 780), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
+	gameObjects.push( new Prop(new Vector2(1750, 450), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
+	gameObjects.push( new Prop(new Vector2(1700, 920), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
+
+	playerAvatar = new Player(playerId, new Vector2(1920/2-200, 1080/2-150), playerShape, playerColor, playerEyes);
 	playerAvatar.state = "AVATAR";
 	gameObjects.push(playerAvatar);
 
@@ -172,29 +234,31 @@ function render(lagOffset){
 	if(isWorld){
 		// Background
 		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.SKY, 1);
-		drawRectangle(ctx, 0, canvas.height*0.3, canvas.width, canvas.height*0.7, true, color.GROUND, 1);
-
-		// link
-		ctx.font = "28px Arial";
-		ctx.fillStyle = "#FFFFFF";
-		ctx.textAlign = "center";
-		ctx.fillText("JOIN THE PARTY AT", canvas.width/2, 30);
-		ctx.font = "36px Arial";
-		ctx.fillStyle = "#FFFFFF";
-		ctx.textAlign = "center";
-		ctx.fillText("polygonpals.tk", canvas.width/2, 66);
+		drawRectangle(ctx, -camera.interpolatedPos().x, 300-camera.interpolatedPos().y, 2000, 1000, true, color.GROUND, 1);
+		grassSprite.draw(ctx, 1920/2 -camera.interpolatedPos().x, 300-camera.interpolatedPos().y);
 
 		// Render all game objects
 		for (var ob = 0; ob < gameObjects.length; ob++){
 			gameObjects[ob].render(lagOffset);
 		}
+
+		// Text bar (TODO scrolling announcements)
+		drawRectangle(ctx, 0, canvas.height-40, canvas.width, 40, true, color.BLACK, 0.3);
+		// link
+		ctx.font = "28px Righteous";
+		ctx.fillStyle = "#FFFFFF";
+		ctx.textAlign = "center";
+		ctx.fillText("JOIN THE PARTY AT   polygonpals.tk", canvas.width/2, canvas.height-10);
+
 	//draw for clients
 	}else{
 		// Background
-		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.GROUND, 1);
+		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.SKY, 1);
+		drawRectangle(ctx, -camera.interpolatedPos().x, 300-camera.interpolatedPos().y, 2000, 1000, true, color.GROUND, 1);
+		grassSprite.draw(ctx, 1920/2 -camera.interpolatedPos().x, 300-camera.interpolatedPos().y);
 
 		// Name
-		ctx.font = "36px Arial";
+		ctx.font = "36px Righteous";
 		ctx.fillStyle = "#000000";
 		ctx.textAlign = "center";
 		ctx.fillText(clientStatus, canvas.width/2, 100);

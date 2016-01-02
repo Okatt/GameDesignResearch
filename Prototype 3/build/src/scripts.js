@@ -84,7 +84,7 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 		this.emoteTimer = 2;
 		this.emoteIndex = emoteID;
 		//change emoteindex * 125 to new width of spritesheet/6
-		this.emoteSprite = new Sprite(spritesheet_emotes_small, this.emoteIndex*60, 0, 60, 75, new Vector2(30, 35));
+		this.emoteSprite = new Sprite(spritesheet_emotes_small, this.emoteIndex*100, 0, 100, 150);
 		this.drawEmote = true;
 	}
 
@@ -108,9 +108,9 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 	}
 
 	this.render = function(lagOffset){
-		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
-		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
-
+			var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
+		
 		// Body
 		this.body.draw(ctx, drawX, drawY);
 
@@ -127,20 +127,20 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 			}
 		}
 
-		if(this.drawEmote){
-			this.emoteSprite.draw(ctx, drawX, drawY-70);
-		}
-
 		if(this.hasCrown){
 			if(this.eyes === 1){
-				crownSpriteSmall.draw(ctx, drawX, drawY-40);
+				crownSpriteSmall.draw(ctx, drawX, drawY-55);
 			}
 			else if(this.eyes === 2){
-				crownSpriteSmall.draw(ctx, drawX, drawY-43);
+				crownSpriteSmall.draw(ctx, drawX, drawY-55);
 			}
 			else {
-				crownSpriteSmall.draw(ctx, drawX, drawY-57);
+				crownSpriteSmall.draw(ctx, drawX, drawY-65);
 			}
+		}
+
+		if(this.drawEmote){
+			this.emoteSprite.draw(ctx, drawX, drawY-100);
 		}
 	}
 }
@@ -258,7 +258,7 @@ function BubbleButton(position, radius, emoteIndex, bgColor){
 	this.bgAlpha = 1;
 
 	this.emoteIndex = emoteIndex;
-	this.emote = new Sprite(spritesheet_emotes, this.emoteIndex*120, 0, 120, 150, new Vector2(60, 70));
+	this.emote = new Sprite(spritesheet_emotes, this.emoteIndex*200, 0, 200, 300);
 
 	// State
 	this.mouseOver = false;
@@ -321,8 +321,8 @@ function BubbleButton(position, radius, emoteIndex, bgColor){
 	// Render
 	this.render = function(lagOffset){
 		if(this.isVisible){
-					var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
-		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
 
 		// Background
 		drawCircle(ctx, drawX, drawY, this.radius, true, this.bgColor, this.bgAlpha);
@@ -432,8 +432,7 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 				socket.emit('delayedUnreveal', memoryTiles[i].number, matchId, playerId);
 			}
 		}
-		turnPlayer = false;
-		socket.emit('changeTurn', matchId);
+		socket.emit('changeTurn', playerId, matchId);
 	};
 
 	// Update
@@ -486,6 +485,8 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 			var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
 			var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
 
+			drawRectangle(ctx, drawX-this.width/2+5, drawY-this.height/2+5, this.width, this.height, true, color.BLACK, 0.3);
+
 			if(this.isRevealed){
 				this.card.draw(ctx, drawX, drawY);
 			}
@@ -537,6 +538,7 @@ var memoryTiles = [];
 var matchedTiles = [];
 
 var turnPlayer = false;
+var turnPointer = false;
 var flips = 0;
 
 
@@ -638,7 +640,7 @@ socket.on('matchRequest', function(mID, mShape, mColor, mEyes, mCrown){
   matchEyes = mEyes;
   potentialMatchId = mID;
 
-  matchAvatar = new Player(potentialMatchId, new Vector2(2*(canvas.width/3), canvas.height/2), matchShape, matchColor, matchEyes);
+  matchAvatar = new Player(potentialMatchId, new Vector2(1920/2+200, 1080/2-150), matchShape, matchColor, matchEyes);
   matchAvatar.state = "AVATAR";
   matchAvatar.hasCrown = mCrown;
   gameObjects.push(matchAvatar);
@@ -669,10 +671,6 @@ socket.on('confirmedMatch', function(p1ID, p2ID, firstTurn){
 
     turnPlayer = turn;
 
-    //move avatars down for memory board to fit.
-    playerAvatar.position.y += 200;
-    matchAvatar.position.y += 200;
-
     if(p1ID === playerId){
       matchId = p2ID;
     }
@@ -696,13 +694,8 @@ socket.on('unMatch', function(p1ID, p2ID){
     }
   }
   else if(p1ID === playerId || p2ID === playerId){
-      //move avatars back up
-      playerAvatar.position.y -= 200;
-      matchAvatar.position.y -= 200;
-
       //remove the memory board if the match ended early or something
       endMemory();
-
 
       matchAvatar.kill();
 
@@ -815,13 +808,13 @@ socket.on('tileFlipped', function(number){
 
 socket.on('memoryCard', function(memoryTile, buttonID){
     if(buttonID >= 8){
-      var b = new MemoryButton(new Vector2(((canvas.width/2)-200) + ((buttonID-8)*125), ((canvas.height/2)-250) + 2*125), 100, 100, memoryTile.index, memoryTile.value, buttonID, "#FFFFFF");
+      var b = new MemoryButton(new Vector2(((canvas.width/2)-186) + ((buttonID-8)*124), ((canvas.height/2)-250) + 2*124), 100, 100, memoryTile.index, memoryTile.value, buttonID, "#FFFFFF");
     }
     else if(buttonID >= 4){
-      var b = new MemoryButton(new Vector2(((canvas.width/2)-200) + ((buttonID-4)*125), ((canvas.height/2)-250) + 125), 100, 100, memoryTile.index, memoryTile.value, buttonID, "#FFFFFF");
+      var b = new MemoryButton(new Vector2(((canvas.width/2)-186) + ((buttonID-4)*124), ((canvas.height/2)-250) + 124), 100, 100, memoryTile.index, memoryTile.value, buttonID, "#FFFFFF");
     }
     else {
-      var b = new MemoryButton(new Vector2(((canvas.width/2)-200) + (buttonID*125), ((canvas.height/2)-250)), 100, 100, memoryTile.index, memoryTile.value, buttonID, "#FFFFFF");
+      var b = new MemoryButton(new Vector2(((canvas.width/2)-186) + (buttonID*124), ((canvas.height/2)-250)), 100, 100, memoryTile.index, memoryTile.value, buttonID, "#FFFFFF");
     }
     
     b.isVisible = false;
@@ -870,8 +863,10 @@ socket.on('memoryMatch', function(tile1, tile2, index){
   }
 });
 
-socket.on('changeTurn', function(){
-  turnPlayer = true;
+socket.on('changeTurn', function(tp){
+  turnPlayer = tp;
+  if(turnPlayer){turnPointer.changeTarget(playerAvatar);}
+  else{turnPointer.changeTarget(matchAvatar);}
 });
 
 socket.on('delayedUnreveal', function(tileNumber){
@@ -1001,8 +996,14 @@ function startMemory(){
   for (var i = 0; i < memoryTiles.length; i++) {
       memoryTiles[i].isVisible = true;
       memoryTiles[i].isDisabled = false;
-      
-    } 
+  }
+
+  // Move camera
+  camera.setTargetPosition(new Vector2(1920/2, 100));
+
+  // Create turn pointer
+  if(turnPlayer){ turnPointer = new Pointer(playerAvatar); gameObjects.push(turnPointer);}
+  else{turnPointer = new Pointer(matchAvatar); gameObjects.push(turnPointer);}   
 }
 
 function endMemory(){
@@ -1016,6 +1017,8 @@ function endMemory(){
   }
   matchedTiles = [];
   turnPlayer = false;
+  turnPointer.kill();
+  turnPointer = false;
 }
 
 function logError(err) {
@@ -1032,13 +1035,13 @@ function gotRemoteStream(event) {
 //*****************************************************************************************
 
 // Colors
-var color = {BLACK: "#000000", DARK_GREY: "#323232", WHITE: "#FFFFFF", GROUND: "#3FA9AB", SKY: "#CF5D5D", BLUE: "#0090FF", GREEN: "#7AFF2D", PINK: "#F319FF", RED: "#FF0000", YELLOW: "#FFFF00"};
+var color = {BLACK: "#000000", DARK_GREY: "#323232", WHITE: "#FFFFFF", GROUND: "#669D6B", SKY: "#4C3C37", BLUE: "#0090FF", GREEN: "#7AFF2D", PINK: "#F319FF", RED: "#FF0000", YELLOW: "#FFFF00"};
 var colorArray = [color.BLACK, color.DARK_GREY, color.WHITE, color.PINK, color.RED, color.YELLOW];
 
 
 // Camera
 function Camera(position){
-	this.position = position;
+	this.position = new Vector2(position.x-canvas.width/2, position.y-canvas.height/2);
 	this.previousPos = this.position.clone();
 	this.targetPos = this.position.clone();
 	this.width = canvas.width;
@@ -1385,6 +1388,7 @@ var ctx;
 var currentTime = Date.now();
 var previousTime = currentTime;
 var lag = 0;
+var camera;
 
 // Input
 var mouse;
@@ -1392,15 +1396,14 @@ var keyboard;
 var previousMouse;
 var previousKeyboard;
 
-
 var acceptButton;
 var rejectButton;
 var makeBabyButton;
 
-
 //change dimensions for new crown sprite
-var crownSprite = new Sprite(spritesheet_crown, 0, 0, 75, 56);
-var crownSpriteSmall = new Sprite(spritesheet_crown_small, 0, 0, 38, 28);
+var crownSprite = new Sprite(spritesheet_crown, 0, 0, 140, 140);
+var crownSpriteSmall = new Sprite(spritesheet_crown_small, 0, 0, 70, 70);
+var grassSprite = new Sprite(spritesheet_grass, 0, 0, 2000, 300);
 
 window.onload = function main(){
 	//Run
@@ -1423,17 +1426,52 @@ function initialize(){
 	previousKeyboard = clone(keyboard);	
 
 	// Camera
-	camera = new Camera(new Vector2(-canvas.width/2, -canvas.height/2));
+	if(isWorld){0
+		camera = new Camera(new Vector2(1920/2, 1080/2-1600));
+		camera.shake(4);
+	}else{ camera = new Camera(new Vector2(1920/2, 1080/2)); }
+	camera.setTargetPosition(new Vector2(1920/2, 1080/2));
 }
 
 function initializeWorld(){
 	initialize();
 
-	// Props
-	gameObjects.push( new Prop(new Vector2(200, 370), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
-	gameObjects.push( new Prop(new Vector2(560, 340), 90, 40, new Sprite(spritesheet_environment, 400, 0, 400, 400, new Vector2(196, 366))) );
-	gameObjects.push( new Prop(new Vector2(canvas.width - 250, 380), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
-	
+	// Trees
+	gameObjects.push( new Prop(new Vector2(50, 446), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(314, 370), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(640, 340), 90, 40, new Sprite(spritesheet_environment, 400, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(1530, 380), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(1900, 446), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+
+	// Bushes
+	gameObjects.push( new Prop(new Vector2(780, 335), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(284, 400), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(90, 470), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(70, 780), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(130, 850), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(100, 970), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(340, 1030), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(700, 800), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1800, 940), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1720, 980), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1830, 740), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1645, 470), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1720, 510), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+
+	// Stones
+	gameObjects.push( new Prop(new Vector2(800, 780), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
+	gameObjects.push( new Prop(new Vector2(1750, 450), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
+	gameObjects.push( new Prop(new Vector2(1700, 920), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
+
+	// Sprite testing
+	// var p = new Player(12345, new Vector2(500, 500), Math.floor(randomRange(0, 3.99)), 3, 1);
+	// p.addBaby(0, 0, 3);
+	// p.addBaby(1, 0, 3);
+	// p.addBaby(2, 0, 3);
+	// p.addBaby(3, 0, 3);
+	// p.getCrown();
+	// gameObjects.push(p);
+
 	// Even niet..
 	//backgroundMusic = background_music;
 
@@ -1448,7 +1486,34 @@ function initializeWorld(){
 function initializePlayer(){
 	initialize();
 
-	playerAvatar = new Player(playerId, new Vector2(canvas.width/3, canvas.height/2), playerShape, playerColor, playerEyes);
+	// Trees
+	gameObjects.push( new Prop(new Vector2(50, 446), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(314, 370), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+	//gameObjects.push( new Prop(new Vector2(640, 340), 90, 40, new Sprite(spritesheet_environment, 400, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(1530, 380), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+	gameObjects.push( new Prop(new Vector2(1900, 446), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
+
+	// Bushes
+	//gameObjects.push( new Prop(new Vector2(780, 335), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(284, 400), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(90, 470), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(70, 780), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(130, 850), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(100, 970), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(340, 1030), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(700, 800), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1800, 940), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1720, 980), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1830, 740), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1645, 470), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+	gameObjects.push( new Prop(new Vector2(1720, 510), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
+
+	// Stones
+	gameObjects.push( new Prop(new Vector2(800, 780), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
+	gameObjects.push( new Prop(new Vector2(1750, 450), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
+	gameObjects.push( new Prop(new Vector2(1700, 920), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
+
+	playerAvatar = new Player(playerId, new Vector2(1920/2-200, 1080/2-150), playerShape, playerColor, playerEyes);
 	playerAvatar.state = "AVATAR";
 	gameObjects.push(playerAvatar);
 
@@ -1539,29 +1604,31 @@ function render(lagOffset){
 	if(isWorld){
 		// Background
 		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.SKY, 1);
-		drawRectangle(ctx, 0, canvas.height*0.3, canvas.width, canvas.height*0.7, true, color.GROUND, 1);
-
-		// link
-		ctx.font = "28px Arial";
-		ctx.fillStyle = "#FFFFFF";
-		ctx.textAlign = "center";
-		ctx.fillText("JOIN THE PARTY AT", canvas.width/2, 30);
-		ctx.font = "36px Arial";
-		ctx.fillStyle = "#FFFFFF";
-		ctx.textAlign = "center";
-		ctx.fillText("polygonpals.tk", canvas.width/2, 66);
+		drawRectangle(ctx, -camera.interpolatedPos().x, 300-camera.interpolatedPos().y, 2000, 1000, true, color.GROUND, 1);
+		grassSprite.draw(ctx, 1920/2 -camera.interpolatedPos().x, 300-camera.interpolatedPos().y);
 
 		// Render all game objects
 		for (var ob = 0; ob < gameObjects.length; ob++){
 			gameObjects[ob].render(lagOffset);
 		}
+
+		// Text bar (TODO scrolling announcements)
+		drawRectangle(ctx, 0, canvas.height-40, canvas.width, 40, true, color.BLACK, 0.3);
+		// link
+		ctx.font = "28px Righteous";
+		ctx.fillStyle = "#FFFFFF";
+		ctx.textAlign = "center";
+		ctx.fillText("JOIN THE PARTY AT   polygonpals.tk", canvas.width/2, canvas.height-10);
+
 	//draw for clients
 	}else{
 		// Background
-		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.GROUND, 1);
+		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.SKY, 1);
+		drawRectangle(ctx, -camera.interpolatedPos().x, 300-camera.interpolatedPos().y, 2000, 1000, true, color.GROUND, 1);
+		grassSprite.draw(ctx, 1920/2 -camera.interpolatedPos().x, 300-camera.interpolatedPos().y);
 
 		// Name
-		ctx.font = "36px Arial";
+		ctx.font = "36px Righteous";
 		ctx.fillStyle = "#000000";
 		ctx.textAlign = "center";
 		ctx.fillText(clientStatus, canvas.width/2, 100);
@@ -1810,11 +1877,11 @@ function Player(id, position, shape, color, eyes){
 		var nextPos;
 		for (var i = 0; i < emotes; i++) {
 
-			nextPos = new Vector2(0, -160);
+			nextPos = new Vector2(0, -220);
 			var r = i*(360/emotes);							
 			nextPos.rotate(r);
 
-			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-60+nextPos.y), 50, i, "#FFFFFF");
+			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-60+nextPos.y), 80, i, "#FFFFFF");
 			this.emoteButtons.push(b);
 			gameObjects.push(b);
 		}
@@ -1831,7 +1898,7 @@ function Player(id, position, shape, color, eyes){
 	this.displayEmote = function(emoteID){
 		this.emoteTimer = 2;
 		this.emoteIndex = emoteID;
-		this.emoteSprite = new Sprite(spritesheet_emotes, this.emoteIndex*120, 0, 120, 150, new Vector2(60, 70));
+		this.emoteSprite = new Sprite(spritesheet_emotes, this.emoteIndex*200, 0, 200, 300);
 		this.drawEmote = true;
 		this.closeEmotes();
 		for (var i = 0; i < this.babies.length; i++) {
@@ -1952,7 +2019,7 @@ function Player(id, position, shape, color, eyes){
 				if(this.id === playerId){
 					var hitbox = new AABB(this.position.x-60, this.position.y-120, 120, 120); // Hitbox for click detection
 
-					if(checkPointvsAABB(new Vector2(mouse.x, mouse.y), hitbox) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+					if(checkPointvsAABB(new Vector2(mouse.x+camera.position.x, mouse.y+camera.position.y), hitbox) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
 					console.log("player pressed");
 					if(this.emoteButtons.length === 0){ this.openEmotes(); }
 					else{ this.closeEmotes(); }
@@ -1967,8 +2034,8 @@ function Player(id, position, shape, color, eyes){
 	}
 
 	this.render = function(lagOffset){
-		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
-		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
 
 		// Body
 		this.body.draw(ctx, drawX, drawY);
@@ -1993,25 +2060,90 @@ function Player(id, position, shape, color, eyes){
 			}
 		}
 
-		if(this.drawEmote){
-			this.emoteSprite.draw(ctx, drawX, drawY-150);
-		}
-
 		if(this.hasCrown){
 			if(this.eyes === 1){
-				crownSprite.draw(ctx, drawX, drawY-83);
+				crownSprite.draw(ctx, drawX+2, drawY-120);
 			}
 			else if(this.eyes === 2){
-				crownSprite.draw(ctx, drawX, drawY-93);
+				crownSprite.draw(ctx, drawX+2, drawY-120);
 			}
 			else {
-				crownSprite.draw(ctx, drawX, drawY-103);
+				crownSprite.draw(ctx, drawX+2, drawY-130);
 			}
+		}
+
+		if(this.drawEmote){
+			this.emoteSprite.draw(ctx, drawX, drawY-200);
 		}
 
 		// Hitbox (debug)
 		//var h = this.getHitbox();
 		//drawRectangle(ctx, h.x, h.y, h.width, h.height, true, color.GREEN, 0.5);
+	}
+}
+
+
+function Pointer(target) {
+	this.type = "Pointer";
+	this.isAlive = true;
+	
+	// Physics
+	this.target = target;
+	this.position = this.target.position.clone();
+	this.previousPos = this.position.clone();
+	this.velocity = new Vector2(0, 0);
+	this.offset = -150;
+	this.min = this.offset;
+	this.max = this.offset+10; // -130
+	this.dir = 1;
+	this.speed = 1;
+	this.drag = 1;
+
+	// Graphics
+	this.depth = target.depth-0.1;
+	this.sprite = new Sprite(memory_cards, 405, 205, 90, 90);
+
+	// Data
+	this.isSolid = false;
+	this.isDynamic = true;
+
+	console.log("pointer created");
+
+	this.kill = function(){
+		this.isAlive = false;	
+	}
+
+	this.changeTarget = function(newTarget){
+		this.target = newTarget;
+	}
+
+	this.update = function(){
+		this.depth = target.depth-0.1;
+
+		// Velocity
+		var d = this.position.getVectorTo(this.target.position);
+		if(d.length() >= 1){
+			this.velocity = new Vector2( d.x*0.1, d.y*0.1 );
+		}else{ this.position = this.target.position.clone(); }
+
+		// Animation
+		if(this.dir === 1 && this.offset >= this.max){this.offset = this.max; this.dir = -1; this.speed = 0;}
+		else if(this.dir === -1 && this.offset <= this.min){this.offset = this.min; this.dir = 1; this.speed = 1;}
+
+		if(this.dir === 1){
+			this.offset += this.speed;
+			this.speed *= 1.2;
+		}else{
+			this.offset += ((this.min-0.5)-this.offset)*0.1;
+		}
+	}
+
+	this.render = function(lagOffset){
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
+
+		// Image
+		this.sprite.draw(ctx, drawX, drawY+this.offset);
 	}
 }
 //*****************************************************************************************
@@ -2033,7 +2165,8 @@ function Prop(position, width, height, sprite){
 	this.sprite = sprite;
 	
 	// Data
-	this.isSolid = true;
+	if(this.width > 0 && this.height > 0){ this.isSolid = true;}
+	else{this.isSolid = false;}	
 	this.isDynamic = false;
 
 	this.kill = function(){
@@ -2045,19 +2178,19 @@ function Prop(position, width, height, sprite){
 	}
 
 	this.update = function(){
-
+		this.previousPos = this.position.clone();
 	}
 
 	this.render = function(lagOffset){
-		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
-		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
 
 		// Render
 		this.sprite.draw(ctx, drawX, drawY);
 
 		// Hitbox (debug)
 		//var h = this.getHitbox();
-		//drawRectangle(ctx, h.x, h.y, h.width, h.height, true, color.GREEN, 0.5);
+		//drawRectangle(ctx, h.x - camera.interpolatedPos().x, h.y - camera.interpolatedPos().y, h.width, h.height, true, color.GREEN, 0.5);
 	}
 }
 //*****************************************************************************************

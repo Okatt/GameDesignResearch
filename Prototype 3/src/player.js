@@ -60,11 +60,11 @@ function Player(id, position, shape, color, eyes){
 		var nextPos;
 		for (var i = 0; i < emotes; i++) {
 
-			nextPos = new Vector2(0, -160);
+			nextPos = new Vector2(0, -220);
 			var r = i*(360/emotes);							
 			nextPos.rotate(r);
 
-			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-60+nextPos.y), 50, i, "#FFFFFF");
+			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-60+nextPos.y), 80, i, "#FFFFFF");
 			this.emoteButtons.push(b);
 			gameObjects.push(b);
 		}
@@ -81,7 +81,7 @@ function Player(id, position, shape, color, eyes){
 	this.displayEmote = function(emoteID){
 		this.emoteTimer = 2;
 		this.emoteIndex = emoteID;
-		this.emoteSprite = new Sprite(spritesheet_emotes, this.emoteIndex*120, 0, 120, 150, new Vector2(60, 70));
+		this.emoteSprite = new Sprite(spritesheet_emotes, this.emoteIndex*200, 0, 200, 300);
 		this.drawEmote = true;
 		this.closeEmotes();
 		for (var i = 0; i < this.babies.length; i++) {
@@ -202,7 +202,7 @@ function Player(id, position, shape, color, eyes){
 				if(this.id === playerId){
 					var hitbox = new AABB(this.position.x-60, this.position.y-120, 120, 120); // Hitbox for click detection
 
-					if(checkPointvsAABB(new Vector2(mouse.x, mouse.y), hitbox) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+					if(checkPointvsAABB(new Vector2(mouse.x+camera.position.x, mouse.y+camera.position.y), hitbox) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
 					console.log("player pressed");
 					if(this.emoteButtons.length === 0){ this.openEmotes(); }
 					else{ this.closeEmotes(); }
@@ -217,8 +217,8 @@ function Player(id, position, shape, color, eyes){
 	}
 
 	this.render = function(lagOffset){
-		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
-		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
 
 		// Body
 		this.body.draw(ctx, drawX, drawY);
@@ -243,24 +243,89 @@ function Player(id, position, shape, color, eyes){
 			}
 		}
 
-		if(this.drawEmote){
-			this.emoteSprite.draw(ctx, drawX, drawY-150);
-		}
-
 		if(this.hasCrown){
 			if(this.eyes === 1){
-				crownSprite.draw(ctx, drawX, drawY-83);
+				crownSprite.draw(ctx, drawX+2, drawY-120);
 			}
 			else if(this.eyes === 2){
-				crownSprite.draw(ctx, drawX, drawY-93);
+				crownSprite.draw(ctx, drawX+2, drawY-120);
 			}
 			else {
-				crownSprite.draw(ctx, drawX, drawY-103);
+				crownSprite.draw(ctx, drawX+2, drawY-130);
 			}
+		}
+
+		if(this.drawEmote){
+			this.emoteSprite.draw(ctx, drawX, drawY-200);
 		}
 
 		// Hitbox (debug)
 		//var h = this.getHitbox();
 		//drawRectangle(ctx, h.x, h.y, h.width, h.height, true, color.GREEN, 0.5);
+	}
+}
+
+
+function Pointer(target) {
+	this.type = "Pointer";
+	this.isAlive = true;
+	
+	// Physics
+	this.target = target;
+	this.position = this.target.position.clone();
+	this.previousPos = this.position.clone();
+	this.velocity = new Vector2(0, 0);
+	this.offset = -150;
+	this.min = this.offset;
+	this.max = this.offset+10; // -130
+	this.dir = 1;
+	this.speed = 1;
+	this.drag = 1;
+
+	// Graphics
+	this.depth = target.depth-0.1;
+	this.sprite = new Sprite(memory_cards, 405, 205, 90, 90);
+
+	// Data
+	this.isSolid = false;
+	this.isDynamic = true;
+
+	console.log("pointer created");
+
+	this.kill = function(){
+		this.isAlive = false;	
+	}
+
+	this.changeTarget = function(newTarget){
+		this.target = newTarget;
+	}
+
+	this.update = function(){
+		this.depth = target.depth-0.1;
+
+		// Velocity
+		var d = this.position.getVectorTo(this.target.position);
+		if(d.length() >= 1){
+			this.velocity = new Vector2( d.x*0.1, d.y*0.1 );
+		}else{ this.position = this.target.position.clone(); }
+
+		// Animation
+		if(this.dir === 1 && this.offset >= this.max){this.offset = this.max; this.dir = -1; this.speed = 0;}
+		else if(this.dir === -1 && this.offset <= this.min){this.offset = this.min; this.dir = 1; this.speed = 1;}
+
+		if(this.dir === 1){
+			this.offset += this.speed;
+			this.speed *= 1.2;
+		}else{
+			this.offset += ((this.min-0.5)-this.offset)*0.1;
+		}
+	}
+
+	this.render = function(lagOffset){
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
+
+		// Image
+		this.sprite.draw(ctx, drawX, drawY+this.offset);
 	}
 }

@@ -3,13 +3,13 @@
 //*****************************************************************************************
 
 // Colors
-var color = {BLACK: "#000000", DARK_GREY: "#323232", WHITE: "#FFFFFF", GROUND: "#3FA9AB", SKY: "#CF5D5D", BLUE: "#0090FF", GREEN: "#7AFF2D", PINK: "#F319FF", RED: "#FF0000", YELLOW: "#FFFF00"};
+var color = {BLACK: "#000000", DARK_GREY: "#323232", WHITE: "#FFFFFF", GROUND: "#669D6B", SKY: "#4C3C37", BLUE: "#0090FF", GREEN: "#7AFF2D", PINK: "#F319FF", RED: "#FF0000", YELLOW: "#FFFF00"};
 var colorArray = [color.BLACK, color.DARK_GREY, color.WHITE, color.PINK, color.RED, color.YELLOW];
 
 
 // Camera
 function Camera(position){
-	this.position = position;
+	this.position = new Vector2(position.x-canvas.width/2, position.y-canvas.height/2);
 	this.previousPos = this.position.clone();
 	this.targetPos = this.position.clone();
 	this.width = canvas.width;

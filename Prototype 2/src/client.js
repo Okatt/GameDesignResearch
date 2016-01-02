@@ -134,7 +134,7 @@ socket.on('matchRequest', function(mID, mShape, mColor, mEyes, mCrown){
   matchEyes = mEyes;
   potentialMatchId = mID;
 
-  matchAvatar = new Player(potentialMatchId, new Vector2(2*(canvas.width/3), canvas.height/2), matchShape, matchColor, matchEyes);
+  matchAvatar = new Player(potentialMatchId, new Vector2(1920/2+200, 1080/2), matchShape, matchColor, matchEyes);
   matchAvatar.state = "AVATAR";
   matchAvatar.hasCrown = mCrown;
   gameObjects.push(matchAvatar);

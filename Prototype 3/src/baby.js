@@ -84,7 +84,7 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 		this.emoteTimer = 2;
 		this.emoteIndex = emoteID;
 		//change emoteindex * 125 to new width of spritesheet/6
-		this.emoteSprite = new Sprite(spritesheet_emotes_small, this.emoteIndex*60, 0, 60, 75, new Vector2(30, 35));
+		this.emoteSprite = new Sprite(spritesheet_emotes_small, this.emoteIndex*100, 0, 100, 150);
 		this.drawEmote = true;
 	}
 
@@ -108,9 +108,9 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 	}
 
 	this.render = function(lagOffset){
-		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
-		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
-
+			var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
+		
 		// Body
 		this.body.draw(ctx, drawX, drawY);
 
@@ -127,20 +127,20 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 			}
 		}
 
-		if(this.drawEmote){
-			this.emoteSprite.draw(ctx, drawX, drawY-70);
-		}
-
 		if(this.hasCrown){
 			if(this.eyes === 1){
-				crownSpriteSmall.draw(ctx, drawX, drawY-40);
+				crownSpriteSmall.draw(ctx, drawX, drawY-55);
 			}
 			else if(this.eyes === 2){
-				crownSpriteSmall.draw(ctx, drawX, drawY-43);
+				crownSpriteSmall.draw(ctx, drawX, drawY-55);
 			}
 			else {
-				crownSpriteSmall.draw(ctx, drawX, drawY-57);
+				crownSpriteSmall.draw(ctx, drawX, drawY-65);
 			}
+		}
+
+		if(this.drawEmote){
+			this.emoteSprite.draw(ctx, drawX, drawY-100);
 		}
 	}
 }
