@@ -603,16 +603,17 @@ socket.on('message', function (message){
 
 socket.on('newPlayer', function(newPlayerID, shape, color, eyes){
   console.log('New player joined the game with ID: ' +newPlayerID +' color: ' +color +' shape: ' +shape);
-  randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
+  randomPosition = new Vector2(randomRange(0, 1080), randomRange(0, 1920));
   //ADDED:
   //color and shape var, these properties decide what the new player looks like
   player = new Player(newPlayerID, randomPosition, shape, color, eyes);
   // Spawn the player in an empty space
   while(checkCollision(player) || checkOutOfBounds(player)){
-    player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
+    player.position = new Vector2(randomRange(0, 1080), randomRange(0, 1920));
     player.previousPos = player.position.clone();
   }
   gameObjects.push(player);
+  console.log("player joined!!!!");
 });
 
 socket.on('emitBaby', function(shape, color, eyes, crown){
@@ -1418,7 +1419,7 @@ function initialize(){
 	previousKeyboard = clone(keyboard);	
 
 	// Camera
-	if(isWorld){0
+	if(isWorld){
 		camera = new Camera(new Vector2(1920/2, 1080/2-1600));
 		camera.shake(4);
 	}else{ camera = new Camera(new Vector2(1920/2, 1080/2)); }
@@ -1769,7 +1770,7 @@ function checkOutOfBounds(object, offset){
 	var hitbox = new AABB(object.position.x + offset.x - object.width/2, object.position.y + offset.y - object.height/2, object.width, object.height);
 
 	// Check if the new hitbox is within the bounds
-	return (hitbox.x < 0 || hitbox.x + hitbox.width > canvas.width || hitbox.y < 1080-310 || hitbox.y + hitbox.height > canvas.height);
+	return (hitbox.x < 0 || hitbox.x + hitbox.width > 1920 || hitbox.y < 1080-310 || hitbox.y + hitbox.height > 1080);
 }
 
 // Collision Circle

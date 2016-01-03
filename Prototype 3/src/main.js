@@ -56,7 +56,7 @@ function initialize(){
 	previousKeyboard = clone(keyboard);	
 
 	// Camera
-	if(isWorld){0
+	if(isWorld){
 		camera = new Camera(new Vector2(1920/2, 1080/2-1600));
 		camera.shake(4);
 	}else{ camera = new Camera(new Vector2(1920/2, 1080/2)); }

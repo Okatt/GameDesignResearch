@@ -113,16 +113,17 @@ socket.on('message', function (message){
 
 socket.on('newPlayer', function(newPlayerID, shape, color, eyes){
   console.log('New player joined the game with ID: ' +newPlayerID +' color: ' +color +' shape: ' +shape);
-  randomPosition = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
+  randomPosition = new Vector2(randomRange(0, 1080), randomRange(0, 1920));
   //ADDED:
   //color and shape var, these properties decide what the new player looks like
   player = new Player(newPlayerID, randomPosition, shape, color, eyes);
   // Spawn the player in an empty space
   while(checkCollision(player) || checkOutOfBounds(player)){
-    player.position = new Vector2(randomRange(0, canvas.width), randomRange(0, canvas.height));
+    player.position = new Vector2(randomRange(0, 1080), randomRange(0, 1920));
     player.previousPos = player.position.clone();
   }
   gameObjects.push(player);
+  console.log("player joined!!!!");
 });
 
 socket.on('emitBaby', function(shape, color, eyes, crown){
