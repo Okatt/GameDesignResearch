@@ -707,6 +707,9 @@ socket.on('unMatch', function(p1ID, p2ID){
       //remove the memory board if the match ended early or something
       endMemory();
 
+      // Remove potential baby
+      if(babyAvatar){babyAvatar.kill(); babyAvatar = false;}
+
       matchAvatar.kill();
 
       makeBabyButton.isVisible = false;
@@ -720,6 +723,9 @@ socket.on('unMatch', function(p1ID, p2ID){
 
       console.log(playerId +' unmatched ' +p2ID);
       clientStatus = 'De match is klaar';
+
+      // Set camera back
+      camera.setTargetPosition(new Vector2(1920/2, 1080/2));
   }
 });
 
@@ -788,6 +794,7 @@ socket.on('createBaby', function(ID, shape, color, eyes){
     playerAvatar.addBaby(shape, color, eyes);
     babyName = null;
     babyAvatar.kill();
+    babyAvatar = false;
   }
 
 });
@@ -889,7 +896,7 @@ socket.on('delayedUnreveal', function(tileNumber){
 
 socket.on('memoryBaby', function(id, shape, color, eyes){
   endMemory();
-  babyAvatar = new Baby(new Vector2(1920/2, 100), null, shape, color, eyes);
+  babyAvatar = new Baby(new Vector2(1920/2, 140), null, shape, color, eyes);
   babyAvatar.moving = false;
   gameObjects.push(babyAvatar);
 
