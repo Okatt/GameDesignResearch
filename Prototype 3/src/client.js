@@ -123,7 +123,6 @@ socket.on('newPlayer', function(newPlayerID, shape, color, eyes){
     player.previousPos = player.position.clone();
   }
   gameObjects.push(player);
-  console.log("player joined!!!!");
 });
 
 socket.on('emitBaby', function(shape, color, eyes, crown){
