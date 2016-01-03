@@ -303,6 +303,8 @@ function Pointer(target) {
 	this.update = function(){
 		this.depth = target.depth-0.1;
 
+		if(this.target === undefined || !this.target.isAlive){this.kill();}
+
 		// Velocity
 		var d = this.position.getVectorTo(this.target.position);
 		if(d.length() >= 1){

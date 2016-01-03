@@ -209,6 +209,7 @@ socket.on('unMatch', function(p1ID, p2ID){
       matchShape = null;
       matchName = null;
       matchEyes = null;
+
       console.log(playerId +' unmatched ' +p2ID);
       clientStatus = 'De match is klaar';
   }
@@ -261,7 +262,6 @@ socket.on('displayEmote', function(emoteID, playerID, matchID){
     matchAvatar.displayEmote(emoteID);
   }
 });
-
 
 socket.on('createBaby', function(ID, shape, color, eyes){
   if(isWorld){
@@ -332,7 +332,7 @@ socket.on('memoryMatch', function(tile1, tile2, index){
   t2 = new MemoryButton(new Vector2(tile2.position.x, tile2.position.y), 100, 100, tile2.index, tile2.value, tile2.number, "#FFFFFF");
 
   t1.isRevealed = true;
-  t2.isRevealed = true;    
+  t2.isRevealed = true; 
   matchedTiles.push(t1, t2);
   gameObjects.push(t1, t2);
 
@@ -381,13 +381,12 @@ socket.on('delayedUnreveal', function(tileNumber){
 
 socket.on('memoryBaby', function(id, shape, color, eyes){
   endMemory();
-  babyAvatar = new Baby(new Vector2(canvas.width/2, canvas.height/2), null, shape, color, eyes);
+  babyAvatar = new Baby(new Vector2(1920/2, 100), null, shape, color, eyes);
   babyAvatar.moving = false;
   gameObjects.push(babyAvatar);
 
   makeBabyButton.isVisible = true;
   makeBabyButton.isDisabled = false;
-
 });
 
 socket.on('ipaddr', function(ip){
@@ -519,7 +518,8 @@ function endMemory(){
   }
   matchedTiles = [];
   turnPlayer = false;
-  turnPointer.kill();
+
+  if(turnPointer){ turnPointer.kill(); }
   turnPointer = false;
 }
 
