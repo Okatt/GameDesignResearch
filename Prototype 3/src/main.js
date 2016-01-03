@@ -93,6 +93,10 @@ function initializeWorld(){
 	gameObjects.push( new Prop(new Vector2(1750, 450), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
 	gameObjects.push( new Prop(new Vector2(1700, 920), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
 
+	// Announcements
+	var am = new AnnouncementManager();
+	gameObjects.push(am);
+
 	// Sprite testing
 	// var p = new Player(12345, new Vector2(500, 500), Math.floor(randomRange(0, 3.99)), 3, 1);
 	// p.addBaby(0, 0, 3);
@@ -241,15 +245,6 @@ function render(lagOffset){
 		for (var ob = 0; ob < gameObjects.length; ob++){
 			gameObjects[ob].render(lagOffset);
 		}
-
-		// Text bar (TODO scrolling announcements)
-		drawRectangle(ctx, 0, canvas.height-40, canvas.width, 40, true, color.BLACK, 0.3);
-		// link
-		ctx.font = "28px Righteous";
-		ctx.fillStyle = "#FFFFFF";
-		ctx.textAlign = "center";
-		ctx.fillText("JOIN THE PARTY AT   polygonpals.tk", canvas.width/2, canvas.height-10);
-
 	//draw for clients
 	}else{
 		// Background
