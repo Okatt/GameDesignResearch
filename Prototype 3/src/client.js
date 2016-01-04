@@ -111,8 +111,14 @@ socket.on('message', function (message){
   signalingMessageCallback(message);
 });
 
+socket.on('announce', function(message){
+  am.announce(message);
+});
+
 socket.on('newPlayer', function(newPlayerID, shape, color, eyes){
   console.log('New player joined the game with ID: ' +newPlayerID +' color: ' +color +' shape: ' +shape);
+  socket.emit('announce', "A new player has joined!");
+
   randomPosition = new Vector2(randomRange(0, 1080), randomRange(0, 1920));
   //ADDED:
   //color and shape var, these properties decide what the new player looks like
@@ -250,6 +256,7 @@ socket.on('checkNames', function(playerID, name){
 
 socket.on('codesExchanged', function(){
     socket.emit('createBaby', matchId, playerId, babyAvatar.shape, babyAvatar.color, babyAvatar.eyes);
+    socket.emit('announce', babyName+" was born!");
     endMatch();
 });
 

@@ -115,6 +115,10 @@ io.sockets.on('connection', function (socket){
         }
 	});
 
+	socket.on('announce', function(message){
+		io.sockets.socket(worldID).emit('announce', message);
+	});
+
 	socket.on('newPlayer', function(id, color, shape, eyes){
 		io.sockets.socket(worldID).emit('newPlayer', id, shape, color, eyes);
 	});

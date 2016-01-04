@@ -7,6 +7,12 @@ function AnnouncementManager(){
 	this.isAlive = true;
 	this.type = "AnnouncementManager";
 
+	// Positioning
+	this.position = new Vector2(canvas.width/2, canvas.height-20);
+	this.previousPos = this.position.clone();
+	this.width = canvas.width;
+	this.height = 40;
+
 	// Graphics
 	this.depth = -2000;
 
@@ -25,7 +31,7 @@ function AnnouncementManager(){
 
 	this.nextMessage = function(){
 		if(this.queue.length >= 1){
-			this.lastMessage = new Announcement(new Vector2(canvas.width, canvas.height-10), this.queue[0]);
+			this.lastMessage = new Announcement(new Vector2(this.position.x+this.width/2, this.position.y+this.height*0.25), this.queue[0]);
 			gameObjects.push(this.lastMessage);
 
 			// Remove the message from the queue
@@ -44,8 +50,11 @@ function AnnouncementManager(){
 	}
 
 	this.render = function(lagOffset){
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+
 		// Text bar
-		drawRectangle(ctx, 0, canvas.height-40, canvas.width, 40, true, color.BLACK, 0.3);
+		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, color.BLACK, 0.3);
 	}
 }
 

@@ -7,6 +7,12 @@ function AnnouncementManager(){
 	this.isAlive = true;
 	this.type = "AnnouncementManager";
 
+	// Positioning
+	this.position = new Vector2(canvas.width/2, canvas.height-20);
+	this.previousPos = this.position.clone();
+	this.width = canvas.width;
+	this.height = 40;
+
 	// Graphics
 	this.depth = -2000;
 
@@ -25,7 +31,7 @@ function AnnouncementManager(){
 
 	this.nextMessage = function(){
 		if(this.queue.length >= 1){
-			this.lastMessage = new Announcement(new Vector2(canvas.width, canvas.height-10), this.queue[0]);
+			this.lastMessage = new Announcement(new Vector2(this.position.x+this.width/2, this.position.y+this.height*0.25), this.queue[0]);
 			gameObjects.push(this.lastMessage);
 
 			// Remove the message from the queue
@@ -44,8 +50,11 @@ function AnnouncementManager(){
 	}
 
 	this.render = function(lagOffset){
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+
 		// Text bar
-		drawRectangle(ctx, 0, canvas.height-40, canvas.width, 40, true, color.BLACK, 0.3);
+		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, color.BLACK, 0.3);
 	}
 }
 
@@ -699,8 +708,14 @@ socket.on('message', function (message){
   signalingMessageCallback(message);
 });
 
+socket.on('announce', function(message){
+  am.announce(message);
+});
+
 socket.on('newPlayer', function(newPlayerID, shape, color, eyes){
   console.log('New player joined the game with ID: ' +newPlayerID +' color: ' +color +' shape: ' +shape);
+  socket.emit('announce', "A new player has joined!");
+
   randomPosition = new Vector2(randomRange(0, 1080), randomRange(0, 1920));
   //ADDED:
   //color and shape var, these properties decide what the new player looks like
@@ -838,6 +853,7 @@ socket.on('checkNames', function(playerID, name){
 
 socket.on('codesExchanged', function(){
     socket.emit('createBaby', matchId, playerId, babyAvatar.shape, babyAvatar.color, babyAvatar.eyes);
+    socket.emit('announce', babyName+" was born!");
     endMatch();
 });
 
@@ -1479,6 +1495,9 @@ var UPDATE_DURATION = 1000/UPS;		// The duration of a single update in ms
 // Logic
 var gameObjects = [];
 
+// Manager
+var am;
+
 // Graphics
 var canvas;
 var ctx;
@@ -1561,7 +1580,7 @@ function initializeWorld(){
 	gameObjects.push( new Prop(new Vector2(1700, 920), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
 
 	// Announcements
-	var am = new AnnouncementManager();
+	am = new AnnouncementManager();
 	gameObjects.push(am);
 
 	// Sprite testing

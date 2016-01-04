@@ -12,6 +12,9 @@ var UPDATE_DURATION = 1000/UPS;		// The duration of a single update in ms
 // Logic
 var gameObjects = [];
 
+// Manager
+var am;
+
 // Graphics
 var canvas;
 var ctx;
@@ -94,7 +97,7 @@ function initializeWorld(){
 	gameObjects.push( new Prop(new Vector2(1700, 920), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
 
 	// Announcements
-	var am = new AnnouncementManager();
+	am = new AnnouncementManager();
 	gameObjects.push(am);
 
 	// Sprite testing
