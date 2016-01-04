@@ -1082,42 +1082,50 @@ function checkCrown(exclude){
   var mb = 0;                           // Most babies
   var currentKing, newKing = false;
 
-  // Only if one player has the highest baby count
+  // Get the current king (todo: save in variable to increase performance)
   for (var i = 0; i < gameObjects.length; i++) {
     if(gameObjects[i].type === "Player" && gameObjects[i].id !== excludeID){
       // Check if the player is the current king
-      if(gameObjects[i].hasCrown){ currentKing = gameObjects[i]; mb = currentKing.babies.length; }
-
-      // Check which player should be the king
-      if(!newKing && gameObjects[i].babies.length > mb){
-        newKing = gameObjects[i];
-        mb = gameObjects[i].babies.length;
-      }else if(newKing.babies.length < gameObjects[i].babies.length){
-        newKing = gameObjects[i];
-        mb = gameObjects[i].babies.length;
-      }else if(newKing.babies.length === gameObjects[i].babies.length){
-        newKing = false;
+      if(gameObjects[i].hasCrown){
+        currentKing = gameObjects[i];
+        mb = currentKing.babies.length;
+        break;
       }
     }
   }
-  if(currentKing === newKing){
-    // Nothing has changed
-    return;
-  }else if(!currentKing && newKing){
-    socket.emit('announce', "X is the new king!");
-    // The new king will get the crown (no one had the crown)
-    newKing.getCrown();
-  }else if(currentKing && newKing){
-    socket.emit('announce', "X took the crown from Y!");
-    // The new king will steal the crown from the current king
-    currentKing.loseCrown();
-    newKing.getCrown();
-  }else if(currentKing && !newKing){
-    socket.emit('announce', "X loses his crown..");
-    currentKing.loseCrown();
-    // The currentKing will lose the crown (because newKing is only false when more people have the most amount of babies)
+
+  // Check all contenders
+  for (var i = 0; i < gameObjects.length; i++) {
+    if(gameObjects[i].type === "Player" && gameObjects[i].id !== excludeID){
+      // Check which player should be the newKing
+      if(gameObjects[i].babies.length > mb){
+        newKing = gameObjects[i];
+        mb = gameObjects[i].babies.length;
+      }else if(gameObjects[i].babies.length === mb){
+        if(currentKing && currentKing.id === gameObjects[i].id){ newKing = gameObjects[i]; }
+        else{ newKing = false; }
+      }
+    }
   }
 
+  // Determine who gets the crown
+  if(currentKing === newKing){
+    // Nothing happends
+  }else if(!currentKing && newKing){
+    // The new king will get the crown (no one had the crown)
+    socket.emit('announce', "X is the new king!");    
+    newKing.getCrown();
+  }else if(currentKing && !newKing){
+    // No one will be the king
+      socket.emit('announce', "X loses his crown..");
+      currentKing.loseCrown();
+  }else if(currentKing && newKing){
+      // Since currentKing !== newKing the new king must have more babies thus
+      // The new king will steal the crown from the current king
+      socket.emit('announce', "X took the crown from Y!");
+      currentKing.loseCrown();
+      newKing.getCrown();
+  }
 
   // Everyone with the highest baby count
   //  var highestBabyCount = 0;
