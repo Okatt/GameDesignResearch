@@ -66,7 +66,6 @@ function Camera(position){
 	};
 }
 
-
 // Sprite
 function Sprite(img, startX, startY, width, height, center, frameCount, fps, loop){
 	// Default values

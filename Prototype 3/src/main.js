@@ -38,6 +38,12 @@ var crownSprite = new Sprite(spritesheet_crown, 0, 0, 140, 140);
 var crownSpriteSmall = new Sprite(spritesheet_crown_small, 0, 0, 70, 70);
 var grassSprite = new Sprite(spritesheet_environment, 0, 400, 2000, 200);
 
+// NOTE
+// Copy paste for resource node sprite:
+//		 sprite = new Sprite(spritesheet_environment, 1000, 0, 200, 200, new Vector2(100, 100), 5, 0, false);
+// Use: (use 0, 1, 2, 3, and 4 to get the different stages)
+//		 sprite.frameIndex = 0;
+
 window.onload = function main(){
 	//Run
 	run();
