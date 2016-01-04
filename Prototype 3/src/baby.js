@@ -22,6 +22,7 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 	this.body = new Sprite(spritesheet_characters_s, shapeIndex*60, colorIndex*60, 60, 60, new Vector2(30, 60));
 	
 	// Data
+	this.state = "";
 	this.isFollowing = player;
 	this.isSolid = false;
 	this.isDynamic = true;
@@ -108,9 +109,14 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 	}
 
 	this.render = function(lagOffset){
-			var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
 		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
 		
+		// If avatar
+		if(this.state === "AVATAR"){
+			// Draw some background polygon 
+		}
+
 		// Body
 		this.body.draw(ctx, drawX, drawY);
 

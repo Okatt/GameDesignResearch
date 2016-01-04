@@ -64,7 +64,7 @@ function Player(id, position, shape, color, eyes){
 			var r = i*(360/emotes);							
 			nextPos.rotate(r);
 
-			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-60+nextPos.y), 60, i, "#FFFFFF");
+			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-60+nextPos.y), 60, "#FFFFFF", new Sprite(spritesheet_emotes, i*150, 0, 150, 225));
 			this.emoteButtons.push(b);
 			gameObjects.push(b);
 		}
@@ -203,11 +203,17 @@ function Player(id, position, shape, color, eyes){
 					var hitbox = new AABB(this.position.x-60, this.position.y-120, 120, 120); // Hitbox for click detection
 
 					if(checkPointvsAABB(new Vector2(mouse.x+camera.position.x, mouse.y+camera.position.y), hitbox) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
-					console.log("player pressed");
-					if(this.emoteButtons.length === 0){ this.openEmotes(); }
-					else{ this.closeEmotes(); }
+						console.log("player pressed");
+						if(this.emoteButtons.length === 0){ this.openEmotes(); }
+						else{ this.closeEmotes(); }
+					}
 				}
-				}
+
+				for (var i = 0; i < this.emoteButtons.length; i++) {
+					if(this.emoteButtons[i].isPressed){
+						socket.emit('pressedEmote', i, playerId, matchId);
+					}
+				}	
 
 				break;
 			default:

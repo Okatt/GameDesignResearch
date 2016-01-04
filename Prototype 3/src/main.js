@@ -160,25 +160,27 @@ function initializePlayer(){
 	playerAvatar.state = "AVATAR";
 	gameObjects.push(playerAvatar);
 
-	acceptButton = new TextButton(new Vector2(canvas.width/3, 175), 300, 100, "Yep", color.GREEN);
+	gameObjects.push( new Chest(new Vector2(1920/2-340, 1080/2+120)) );
+
+	acceptButton = new TextButton(new Vector2(canvas.width/2-110, 136), 200, 60, "Yep", "#141414", "#FFFFFF");
 	acceptButton.onClick = function(){acceptMatch()};
 	gameObjects.push(acceptButton);
 	acceptButton.isVisible = false;
 	acceptButton.isDisabled = true;
 
-	rejectButton = new TextButton(new Vector2(2*(canvas.width/3), 175), 300, 100, "Nope", color.RED);
+	rejectButton = new TextButton(new Vector2(canvas.width/2+110, 136), 200, 60, "Nope", "#141414", "#FFFFFF");
 	rejectButton.onClick = function(){rejectMatch()};
 	gameObjects.push(rejectButton);
 	rejectButton.isVisible = false;
 	rejectButton.isDisabled = true;
 
-	makeBabyButton = new TextButton(new Vector2(canvas.width/2, canvas.height-150), 300, 100, "BENOEM DE CREATIE", color.DARK_GREY);
+	makeBabyButton = new TextButton(new Vector2(canvas.width/2, canvas.height/2+90), 380, 60, "Click here to name the polygon", "#141414", "#FFFFFF");
 	makeBabyButton.onClick = function(){confirmCode()};
 	gameObjects.push(makeBabyButton);
 	makeBabyButton.isVisible = false;
 	makeBabyButton.isDisabled = true;
 
-	shareButton = new TextButton(new Vector2(canvas.width/2, canvas.height - 50), 100, 50, "SHARE", color.BLUE);
+	shareButton = new TextButton(new Vector2(canvas.width/2, canvas.height-50), 100, 50, "SHARE", "#3C5899", "#FFFFFF");
 	shareButton.onClick = function(){share()};
 	gameObjects.push(shareButton);
 }
@@ -265,7 +267,7 @@ function render(lagOffset){
 		ctx.font = "36px Righteous";
 		ctx.fillStyle = "#000000";
 		ctx.textAlign = "center";
-		ctx.fillText(clientStatus, canvas.width/2, 100);
+		ctx.fillText(clientStatus, canvas.width/2, 60);
 
 		// Render all game objects
 		for(var ob = 0; ob < gameObjects.length; ob++){

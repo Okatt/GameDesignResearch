@@ -32,7 +32,7 @@ var matchEyes;
 var matchAvatar;
 
 var link;
-var clientStatus = 'Connecting to world';
+var clientStatus = 'Connecting to the world...';
 var babyName;
 var matchBabyName;
 
@@ -95,11 +95,11 @@ socket.on('playerLeft', function(id){
 
   else {
     if(id === potentialMatchId){
-      clientStatus = 'De andere speler heeft het spel verlaten';
+      clientStatus = 'We\'re sorry, but the other player has left the game...';
       rejectMatch();
     } 
     else if(id === matchId){
-      clientStatus = 'De andere speler heeft het spel verlaten';
+      clientStatus = 'We\'re sorry, but the other player has left the game...';
       endMatch();
     }
   }
@@ -153,7 +153,7 @@ socket.on('matchRequest', function(mID, mShape, mColor, mEyes, mCrown){
   matchAvatar.hasCrown = mCrown;
   gameObjects.push(matchAvatar);
 
-  clientStatus = 'Wil jij met deze persoon spelen?';
+  clientStatus = 'Do you want to play with this person?';
 
   acceptButton.isVisible = true;
   acceptButton.isDisabled = false;
@@ -185,7 +185,7 @@ socket.on('confirmedMatch', function(p1ID, p2ID, firstTurn){
     else if(p2ID === playerId){
       matchId = p1ID;
     }
-    clientStatus = 'Zoek elkaar en kies een naam voor jullie creatie. Jullie moeten dezelfde naam invoeren om de creatie te krijgen.';
+    clientStatus = 'Find each other and choose a name for your new polygon. You need to enter the same name to create the polygon.';
 
     //start the memory game
     startMemory();
@@ -220,7 +220,7 @@ socket.on('unMatch', function(p1ID, p2ID){
       matchEyes = null;
 
       console.log(playerId +' unmatched ' +p2ID);
-      clientStatus = 'De match is klaar';
+      clientStatus = 'The match is over.';
 
       // Set camera back
       camera.setTargetPosition(new Vector2(1920/2, 1080/2));
@@ -245,7 +245,7 @@ socket.on('matchRejected', function(rejectedID, playerID){
 
     matchAvatar.kill();
     endMemory();
-    clientStatus = 'De match was geen success';
+    clientStatus = 'The match was no success.';
   }
 });
 
@@ -393,6 +393,7 @@ socket.on('delayedUnreveal', function(tileNumber){
 socket.on('memoryBaby', function(id, shape, color, eyes){
   endMemory();
   babyAvatar = new Baby(new Vector2(1920/2, 140), null, shape, color, eyes);
+  babyAvatar.state = "AVATAR";
   babyAvatar.moving = false;
   gameObjects.push(babyAvatar);
 
@@ -450,7 +451,7 @@ function endMatch(){
 }
 
 function acceptMatch(){
-  clientStatus = "Waiting for other player...";
+  clientStatus = "Waiting for the other player...";
 
   acceptButton.isVisible = false;
   acceptButton.isDisabled = true;

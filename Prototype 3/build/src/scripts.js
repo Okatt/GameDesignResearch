@@ -129,6 +129,7 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 	this.body = new Sprite(spritesheet_characters_s, shapeIndex*60, colorIndex*60, 60, 60, new Vector2(30, 60));
 	
 	// Data
+	this.state = "";
 	this.isFollowing = player;
 	this.isSolid = false;
 	this.isDynamic = true;
@@ -215,9 +216,14 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 	}
 
 	this.render = function(lagOffset){
-			var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
 		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
 		
+		// If avatar
+		if(this.state === "AVATAR"){
+			// Draw some background polygon 
+		}
+
 		// Body
 		this.body.draw(ctx, drawX, drawY);
 
@@ -255,7 +261,7 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 //	Button
 //*****************************************************************************************
 
-function TextButton(position, width, height, text, bgColor){
+function TextButton(position, width, height, text, bgColor, textColor){
 	this.type = "TextButton";
 	this.isAlive = true;
 	
@@ -270,7 +276,7 @@ function TextButton(position, width, height, text, bgColor){
 	this.bgColor = bgColor;
 	this.bgAlpha = 1;
 	this.text = text;
-	this.textColor = color.BLACK;
+	this.textColor = textColor;
 	this.textHoverColor = color.BLACK;
 
 	// State
@@ -333,8 +339,11 @@ function TextButton(position, width, height, text, bgColor){
 	// Render
 	this.render = function(lagOffset){
 		if(this.isVisible){
-					var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
 		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+
+		// Shadow
+		drawRectangle(ctx, drawX-this.width/2+4, drawY-this.height/2+4, this.width, this.height, true, color.BLACK, 0.3);
 
 		// Background
 		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, this.bgColor, this.bgAlpha);
@@ -342,15 +351,15 @@ function TextButton(position, width, height, text, bgColor){
 		// Text
 		ctx.textAlign = "center";
 		ctx.textBaseline = "middle";
-		if(!this.mouseOver){drawText(ctx, drawX, drawY, this.width, 24, this.text, "Arial", 24, this.textColor, 1);}
-		else{drawText(ctx, drawX, drawY, this.width, 24, this.text, "Arial", 24, this.textHoverColor, 1);}
+		if(!this.mouseOver){drawText(ctx, drawX, drawY, this.width, 24, this.text, "Righteous", 24, this.textColor, 1);}
+		else{drawText(ctx, drawX, drawY, this.width, 24, this.text, "Righteous", 24, this.textHoverColor, 1);}
 		ctx.textBaseline = "alphabetic";
 		}
 	};
 }
 
 
-function BubbleButton(position, radius, emoteIndex, bgColor){
+function BubbleButton(position, radius, bgColor, sprite){
 	this.type = "BubbleButton";
 	this.isAlive = true;
 	
@@ -363,9 +372,7 @@ function BubbleButton(position, radius, emoteIndex, bgColor){
 	this.depth = 0;
 	this.bgColor = bgColor;
 	this.bgAlpha = 1;
-
-	this.emoteIndex = emoteIndex;
-	this.emote = new Sprite(spritesheet_emotes, this.emoteIndex*150, 0, 150, 225);
+	this.sprite = sprite;
 
 	// State
 	this.mouseOver = false;
@@ -402,9 +409,7 @@ function BubbleButton(position, radius, emoteIndex, bgColor){
 	};
 
 	// onClick gets called when the button is pressed (it sets isPressed on true for easier communication with other objects)
-	this.onClick = function(){
-		socket.emit('pressedEmote', this.emoteIndex, playerId, matchId);
-	};
+	this.onClick = function(){};
 
 	// Update
 	this.update = function(){
@@ -434,8 +439,8 @@ function BubbleButton(position, radius, emoteIndex, bgColor){
 		// Background
 		drawCircle(ctx, drawX, drawY, this.radius, true, this.bgColor, this.bgAlpha);
 
-		//emote
-		this.emote.draw(ctx, drawX, drawY);
+		// Sprite
+		this.sprite.draw(ctx, drawX, drawY);
 		}
 	};
 }
@@ -595,6 +600,95 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 		}
 	};
 }
+//*****************************************************************************************
+//	Chest with accessories the player can buy and wear
+//*****************************************************************************************
+
+// Inventory chest
+function Chest(position){
+	this.type = "Chest";
+	this.isAlive = true;
+	
+	// Physics
+	this.position = position;
+	this.previousPos = this.position.clone();
+	this.width = 200;
+	this.height = 200;
+
+	// Graphics
+	this.depth = canvas.height-this.position.y;
+	this.sprite = new Sprite(spritesheet_environment, 1000, 200, 200, 200, new Vector2(100, 100), 2, 0, false);
+
+	// Data
+	this.isSolid = true;
+	this.isDynamic = false;
+	this.isOpen = false;
+
+	this.itemButtons = [];
+
+	this.kill = function(){
+		this.isAlive = false;
+	};
+
+	this.getHitbox = function(){
+		return new AABB(this.position.x - this.width/2, this.position.y - this.height/2, this.width, this.height);
+	}
+
+	this.open = function(){
+		this.sprite.frameIndex = 1;
+		this.isOpen = true;
+
+		var items = 6;
+		var nextPos;
+		for (var i = 0; i < items; i++) {
+
+			nextPos = new Vector2(0, -140);
+			var r = i*(360/items);							
+			nextPos.rotate(r);
+
+			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y+nextPos.y), 60, "#FFFFFF", new Sprite(spritesheet_emotes, i*150, 0, 150, 225));
+			this.itemButtons.push(b);
+			gameObjects.push(b);
+		}
+	};
+
+	this.close = function(){
+		this.sprite.frameIndex = 0;
+		this.isOpen = false;
+
+		for (var i = 0; i < this.itemButtons.length; i++) {
+			this.itemButtons[i].kill();
+		}
+		this.itemButtons = [];
+	};
+
+	this.update = function(){
+		var hitbox = this.getHitbox(); // Hitbox for click detection, adjust later when the final art is implemented
+		if(checkPointvsAABB(new Vector2(mouse.x+camera.position.x, mouse.y+camera.position.y), hitbox) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+			console.log("chest pressed");
+			if(this.isOpen){ this.close(); }
+			else{ this.open(); }
+		}
+
+		for (var i = 0; i < this.itemButtons.length; i++) {
+			if(this.itemButtons[i].isPressed){
+				// buy/wear item
+			}
+		}
+	};
+
+	this.render = function(lagOffset){
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
+
+		// Image
+		this.sprite.draw(ctx, drawX, drawY);
+
+		// Hitbox (debug)
+		var h = this.getHitbox();
+		drawRectangle(ctx, h.x - camera.interpolatedPos().x, h.y - camera.interpolatedPos().y, h.width, h.height, true, color.GREEN, 0.5);
+	};
+}
 /****************************************************************************
  * Initial setup
  ****************************************************************************/
@@ -629,7 +723,7 @@ var matchEyes;
 var matchAvatar;
 
 var link;
-var clientStatus = 'Connecting to world';
+var clientStatus = 'Connecting to the world...';
 var babyName;
 var matchBabyName;
 
@@ -692,11 +786,11 @@ socket.on('playerLeft', function(id){
 
   else {
     if(id === potentialMatchId){
-      clientStatus = 'De andere speler heeft het spel verlaten';
+      clientStatus = 'We\'re sorry, but the other player has left the game...';
       rejectMatch();
     } 
     else if(id === matchId){
-      clientStatus = 'De andere speler heeft het spel verlaten';
+      clientStatus = 'We\'re sorry, but the other player has left the game...';
       endMatch();
     }
   }
@@ -750,7 +844,7 @@ socket.on('matchRequest', function(mID, mShape, mColor, mEyes, mCrown){
   matchAvatar.hasCrown = mCrown;
   gameObjects.push(matchAvatar);
 
-  clientStatus = 'Wil jij met deze persoon spelen?';
+  clientStatus = 'Do you want to play with this person?';
 
   acceptButton.isVisible = true;
   acceptButton.isDisabled = false;
@@ -782,7 +876,7 @@ socket.on('confirmedMatch', function(p1ID, p2ID, firstTurn){
     else if(p2ID === playerId){
       matchId = p1ID;
     }
-    clientStatus = 'Zoek elkaar en kies een naam voor jullie creatie. Jullie moeten dezelfde naam invoeren om de creatie te krijgen.';
+    clientStatus = 'Find each other and choose a name for your new polygon. You need to enter the same name to create the polygon.';
 
     //start the memory game
     startMemory();
@@ -817,7 +911,7 @@ socket.on('unMatch', function(p1ID, p2ID){
       matchEyes = null;
 
       console.log(playerId +' unmatched ' +p2ID);
-      clientStatus = 'De match is klaar';
+      clientStatus = 'The match is over.';
 
       // Set camera back
       camera.setTargetPosition(new Vector2(1920/2, 1080/2));
@@ -842,7 +936,7 @@ socket.on('matchRejected', function(rejectedID, playerID){
 
     matchAvatar.kill();
     endMemory();
-    clientStatus = 'De match was geen success';
+    clientStatus = 'The match was no success.';
   }
 });
 
@@ -990,6 +1084,7 @@ socket.on('delayedUnreveal', function(tileNumber){
 socket.on('memoryBaby', function(id, shape, color, eyes){
   endMemory();
   babyAvatar = new Baby(new Vector2(1920/2, 140), null, shape, color, eyes);
+  babyAvatar.state = "AVATAR";
   babyAvatar.moving = false;
   gameObjects.push(babyAvatar);
 
@@ -1047,7 +1142,7 @@ function endMatch(){
 }
 
 function acceptMatch(){
-  clientStatus = "Waiting for other player...";
+  clientStatus = "Waiting for the other player...";
 
   acceptButton.isVisible = false;
   acceptButton.isDisabled = true;
@@ -1699,25 +1794,27 @@ function initializePlayer(){
 	playerAvatar.state = "AVATAR";
 	gameObjects.push(playerAvatar);
 
-	acceptButton = new TextButton(new Vector2(canvas.width/3, 175), 300, 100, "Yep", color.GREEN);
+	gameObjects.push( new Chest(new Vector2(1920/2-340, 1080/2+120)) );
+
+	acceptButton = new TextButton(new Vector2(canvas.width/2-110, 136), 200, 60, "Yep", "#141414", "#FFFFFF");
 	acceptButton.onClick = function(){acceptMatch()};
 	gameObjects.push(acceptButton);
 	acceptButton.isVisible = false;
 	acceptButton.isDisabled = true;
 
-	rejectButton = new TextButton(new Vector2(2*(canvas.width/3), 175), 300, 100, "Nope", color.RED);
+	rejectButton = new TextButton(new Vector2(canvas.width/2+110, 136), 200, 60, "Nope", "#141414", "#FFFFFF");
 	rejectButton.onClick = function(){rejectMatch()};
 	gameObjects.push(rejectButton);
 	rejectButton.isVisible = false;
 	rejectButton.isDisabled = true;
 
-	makeBabyButton = new TextButton(new Vector2(canvas.width/2, canvas.height-150), 300, 100, "BENOEM DE CREATIE", color.DARK_GREY);
+	makeBabyButton = new TextButton(new Vector2(canvas.width/2, canvas.height/2+90), 380, 60, "Click here to name the polygon", "#141414", "#FFFFFF");
 	makeBabyButton.onClick = function(){confirmCode()};
 	gameObjects.push(makeBabyButton);
 	makeBabyButton.isVisible = false;
 	makeBabyButton.isDisabled = true;
 
-	shareButton = new TextButton(new Vector2(canvas.width/2, canvas.height - 50), 100, 50, "SHARE", color.BLUE);
+	shareButton = new TextButton(new Vector2(canvas.width/2, canvas.height-50), 100, 50, "SHARE", "#3C5899", "#FFFFFF");
 	shareButton.onClick = function(){share()};
 	gameObjects.push(shareButton);
 }
@@ -1804,7 +1901,7 @@ function render(lagOffset){
 		ctx.font = "36px Righteous";
 		ctx.fillStyle = "#000000";
 		ctx.textAlign = "center";
-		ctx.fillText(clientStatus, canvas.width/2, 100);
+		ctx.fillText(clientStatus, canvas.width/2, 60);
 
 		// Render all game objects
 		for(var ob = 0; ob < gameObjects.length; ob++){
@@ -2053,7 +2150,7 @@ function Player(id, position, shape, color, eyes){
 			var r = i*(360/emotes);							
 			nextPos.rotate(r);
 
-			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-60+nextPos.y), 60, i, "#FFFFFF");
+			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-60+nextPos.y), 60, "#FFFFFF", new Sprite(spritesheet_emotes, i*150, 0, 150, 225));
 			this.emoteButtons.push(b);
 			gameObjects.push(b);
 		}
@@ -2192,11 +2289,17 @@ function Player(id, position, shape, color, eyes){
 					var hitbox = new AABB(this.position.x-60, this.position.y-120, 120, 120); // Hitbox for click detection
 
 					if(checkPointvsAABB(new Vector2(mouse.x+camera.position.x, mouse.y+camera.position.y), hitbox) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
-					console.log("player pressed");
-					if(this.emoteButtons.length === 0){ this.openEmotes(); }
-					else{ this.closeEmotes(); }
+						console.log("player pressed");
+						if(this.emoteButtons.length === 0){ this.openEmotes(); }
+						else{ this.closeEmotes(); }
+					}
 				}
-				}
+
+				for (var i = 0; i < this.emoteButtons.length; i++) {
+					if(this.emoteButtons[i].isPressed){
+						socket.emit('pressedEmote', i, playerId, matchId);
+					}
+				}	
 
 				break;
 			default:
