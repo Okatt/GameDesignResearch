@@ -196,10 +196,9 @@ io.sockets.on('connection', function (socket){
 	});
 
 	socket.on('createBaby', function(p1ID, p2ID, shape, color, eyes){
-		io.sockets.socket(worldID).emit('createBaby', p1ID, shape, color, eyes);
-		io.sockets.socket(worldID).emit('createBaby', p2ID, shape, color, eyes);
-		io.sockets.socket(p1ID).emit('createBaby', p1ID, shape, color, eyes);
-		io.sockets.socket(p2ID).emit('createBaby', p2ID, shape, color, eyes);
+		io.sockets.socket(worldID).emit('createWorldBaby', p1ID, p2ID, shape, color, eyes);
+		io.sockets.socket(p1ID).emit('createAppBaby', p1ID, shape, color, eyes);
+		io.sockets.socket(p2ID).emit('createAppBaby', p2ID, shape, color, eyes);
 		interactions++;
 	});
 
@@ -235,6 +234,7 @@ io.sockets.on('connection', function (socket){
 	});
 
 	socket.on('changeTurn', function(playerID, matchID){
+		console.log("turn changed");
 		io.sockets.socket(matchID).emit('changeTurn', true);
 		io.sockets.socket(playerID).emit('changeTurn', false);
 	});

@@ -276,26 +276,22 @@ socket.on('displayEmote', function(emoteID, playerID, matchID){
   }
 });
 
-socket.on('createBaby', function(ID, shape, color, eyes){
-  if(isWorld){
-    var highestBabyCount = 0;
-
-    for (var i = 0; i < gameObjects.length; i++) {
-      if(gameObjects[i].type === "Player"){
-        if(gameObjects[i].id === ID){
-          gameObjects[i].addBaby(shape, color, eyes);
-        }
+socket.on('createWorldBaby', function(ID1, ID2, shape, color, eyes){
+  for (var i = 0; i < gameObjects.length; i++) {
+    if(gameObjects[i].type === "Player"){
+      if(gameObjects[i].id === ID1 || gameObjects[i].id === ID2){
+        gameObjects[i].addBaby(shape, color, eyes);
       }
     }
-    checkCrown();
   }
-  else {
+  checkCrown();
+});
+
+socket.on('createAppBaby', function(ID, shape, color, eyes){
     playerAvatar.addBaby(shape, color, eyes);
     babyName = null;
     babyAvatar.kill();
     babyAvatar = false;
-  }
-
 });
 
 socket.on('loseCrown', function(){
@@ -484,27 +480,68 @@ function share(){
 }
 
 function checkCrown(exclude){
-
   var excludeID = exclude || null;
-  var highestBabyCount = 0;
+  
+  var mb = 0;                           // Most babies
+  var currentKing, newKing = false;
 
+  // Only if one player has the highest baby count
   for (var i = 0; i < gameObjects.length; i++) {
     if(gameObjects[i].type === "Player" && gameObjects[i].id !== excludeID){
-      if(highestBabyCount < gameObjects[i].babies.length){
-         highestBabyCount = gameObjects[i].babies.length;
-       }
+      // Check if the player is the current king
+      if(gameObjects[i].hasCrown){ currentKing = gameObjects[i]; mb = currentKing.babies.length; }
+
+      // Check which player should be the king
+      if(!newKing && gameObjects[i].babies.length > mb){
+        newKing = gameObjects[i];
+        mb = gameObjects[i].babies.length;
+      }else if(newKing.babies.length < gameObjects[i].babies.length){
+        newKing = gameObjects[i];
+        mb = gameObjects[i].babies.length;
+      }else if(newKing.babies.length === gameObjects[i].babies.length){
+        newKing = false;
+      }
     }
   }
-  for(var i = 0; i < gameObjects.length; i++){
-    if(gameObjects[i].type === "Player"){
-      if(gameObjects[i].babies.length === highestBabyCount){
-        gameObjects[i].getCrown();
-      }
-      else if(gameObjects[i].hasCrown){
-        gameObjects[i].loseCrown();
-      }
-    }
+  if(currentKing === newKing){
+    // Nothing has changed
+    return;
+  }else if(!currentKing && newKing){
+    socket.emit('announce', "X is the new king!");
+    // The new king will get the crown (no one had the crown)
+    newKing.getCrown();
+  }else if(currentKing && newKing){
+    socket.emit('announce', "X took the crown from Y!");
+    // The new king will steal the crown from the current king
+    currentKing.loseCrown();
+    newKing.getCrown();
+  }else if(currentKing && !newKing){
+    socket.emit('announce', "X loses his crown..");
+    currentKing.loseCrown();
+    // The currentKing will lose the crown (because newKing is only false when more people have the most amount of babies)
   }
+
+
+  // Everyone with the highest baby count
+  //  var highestBabyCount = 0;
+  //
+  // for (var i = 0; i < gameObjects.length; i++) {
+  //   if(gameObjects[i].type === "Player" && gameObjects[i].id !== excludeID){
+  //     if(highestBabyCount < gameObjects[i].babies.length){
+  //        highestBabyCount = gameObjects[i].babies.length;
+  //      }
+  //   }
+  // }
+  // for(var i = 0; i < gameObjects.length; i++){
+  //   if(gameObjects[i].type === "Player"){
+  //     if(gameObjects[i].babies.length === highestBabyCount){
+  //       gameObjects[i].getCrown();
+  //     }
+  //     else if(gameObjects[i].hasCrown){
+  //       gameObjects[i].loseCrown();
+  //     }
+  //   }
+  // }
 }
 
 function startMemory(){
