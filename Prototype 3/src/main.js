@@ -286,11 +286,11 @@ function render(lagOffset){
 			gameObjects[ob].render(lagOffset);
 		}
 
-		//gemcounter
+		// Gem counter
 		gemSprite.draw(ctx, 100, canvas.height-100);
 		ctx.font = "48px Righteous";
 		ctx.fillStyle = "#3CD15D";
-		ctx.textAlign = "center";
-		ctx.fillText(gems.toString(), 185, canvas.height-85);
+		ctx.textAlign = "left";
+		ctx.fillText(gems.toString(), 164, canvas.height-85);
 	}	
 }

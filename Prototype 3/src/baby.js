@@ -49,7 +49,7 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 	this.avoidObstacles = function(){
 		var v = new Vector2(0, 0);
 		for (var i = 0; i < gameObjects.length; i++) {
-			if(this !== gameObjects[i]){
+			if(this !== gameObjects[i] && gameObjects[i].position !== undefined){
 				var dist = this.position.getVectorTo(gameObjects[i].position);
 				var dl = dist.length();
 				if(dl < 30){
