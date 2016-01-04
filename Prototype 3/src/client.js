@@ -244,6 +244,7 @@ socket.on('matchRejected', function(rejectedID, playerID){
     rejectButton.isDisabled = true;
 
     matchAvatar.kill();
+    endMemory();
     clientStatus = 'De match was geen success';
   }
 });
