@@ -356,7 +356,7 @@ function BubbleButton(position, radius, emoteIndex, bgColor){
 	this.bgAlpha = 1;
 
 	this.emoteIndex = emoteIndex;
-	this.emote = new Sprite(spritesheet_emotes, this.emoteIndex*200, 0, 200, 300);
+	this.emote = new Sprite(spritesheet_emotes, this.emoteIndex*150, 0, 150, 225);
 
 	// State
 	this.mouseOver = false;
@@ -408,7 +408,7 @@ function BubbleButton(position, radius, emoteIndex, bgColor){
 			//this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
 			
 			// Call the onClick function when the button is pressed
-			if(checkPointvsCC(new Vector2(mouse.x, mouse.y), this.getHitbox()) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+			if(checkPointvsCC(new Vector2(mouse.x+camera.position.x, mouse.y+camera.position.y), this.getHitbox()) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
 				console.log("Pressed");
 				this.isPressed = true;
 				this.onClick();
@@ -1969,11 +1969,11 @@ function Player(id, position, shape, color, eyes){
 		var nextPos;
 		for (var i = 0; i < emotes; i++) {
 
-			nextPos = new Vector2(0, -220);
+			nextPos = new Vector2(0, -140);
 			var r = i*(360/emotes);							
 			nextPos.rotate(r);
 
-			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-60+nextPos.y), 80, i, "#FFFFFF");
+			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-60+nextPos.y), 60, i, "#FFFFFF");
 			this.emoteButtons.push(b);
 			gameObjects.push(b);
 		}
@@ -1990,7 +1990,7 @@ function Player(id, position, shape, color, eyes){
 	this.displayEmote = function(emoteID){
 		this.emoteTimer = 2;
 		this.emoteIndex = emoteID;
-		this.emoteSprite = new Sprite(spritesheet_emotes, this.emoteIndex*200, 0, 200, 300);
+		this.emoteSprite = new Sprite(spritesheet_emotes, this.emoteIndex*150, 0, 150, 225);
 		this.drawEmote = true;
 		this.closeEmotes();
 		for (var i = 0; i < this.babies.length; i++) {
@@ -2165,7 +2165,7 @@ function Player(id, position, shape, color, eyes){
 		}
 
 		if(this.drawEmote){
-			this.emoteSprite.draw(ctx, drawX, drawY-200);
+			this.emoteSprite.draw(ctx, drawX, drawY-160);
 		}
 
 		// Hitbox (debug)

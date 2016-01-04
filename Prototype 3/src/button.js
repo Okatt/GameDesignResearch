@@ -112,7 +112,7 @@ function BubbleButton(position, radius, emoteIndex, bgColor){
 	this.bgAlpha = 1;
 
 	this.emoteIndex = emoteIndex;
-	this.emote = new Sprite(spritesheet_emotes, this.emoteIndex*200, 0, 200, 300);
+	this.emote = new Sprite(spritesheet_emotes, this.emoteIndex*150, 0, 150, 225);
 
 	// State
 	this.mouseOver = false;
@@ -164,7 +164,7 @@ function BubbleButton(position, radius, emoteIndex, bgColor){
 			//this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
 			
 			// Call the onClick function when the button is pressed
-			if(checkPointvsCC(new Vector2(mouse.x, mouse.y), this.getHitbox()) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+			if(checkPointvsCC(new Vector2(mouse.x+camera.position.x, mouse.y+camera.position.y), this.getHitbox()) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
 				console.log("Pressed");
 				this.isPressed = true;
 				this.onClick();

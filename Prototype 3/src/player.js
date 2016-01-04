@@ -60,11 +60,11 @@ function Player(id, position, shape, color, eyes){
 		var nextPos;
 		for (var i = 0; i < emotes; i++) {
 
-			nextPos = new Vector2(0, -220);
+			nextPos = new Vector2(0, -140);
 			var r = i*(360/emotes);							
 			nextPos.rotate(r);
 
-			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-60+nextPos.y), 80, i, "#FFFFFF");
+			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-60+nextPos.y), 60, i, "#FFFFFF");
 			this.emoteButtons.push(b);
 			gameObjects.push(b);
 		}
@@ -81,7 +81,7 @@ function Player(id, position, shape, color, eyes){
 	this.displayEmote = function(emoteID){
 		this.emoteTimer = 2;
 		this.emoteIndex = emoteID;
-		this.emoteSprite = new Sprite(spritesheet_emotes, this.emoteIndex*200, 0, 200, 300);
+		this.emoteSprite = new Sprite(spritesheet_emotes, this.emoteIndex*150, 0, 150, 225);
 		this.drawEmote = true;
 		this.closeEmotes();
 		for (var i = 0; i < this.babies.length; i++) {
@@ -256,7 +256,7 @@ function Player(id, position, shape, color, eyes){
 		}
 
 		if(this.drawEmote){
-			this.emoteSprite.draw(ctx, drawX, drawY-200);
+			this.emoteSprite.draw(ctx, drawX, drawY-160);
 		}
 
 		// Hitbox (debug)
