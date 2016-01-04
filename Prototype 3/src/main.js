@@ -33,6 +33,10 @@ var acceptButton;
 var rejectButton;
 var makeBabyButton;
 
+var gemSprite;
+var gems;
+var nodeSpawner;
+
 //change dimensions for new crown sprite
 var crownSprite = new Sprite(spritesheet_crown, 0, 0, 140, 140);
 var crownSpriteSmall = new Sprite(spritesheet_crown_small, 0, 0, 70, 70);
@@ -181,6 +185,14 @@ function initializePlayer(){
 	shareButton = new TextButton(new Vector2(canvas.width/2, canvas.height - 50), 100, 50, "SHARE", color.BLUE);
 	shareButton.onClick = function(){share()};
 	gameObjects.push(shareButton);
+
+	gems = 0;
+	gemSprite = new Sprite(spritesheet_gem, 0, 0, 100, 100);
+
+	nodeSpawner = new NodeSpawner();
+	gameObjects.push(nodeSpawner);
+	nodeSpawner.spawnNew();
+
 }
 
 function run(){
@@ -271,5 +283,12 @@ function render(lagOffset){
 		for(var ob = 0; ob < gameObjects.length; ob++){
 			gameObjects[ob].render(lagOffset);
 		}
+
+		//gemcounter
+		gemSprite.draw(ctx, 100, canvas.height-100);
+		ctx.font = "48px Righteous";
+		ctx.fillStyle = "#3CD15D";
+		ctx.textAlign = "center";
+		ctx.fillText(gems.toString(), 185, canvas.height-85);
 	}	
 }
