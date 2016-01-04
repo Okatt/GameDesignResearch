@@ -517,16 +517,16 @@ function checkCrown(exclude){
     // Nothing happends
   }else if(!currentKing && newKing){
     // The new king will get the crown (no one had the crown)
-    socket.emit('announce', "X is the new king!");    
+    socket.emit('announce', "There is a new king!");    
     newKing.getCrown();
   }else if(currentKing && !newKing){
     // No one will be the king
-      socket.emit('announce', "X loses his crown..");
+      socket.emit('announce', "The king has fallen...");
       currentKing.loseCrown();
   }else if(currentKing && newKing){
       // Since currentKing !== newKing the new king must have more babies thus
       // The new king will steal the crown from the current king
-      socket.emit('announce', "X took the crown from Y!");
+      socket.emit('announce', "The king has been overthrown!");
       currentKing.loseCrown();
       newKing.getCrown();
   }
