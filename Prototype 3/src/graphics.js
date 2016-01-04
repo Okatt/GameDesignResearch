@@ -87,20 +87,31 @@ function Sprite(img, startX, startY, width, height, center, frameCount, fps, loo
 	this.frameIndex = 0;
 	this.loop = loop;
 	this.isDone = false;
+	this.isPaused = false;
 
 	this.reset = function(){
 		this.frameIndex = 0;
 		this.isDone = false;
 	};
 
+	this.play = function(){
+		this.isPaused = false;
+	};
+
+	this.pause = function(){
+		this.isPaused = true;
+	};
+
 	this.update = function(){
-		// We want to maintain the correct frametime thus we add fps/UPS (updates per second)
-		this.frameIndex = (this.frameIndex+(UPDATE_DURATION/1000*this.fps));
-		if(this.frameIndex > this.frameCount){
-			if(this.loop){
-				this.frameIndex = this.frameIndex % this.frameCount;
-			}else{
-				this.frameIndex = this.frameCount-1; this.isDone = true;
+		if(!this.isPaused){
+			// We want to maintain the correct frametime thus we add fps/UPS (updates per second)
+			this.frameIndex = (this.frameIndex+(UPDATE_DURATION/1000*this.fps));
+			if(this.frameIndex > this.frameCount){
+				if(this.loop){
+					this.frameIndex = this.frameIndex % this.frameCount;
+				}else{
+					this.frameIndex = this.frameCount-1; this.isDone = true;
+				}
 			}
 		}
 	};
