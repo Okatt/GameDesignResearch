@@ -1114,16 +1114,16 @@ function checkCrown(exclude){
     // Nothing happends
   }else if(!currentKing && newKing){
     // The new king will get the crown (no one had the crown)
-    socket.emit('announce', "X is the new king!");    
+    socket.emit('announce', "There is a new king!");    
     newKing.getCrown();
   }else if(currentKing && !newKing){
     // No one will be the king
-      socket.emit('announce', "X loses his crown..");
+      socket.emit('announce', "The king has fallen...");
       currentKing.loseCrown();
   }else if(currentKing && newKing){
       // Since currentKing !== newKing the new king must have more babies thus
       // The new king will steal the crown from the current king
-      socket.emit('announce', "X took the crown from Y!");
+      socket.emit('announce', "The king has been overthrown!");
       currentKing.loseCrown();
       newKing.getCrown();
   }
@@ -1565,7 +1565,7 @@ var makeBabyButton;
 //change dimensions for new crown sprite
 var crownSprite = new Sprite(spritesheet_crown, 0, 0, 140, 140);
 var crownSpriteSmall = new Sprite(spritesheet_crown_small, 0, 0, 70, 70);
-var grassSprite = new Sprite(spritesheet_grass, 0, 0, 2000, 300);
+var grassSprite = new Sprite(spritesheet_environment, 0, 400, 2000, 200);
 
 window.onload = function main(){
 	//Run

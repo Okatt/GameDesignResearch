@@ -36,7 +36,7 @@ var makeBabyButton;
 //change dimensions for new crown sprite
 var crownSprite = new Sprite(spritesheet_crown, 0, 0, 140, 140);
 var crownSpriteSmall = new Sprite(spritesheet_crown_small, 0, 0, 70, 70);
-var grassSprite = new Sprite(spritesheet_grass, 0, 0, 2000, 300);
+var grassSprite = new Sprite(spritesheet_environment, 0, 400, 2000, 200);
 
 window.onload = function main(){
 	//Run
