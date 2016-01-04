@@ -337,3 +337,56 @@ function Pointer(target) {
 		this.sprite.draw(ctx, drawX, drawY+this.offset);
 	}
 }
+
+function ResourceNode(position, spawner, health, value){
+	this.type = "Resource";
+	this.isAlive = true;
+	
+	// Physics
+	this.position = position;
+	this.previousPos = this.position.clone();
+	this.velocity = new Vector2(0, 0);
+	this.width = 200;
+	this.height = 200;
+	this.drag = 0.95;
+
+	// Graphics
+	this.depth = canvas.height-this.position.y;
+	this.body = new Sprite(spritesheet_environment, 1000, 0, 200, 200, new Vector2(100, 100), 5, 0, false);
+	this.body.frameIndex = 0;
+
+	this.isSolid = true;
+	this.isDynamic = true;
+
+	this.hits = 0;
+	this.spawner = spawner;
+	this.health = health;
+	this.value = value;
+
+	this.kill = function(){
+		gems += this.value;
+		this.spawner.spawnNew();
+		this.isAlive = false;
+	}
+
+	this.getHitbox = function(){
+		return new AABB(this.position.x - this.width/2, this.position.y - this.height/2, this.width, this.height);
+	}
+
+	this.update = function(){
+		var hitbox = new AABB(this.position.x-60, this.position.y-120, 120, 120); // Hitbox for click detection
+
+			if(checkPointvsAABB(new Vector2(mouse.x+camera.position.x, mouse.y+camera.position.y), hitbox) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+			if(this.hits < this.health){ this.hits++; this.body.frameIndex = this.hits;}
+			else{ this.kill(); }
+		}
+	}
+
+	this.render = function(lagOffset){
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
+
+		// Body
+		this.body.draw(ctx, drawX, drawY);
+	}
+}

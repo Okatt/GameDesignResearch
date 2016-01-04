@@ -1667,6 +1667,10 @@ var acceptButton;
 var rejectButton;
 var makeBabyButton;
 
+var gemSprite;
+var gems;
+var nodeSpawner;
+
 //change dimensions for new crown sprite
 var crownSprite = new Sprite(spritesheet_crown, 0, 0, 140, 140);
 var crownSpriteSmall = new Sprite(spritesheet_crown_small, 0, 0, 70, 70);
@@ -1817,6 +1821,14 @@ function initializePlayer(){
 	shareButton = new TextButton(new Vector2(canvas.width/2, canvas.height-50), 100, 50, "SHARE", "#3C5899", "#FFFFFF");
 	shareButton.onClick = function(){share()};
 	gameObjects.push(shareButton);
+
+	gems = 0;
+	gemSprite = new Sprite(spritesheet_gem, 0, 0, 100, 100);
+
+	nodeSpawner = new NodeSpawner();
+	gameObjects.push(nodeSpawner);
+	nodeSpawner.spawnNew();
+
 }
 
 function run(){
@@ -1907,7 +1919,37 @@ function render(lagOffset){
 		for(var ob = 0; ob < gameObjects.length; ob++){
 			gameObjects[ob].render(lagOffset);
 		}
+
+		//gemcounter
+		gemSprite.draw(ctx, 100, canvas.height-100);
+		ctx.font = "48px Righteous";
+		ctx.fillStyle = "#3CD15D";
+		ctx.textAlign = "center";
+		ctx.fillText(gems.toString(), 185, canvas.height-85);
 	}	
+}
+function NodeSpawner(){
+	this.type = "NodeSpawner";
+	this.isAlive = true;
+
+	this.nodes = [];
+
+	this.kill = function(){
+		this.isAlive = false;
+	}
+
+	this.spawnNew = function(){
+		var n = new ResourceNode(new Vector2(canvas.width/2, canvas.height/2), this, 4, 1);
+
+		this.nodes.push(n);
+		gameObjects.push(n);
+	}
+
+	this.update = function(){
+	}
+
+	this.render = function(lagOffset){
+	}
 }
 //*****************************************************************************************
 //	Physics
@@ -2421,6 +2463,59 @@ function Pointer(target) {
 
 		// Image
 		this.sprite.draw(ctx, drawX, drawY+this.offset);
+	}
+}
+
+function ResourceNode(position, spawner, health, value){
+	this.type = "Resource";
+	this.isAlive = true;
+	
+	// Physics
+	this.position = position;
+	this.previousPos = this.position.clone();
+	this.velocity = new Vector2(0, 0);
+	this.width = 200;
+	this.height = 200;
+	this.drag = 0.95;
+
+	// Graphics
+	this.depth = canvas.height-this.position.y;
+	this.body = new Sprite(spritesheet_environment, 1000, 0, 200, 200, new Vector2(100, 100), 5, 0, false);
+	this.body.frameIndex = 0;
+
+	this.isSolid = true;
+	this.isDynamic = true;
+
+	this.hits = 0;
+	this.spawner = spawner;
+	this.health = health;
+	this.value = value;
+
+	this.kill = function(){
+		gems += this.value;
+		this.spawner.spawnNew();
+		this.isAlive = false;
+	}
+
+	this.getHitbox = function(){
+		return new AABB(this.position.x - this.width/2, this.position.y - this.height/2, this.width, this.height);
+	}
+
+	this.update = function(){
+		var hitbox = new AABB(this.position.x-60, this.position.y-120, 120, 120); // Hitbox for click detection
+
+			if(checkPointvsAABB(new Vector2(mouse.x+camera.position.x, mouse.y+camera.position.y), hitbox) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+			if(this.hits < this.health){ this.hits++; this.body.frameIndex = this.hits;}
+			else{ this.kill(); }
+		}
+	}
+
+	this.render = function(lagOffset){
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset) - camera.interpolatedPos().x;
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
+
+		// Body
+		this.body.draw(ctx, drawX, drawY);
 	}
 }
 //*****************************************************************************************
