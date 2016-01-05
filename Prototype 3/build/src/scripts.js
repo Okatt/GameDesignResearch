@@ -532,7 +532,7 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 
 	this.checkMatch = function(){
 		for(var i = 0; i < memoryTiles.length; i++){
-			if(memoryTiles[i].isRevealed && memoryTiles[i].number !== this.number && memoryTiles[i].index === this.index && memoryTiles[i].value === this.value){
+			if(memoryTiles[i].startURtimer === false && memoryTiles[i].isRevealed && memoryTiles[i].number !== this.number && memoryTiles[i].index === this.index && memoryTiles[i].value === this.value){
 				socket.emit('memoryMatch', memoryTiles[i], this, matchId, playerId, this.index);
 				flips = 0;
 				return;
@@ -544,7 +544,10 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 				socket.emit('delayedUnreveal', memoryTiles[i].number, matchId, playerId);
 			}
 		}
-		socket.emit('changeTurn', playerId, matchId);
+		if(turnPlayer){
+			turnTimer = 1;
+		}
+		turnPlayer = false;
 	};
 
 	// Update
@@ -1030,8 +1033,26 @@ socket.on('memoryCard', function(memoryTile, buttonID){
 socket.on('memoryMatch', function(tile1, tile2, index){
   var t1, t2;
 
-  t1 = new MemoryButton(new Vector2(tile1.position.x, tile1.position.y), 100, 100, tile1.index, tile1.value, tile1.number, "#FFFFFF");
-  t2 = new MemoryButton(new Vector2(tile2.position.x, tile2.position.y), 100, 100, tile2.index, tile2.value, tile2.number, "#FFFFFF");
+  if(tile1.number >= 8){
+    var t1 = new MemoryButton(new Vector2(((canvas.width/2)-186) + ((tile1.number-8)*124), ((canvas.height/2)-250) + 2*124), 100, 100, tile1.index, tile1.value, tile1.number, "#FFFFFF");
+  }
+  else if(tile1.number >= 4){
+    var t1 = new MemoryButton(new Vector2(((canvas.width/2)-186) + ((tile1.number-4)*124), ((canvas.height/2)-250) + 124), 100, 100, tile1.index, tile1.value, tile1.number, "#FFFFFF");
+  }
+  else {
+     var t1 = new MemoryButton(new Vector2(((canvas.width/2)-186) + (tile1.number*124), ((canvas.height/2)-250)), 100, 100, tile1.index, tile1.value, tile1.number, "#FFFFFF");
+  }
+
+  if(tile2.number >= 8){
+    var t2 = new MemoryButton(new Vector2(((canvas.width/2)-186) + ((tile2.number-8)*124), ((canvas.height/2)-250) + 2*124), 100, 100, tile2.index, tile2.value, tile2.number, "#FFFFFF");
+  }
+  else if(tile2.number >= 4){
+    var t2 = new MemoryButton(new Vector2(((canvas.width/2)-186) + ((tile2.number-4)*124), ((canvas.height/2)-250) + 124), 100, 100, tile2.index, tile2.value, tile2.number, "#FFFFFF");
+  }
+  else {
+     var t2 = new MemoryButton(new Vector2(((canvas.width/2)-186) + (tile2.number*124), ((canvas.height/2)-250)), 100, 100, tile2.index, tile2.value, tile2.number, "#FFFFFF");
+  }
+
 
   t1.isRevealed = true;
   t2.isRevealed = true; 
@@ -1671,6 +1692,8 @@ var gemSprite;
 var gems;
 var nodeSpawner;
 
+var turnTimer = -1;
+
 //change dimensions for new crown sprite
 var crownSprite = new Sprite(spritesheet_crown, 0, 0, 140, 140);
 var crownSpriteSmall = new Sprite(spritesheet_crown_small, 0, 0, 70, 70);
@@ -1798,8 +1821,6 @@ function initializePlayer(){
 	playerAvatar.state = "AVATAR";
 	gameObjects.push(playerAvatar);
 
-	gameObjects.push( new Chest(new Vector2(1920/2-340, 1080/2+120)) );
-
 	acceptButton = new TextButton(new Vector2(canvas.width/2-110, 136), 200, 60, "Yep", "#141414", "#FFFFFF");
 	acceptButton.onClick = function(){acceptMatch()};
 	gameObjects.push(acceptButton);
@@ -1821,6 +1842,8 @@ function initializePlayer(){
 	shareButton = new TextButton(new Vector2(canvas.width/2, canvas.height-50), 100, 50, "SHARE", "#3C5899", "#FFFFFF");
 	shareButton.onClick = function(){share()};
 	gameObjects.push(shareButton);
+	/*
+	gameObjects.push( new Chest(new Vector2(1920/2-340, 1080/2+120)) );
 
 	gems = 0;
 	gemSprite = new Sprite(spritesheet_gem, 0, 0, 100, 100);
@@ -1828,7 +1851,7 @@ function initializePlayer(){
 	nodeSpawner = new NodeSpawner();
 	gameObjects.push(nodeSpawner);
 	nodeSpawner.spawnNew();
-
+	*/
 }
 
 function run(){
@@ -1876,6 +1899,11 @@ function update(){
 		}
 	}
 
+	if(turnTimer > 0){
+		turnTimer -= UPDATE_DURATION/1000;
+		if(turnTimer === 0){socket.emit('changeTurn', playerId, matchId); turnTimer = -1;}
+	}
+
 	// Camera
 	camera.update();
 
@@ -1919,13 +1947,14 @@ function render(lagOffset){
 		for(var ob = 0; ob < gameObjects.length; ob++){
 			gameObjects[ob].render(lagOffset);
 		}
-
+		/*
 		// Gem counter
 		gemSprite.draw(ctx, 100, canvas.height-100);
 		ctx.font = "48px Righteous";
 		ctx.fillStyle = "#3CD15D";
 		ctx.textAlign = "left";
 		ctx.fillText(gems.toString(), 164, canvas.height-85);
+		*/
 	}	
 }
 //*****************************************************************************************

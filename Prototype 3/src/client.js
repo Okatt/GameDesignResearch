@@ -339,8 +339,26 @@ socket.on('memoryCard', function(memoryTile, buttonID){
 socket.on('memoryMatch', function(tile1, tile2, index){
   var t1, t2;
 
-  t1 = new MemoryButton(new Vector2(tile1.position.x, tile1.position.y), 100, 100, tile1.index, tile1.value, tile1.number, "#FFFFFF");
-  t2 = new MemoryButton(new Vector2(tile2.position.x, tile2.position.y), 100, 100, tile2.index, tile2.value, tile2.number, "#FFFFFF");
+  if(tile1.number >= 8){
+    var t1 = new MemoryButton(new Vector2(((canvas.width/2)-186) + ((tile1.number-8)*124), ((canvas.height/2)-250) + 2*124), 100, 100, tile1.index, tile1.value, tile1.number, "#FFFFFF");
+  }
+  else if(tile1.number >= 4){
+    var t1 = new MemoryButton(new Vector2(((canvas.width/2)-186) + ((tile1.number-4)*124), ((canvas.height/2)-250) + 124), 100, 100, tile1.index, tile1.value, tile1.number, "#FFFFFF");
+  }
+  else {
+     var t1 = new MemoryButton(new Vector2(((canvas.width/2)-186) + (tile1.number*124), ((canvas.height/2)-250)), 100, 100, tile1.index, tile1.value, tile1.number, "#FFFFFF");
+  }
+
+  if(tile2.number >= 8){
+    var t2 = new MemoryButton(new Vector2(((canvas.width/2)-186) + ((tile2.number-8)*124), ((canvas.height/2)-250) + 2*124), 100, 100, tile2.index, tile2.value, tile2.number, "#FFFFFF");
+  }
+  else if(tile2.number >= 4){
+    var t2 = new MemoryButton(new Vector2(((canvas.width/2)-186) + ((tile2.number-4)*124), ((canvas.height/2)-250) + 124), 100, 100, tile2.index, tile2.value, tile2.number, "#FFFFFF");
+  }
+  else {
+     var t2 = new MemoryButton(new Vector2(((canvas.width/2)-186) + (tile2.number*124), ((canvas.height/2)-250)), 100, 100, tile2.index, tile2.value, tile2.number, "#FFFFFF");
+  }
+
 
   t1.isRevealed = true;
   t2.isRevealed = true; 

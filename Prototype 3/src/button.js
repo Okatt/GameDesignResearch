@@ -273,7 +273,7 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 
 	this.checkMatch = function(){
 		for(var i = 0; i < memoryTiles.length; i++){
-			if(memoryTiles[i].isRevealed && memoryTiles[i].number !== this.number && memoryTiles[i].index === this.index && memoryTiles[i].value === this.value){
+			if(memoryTiles[i].startURtimer === false && memoryTiles[i].isRevealed && memoryTiles[i].number !== this.number && memoryTiles[i].index === this.index && memoryTiles[i].value === this.value){
 				socket.emit('memoryMatch', memoryTiles[i], this, matchId, playerId, this.index);
 				flips = 0;
 				return;
@@ -285,7 +285,10 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 				socket.emit('delayedUnreveal', memoryTiles[i].number, matchId, playerId);
 			}
 		}
-		socket.emit('changeTurn', playerId, matchId);
+		if(turnPlayer){
+			turnTimer = 1;
+		}
+		turnPlayer = false;
 	};
 
 	// Update

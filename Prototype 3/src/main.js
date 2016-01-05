@@ -39,6 +39,8 @@ var gemSprite;
 var gems;
 var nodeSpawner;
 
+var turnTimer = -1;
+
 //change dimensions for new crown sprite
 var crownSprite = new Sprite(spritesheet_crown, 0, 0, 140, 140);
 var crownSpriteSmall = new Sprite(spritesheet_crown_small, 0, 0, 70, 70);
@@ -166,8 +168,6 @@ function initializePlayer(){
 	playerAvatar.state = "AVATAR";
 	gameObjects.push(playerAvatar);
 
-	gameObjects.push( new Chest(new Vector2(1920/2-340, 1080/2+120)) );
-
 	acceptButton = new TextButton(new Vector2(canvas.width/2-110, 136), 200, 60, "Yep", "#141414", "#FFFFFF");
 	acceptButton.onClick = function(){acceptMatch()};
 	gameObjects.push(acceptButton);
@@ -189,6 +189,8 @@ function initializePlayer(){
 	shareButton = new TextButton(new Vector2(canvas.width/2, canvas.height-50), 100, 50, "SHARE", "#3C5899", "#FFFFFF");
 	shareButton.onClick = function(){share()};
 	gameObjects.push(shareButton);
+	/*
+	gameObjects.push( new Chest(new Vector2(1920/2-340, 1080/2+120)) );
 
 	gems = 0;
 	gemSprite = new Sprite(spritesheet_gem, 0, 0, 100, 100);
@@ -196,7 +198,7 @@ function initializePlayer(){
 	nodeSpawner = new NodeSpawner();
 	gameObjects.push(nodeSpawner);
 	nodeSpawner.spawnNew();
-
+	*/
 }
 
 function run(){
@@ -244,6 +246,11 @@ function update(){
 		}
 	}
 
+	if(turnTimer > 0){
+		turnTimer -= UPDATE_DURATION/1000;
+		if(turnTimer === 0){socket.emit('changeTurn', playerId, matchId); turnTimer = -1;}
+	}
+
 	// Camera
 	camera.update();
 
@@ -287,12 +294,13 @@ function render(lagOffset){
 		for(var ob = 0; ob < gameObjects.length; ob++){
 			gameObjects[ob].render(lagOffset);
 		}
-
+		/*
 		// Gem counter
 		gemSprite.draw(ctx, 100, canvas.height-100);
 		ctx.font = "48px Righteous";
 		ctx.fillStyle = "#3CD15D";
 		ctx.textAlign = "left";
 		ctx.fillText(gems.toString(), 164, canvas.height-85);
+		*/
 	}	
 }
