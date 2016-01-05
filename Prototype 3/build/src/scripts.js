@@ -881,6 +881,7 @@ socket.on('confirmedMatch', function(p1ID, p2ID, firstTurn){
     console.log(p1ID +' matched with ' +p2ID);
 
     turnPlayer = turn;
+    matchAvatar.showUnmatch = true;
 
     if(p1ID === playerId){
       matchId = p2ID;
@@ -2336,11 +2337,20 @@ function Player(id, position, shape, color, eyes){
 
 	this.isHighlighted = false;
 
+		this.unMatchButton =  new TextButton(new Vector2(this.position.x-this.width/2-250, this.position.y-300), 200, 60, "Unmatch?", "#FFFFFF", "#141414");
+		gameObjects.push(this.unMatchButton);
+		this.unMatchButton.onClick = function(){endMatch(); this.isVisible = false; this.isDisabled = true;};
+		this.unMatchButton.isVisible = false;
+		this.unMatchButton.isDisabled = true;
+
+		this.showUnmatch = false;
+
 	this.kill = function(){
 		this.isAlive = false;
 		for (var i = 0; i < this.babies.length; i++) {
 			this.babies[i].kill();
 		}
+		this.unMatchButton.kill();
 	}
 
 	this.getHitbox = function(){
@@ -2438,6 +2448,11 @@ function Player(id, position, shape, color, eyes){
 		if(bestMatch){ worldSeekMatch(this, bestMatch); }
 	}
 
+	this.openUnmatch = function(){
+		this.unMatchButton.isVisible = !this.unMatchButton.isVisible;
+		this.unMatchButton.isDisabled = !this.unMatchButton.isDisabled;
+	}
+
 	this.update = function(){
 		// Timer
 		this.timer -= UPDATE_DURATION/1000;
@@ -2499,7 +2514,8 @@ function Player(id, position, shape, color, eyes){
 				break;
 			case "AVATAR":
 			// TODO
-				if(highlighted === false && this.id === playerId){
+				if(highlighted === false){
+					if(this.id === playerId){
 					var hitbox;
 
 					if(this.isLarge){ hitbox = new AABB(this.position.x-150, this.position.y-300, 300, 300); }
@@ -2511,14 +2527,26 @@ function Player(id, position, shape, color, eyes){
 						if(this.emoteButtons.length === 0){ this.openEmotes(); }
 						else{ this.closeEmotes(); }
 					}
-				}
-
-				for (var i = 0; i < this.emoteButtons.length; i++) {
-					if(this.emoteButtons[i].isPressed){
-						socket.emit('pressedEmote', i, playerId, matchId);
 					}
-				}	
+					else if(this.showUnmatch){
+						var hitbox;
 
+						if(this.isLarge){ hitbox = new AABB(this.position.x-150, this.position.y-300, 300, 300); }
+						else{ hitbox = new AABB(this.position.x-60, this.position.y-120, 120, 120); /*Hitbox for click detection*/ }
+					
+
+						if(checkPointvsAABB(new Vector2(mouse.x+camera.position.x, mouse.y+camera.position.y), hitbox) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+							console.log("match pressed");
+							this.openUnmatch();
+						}	
+					}
+
+					for (var i = 0; i < this.emoteButtons.length; i++) {
+						if(this.emoteButtons[i].isPressed){
+							socket.emit('pressedEmote', i, playerId, matchId);
+						}
+					}	
+				}
 				break;
 			default:
 				console.log("Err - State evaluation error: "+this.state+" is not a valid state. Reference: "+this);

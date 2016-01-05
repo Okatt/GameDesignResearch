@@ -185,6 +185,7 @@ socket.on('confirmedMatch', function(p1ID, p2ID, firstTurn){
     console.log(p1ID +' matched with ' +p2ID);
 
     turnPlayer = turn;
+    matchAvatar.showUnmatch = true;
 
     if(p1ID === playerId){
       matchId = p2ID;
