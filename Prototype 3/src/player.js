@@ -17,6 +17,7 @@ function Player(id, position, shape, color, eyes){
 	// Graphics
 	this.depth = canvas.height-this.position.y;
 	this.body = new Sprite(spritesheet_characters, shape*120, color*120, 120, 120, new Vector2(60, 120));
+	this.bodyLarge = new Sprite(spritesheet_characters_l, shape*300, color*300, 300, 300, new Vector2(150, 300));
 	this.eyes = eyes;
 
 	this.color = color;
@@ -29,10 +30,10 @@ function Player(id, position, shape, color, eyes){
 	this.isSolid = true;
 	this.isDynamic = true;
 	this.state = "IDLE"; // IDLE, MOVING
+	this.isLarge = false;
 	this.babies = [];
 
 	this.emoteButtons = [];
-
 	this.drawEmote = false;
 	this.emoteTimer = 0;
 	this.emoteIndex;
@@ -62,11 +63,13 @@ function Player(id, position, shape, color, eyes){
 		var nextPos;
 		for (var i = 0; i < emotes; i++) {
 
-			nextPos = new Vector2(0, -140);
+			if(this.isLarge){ nextPos = new Vector2(0, -200);}
+			else{nextPos = new Vector2(0, -140);}
+
 			var r = i*(360/emotes);							
 			nextPos.rotate(r);
 
-			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-60+nextPos.y), 60, "#FFFFFF", new Sprite(spritesheet_emotes, i*150, 0, 150, 225));
+			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-150+nextPos.y), 60, "#FFFFFF", new Sprite(spritesheet_emotes, i*150, 0, 150, 225));
 			this.emoteButtons.push(b);
 			gameObjects.push(b);
 		}
@@ -207,7 +210,11 @@ function Player(id, position, shape, color, eyes){
 			case "AVATAR":
 			// TODO
 				if(highlighted === false && this.id === playerId){
-					var hitbox = new AABB(this.position.x-60, this.position.y-120, 120, 120); // Hitbox for click detection
+					var hitbox;
+
+					if(this.isLarge){ hitbox = new AABB(this.position.x-150, this.position.y-300, 300, 300); }
+					else{ hitbox = new AABB(this.position.x-60, this.position.y-120, 120, 120); /*Hitbox for click detection*/ }
+					
 
 					if(checkPointvsAABB(new Vector2(mouse.x+camera.position.x, mouse.y+camera.position.y), hitbox) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
 						console.log("player pressed");
@@ -234,7 +241,8 @@ function Player(id, position, shape, color, eyes){
 		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
 
 		// Body
-		this.body.draw(ctx, drawX, drawY);
+		if(this.state === "AVATAR"){ this.bodyLarge.draw(ctx, drawX, drawY); }
+		else{ this.body.draw(ctx, drawX, drawY); }
 
 		// Debug
 		// ctx.textAlign = "center";
@@ -244,15 +252,35 @@ function Player(id, position, shape, color, eyes){
 
 		// Eyes
 		if(this.eyeTimer >= 0.1){
-			if(this.eyes === 1){ drawCircle(ctx, drawX, drawY-50, 25, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-50+randomRange(0, 2), 22, true, "#323232", 1); }
-			else if(this.eyes === 2){ 
-				drawCircle(ctx, drawX-22, drawY-50, 20, true, "#FFFFFF", 1); drawCircle(ctx, drawX-22+randomRange(0, 2), drawY-50+randomRange(0, 2), 17, true, "#323232", 1);
-				drawCircle(ctx, drawX+22, drawY-50, 20, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-50+randomRange(0, 2), 17, true, "#323232", 1);
-			}
-			else{
-				drawCircle(ctx, drawX, drawY-74, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-74+randomRange(0, 2), 15, true, "#323232", 1);
-				drawCircle(ctx, drawX-22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX-22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
-				drawCircle(ctx, drawX+22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
+			if(this.isLarge){
+				// if(this.eyes === 1){ drawCircle(ctx, drawX, drawY+(4*2.5), (25*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY+(4*2.5)+randomRange(0, 2), (22*2.5), true, "#323232", 1); }
+				// else if(this.eyes === 2){ 
+				// 	drawCircle(ctx, drawX-(22*2.5), drawY+(4*2.5), (20*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX-(22*2.5)+randomRange(0, 2), drawY+(4*2.5)+randomRange(0, 2), (17*2.5), true, "#323232", 1);
+				// 	drawCircle(ctx, drawX+(22*2.5), drawY+(4*2.5), (20*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX+(22*2.5)+randomRange(0, 2), drawY+(4*2.5)+randomRange(0, 2), (17*2.5), true, "#323232", 1);
+				// }else{
+				// 	drawCircle(ctx, drawX, drawY-(14*2.5), (18*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-(14*2.5)+randomRange(0, 2), (15*2.5), true, "#323232", 1);
+				// 	drawCircle(ctx, drawX-(22*2.5), drawY+(18*2.5), (18*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX-(22*2.5)+randomRange(0, 2), drawY+(18*2.5)+randomRange(0, 2), (15*2.5), true, "#323232", 1);
+				// 	drawCircle(ctx, drawX+(22*2.5), drawY+(18*2.5), (18*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX+(22*2.5)+randomRange(0, 2), drawY+(18*2.5)+randomRange(0, 2), (15*2.5), true, "#323232", 1);
+				// }
+				if(this.eyes === 1){ drawCircle(ctx, drawX, drawY-(50*2.5), (25*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-(50*2.5)+randomRange(0, 2), (22*2.5), true, "#323232", 1); }
+				else if(this.eyes === 2){ 
+					drawCircle(ctx, drawX-(22*2.5), drawY-(50*2.5), (20*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX-(22*2.5)+randomRange(0, 2), drawY-(50*2.5)+randomRange(0, 2), (17*2.5), true, "#323232", 1);
+					drawCircle(ctx, drawX+(22*2.5), drawY-(50*2.5), (20*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX+(22*2.5)+randomRange(0, 2), drawY-(50*2.5)+randomRange(0, 2), (17*2.5), true, "#323232", 1);
+				}else{
+					drawCircle(ctx, drawX, drawY-(74*2.5), (18*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-(74*2.5)+randomRange(0, 2), (15*2.5), true, "#323232", 1);
+					drawCircle(ctx, drawX-(22*2.5), drawY-(38*2.5), (18*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX-(22*2.5)+randomRange(0, 2), drawY-(38*2.5)+randomRange(0, 2), (15*2.5), true, "#323232", 1);
+					drawCircle(ctx, drawX+(22*2.5), drawY-(38*2.5), (18*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX+(22*2.5)+randomRange(0, 2), drawY-(38*2.5)+randomRange(0, 2), (15*2.5), true, "#323232", 1);
+				}
+			}else{
+				if(this.eyes === 1){ drawCircle(ctx, drawX, drawY-50, 25, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-50+randomRange(0, 2), 22, true, "#323232", 1); }
+				else if(this.eyes === 2){ 
+					drawCircle(ctx, drawX-22, drawY-50, 20, true, "#FFFFFF", 1); drawCircle(ctx, drawX-22+randomRange(0, 2), drawY-50+randomRange(0, 2), 17, true, "#323232", 1);
+					drawCircle(ctx, drawX+22, drawY-50, 20, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-50+randomRange(0, 2), 17, true, "#323232", 1);
+				}else{
+					drawCircle(ctx, drawX, drawY-74, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-74+randomRange(0, 2), 15, true, "#323232", 1);
+					drawCircle(ctx, drawX-22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX-22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
+					drawCircle(ctx, drawX+22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
+				}
 			}
 		}
 
@@ -288,7 +316,7 @@ function Pointer(target) {
 	this.position = this.target.position.clone();
 	this.previousPos = this.position.clone();
 	this.velocity = new Vector2(0, 0);
-	this.offset = -150;
+	this.offset = -350;
 	this.min = this.offset;
 	this.max = this.offset+10; // -130
 	this.dir = 1;

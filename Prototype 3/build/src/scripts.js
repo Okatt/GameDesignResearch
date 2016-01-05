@@ -19,6 +19,8 @@ function AnnouncementManager(){
 	// Data
 	this.queue = [];
 	this.lastMessage = false;
+	this.defaultMessage = "JOIN THE PARTY AT  polygonpals.tk";
+	this.scrollSpeed = 5;
 	this.isSolid = false;
 	this.isDynamic = false;
 
@@ -31,7 +33,7 @@ function AnnouncementManager(){
 
 	this.nextMessage = function(){
 		if(this.queue.length >= 1){
-			this.lastMessage = new Announcement(new Vector2(this.position.x+this.width/2, this.position.y+this.height*0.25), this.queue[0]);
+			this.lastMessage = new Announcement(new Vector2(this.position.x+this.width/2, this.position.y+this.height*0.25), this.scrollSpeed, this.queue[0]);
 			gameObjects.push(this.lastMessage);
 
 			// Remove the message from the queue
@@ -41,10 +43,10 @@ function AnnouncementManager(){
 
 	this.update = function(){
 		if(!this.lastMessage){
-			if(this.queue.length === 0){this.announce("JOIN THE PARTY AT  polygonpals.tk");}
+			if(this.queue.length === 0){this.announce(this.defaultMessage);}
 			this.nextMessage();
 		}else if(this.lastMessage.position.x+this.lastMessage.measureTextWidth() <= canvas.width){
-			if(this.queue.length === 0){this.announce("JOIN THE PARTY AT  polygonpals.tk");}
+			if(this.queue.length === 0){this.announce(this.defaultMessage);}
 			this.nextMessage();
 		}
 	}
@@ -59,14 +61,14 @@ function AnnouncementManager(){
 }
 
 // Announcement
-function Announcement(position, message){
+function Announcement(position, speed, message){
 	this.isAlive = true;
 	this.type = "Announcement";
 
 	// Positioning
 	this.position = position;
 	this.previousPos = this.position.clone();
-	this.velocity = new Vector2(-2, 0);
+	this.velocity = new Vector2(-speed, 0);
 	
 	// Graphics
 	this.depth = -2001;
@@ -272,7 +274,7 @@ function TextButton(position, width, height, text, bgColor, textColor){
 	this.height = height;
 
 	// Graphics
-	this.depth = 0;
+	this.depth = -2001;
 	this.bgColor = bgColor;
 	this.bgAlpha = 1;
 	this.text = text;
@@ -843,10 +845,15 @@ socket.on('matchRequest', function(mID, mShape, mColor, mEyes, mCrown){
   matchEyes = mEyes;
   potentialMatchId = mID;
 
-  matchAvatar = new Player(potentialMatchId, new Vector2(1920/2+200, 1080/2-150), matchShape, matchColor, matchEyes);
+  // Potential match
+  matchAvatar = new Player(potentialMatchId, new Vector2(1920/2+300, 1080/2+150), matchShape, matchColor, matchEyes);
   matchAvatar.state = "AVATAR";
+  matchAvatar.isLarge = true;
   matchAvatar.hasCrown = mCrown;
   gameObjects.push(matchAvatar);
+
+  playerAvatar.position = new Vector2(1920/2-300, 1080/2+150);
+  playerAvatar.previousPos = playerAvatar.position.clone();
 
   clientStatus = 'Do you want to play with this person?';
 
@@ -916,6 +923,10 @@ socket.on('unMatch', function(p1ID, p2ID){
 
       console.log(playerId +' unmatched ' +p2ID);
       clientStatus = 'The match is over.';
+
+      // Set player back
+      playerAvatar.position = new Vector2(1920/2, 1080/2+150);
+      playerAvatar.previousPos = playerAvatar.position.clone();
 
       // Set camera back
       camera.setTargetPosition(new Vector2(1920/2, 1080/2));
@@ -1105,7 +1116,7 @@ socket.on('delayedUnreveal', function(tileNumber){
 
 socket.on('memoryBaby', function(id, shape, color, eyes){
   endMemory();
-  babyAvatar = new Baby(new Vector2(1920/2, 140), null, shape, color, eyes);
+  babyAvatar = new Baby(new Vector2(1920/2, 340), null, shape, color, eyes);
   babyAvatar.state = "AVATAR";
   babyAvatar.moving = false;
   gameObjects.push(babyAvatar);
@@ -1274,7 +1285,7 @@ function startMemory(){
   }
 
   // Move camera
-  camera.setTargetPosition(new Vector2(1920/2, 100));
+  camera.setTargetPosition(new Vector2(1920/2, 300));
 
   // Create turn pointer
   if(turnPlayer){ turnPointer = new Pointer(playerAvatar); gameObjects.push(turnPointer);}
@@ -1865,44 +1876,23 @@ function initializeWorld(){
 function initializePlayer(){
 	initialize();
 
-	// Trees
-	gameObjects.push( new Prop(new Vector2(50, 446), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
-	gameObjects.push( new Prop(new Vector2(314, 370), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
-	//gameObjects.push( new Prop(new Vector2(640, 340), 90, 40, new Sprite(spritesheet_environment, 400, 0, 400, 400, new Vector2(196, 366))) );
-	gameObjects.push( new Prop(new Vector2(1530, 380), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
-	gameObjects.push( new Prop(new Vector2(1900, 446), 90, 40, new Sprite(spritesheet_environment, 0, 0, 400, 400, new Vector2(196, 366))) );
-
-	// Bushes
-	//gameObjects.push( new Prop(new Vector2(780, 335), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
-	gameObjects.push( new Prop(new Vector2(284, 400), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
-	gameObjects.push( new Prop(new Vector2(90, 470), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
-	gameObjects.push( new Prop(new Vector2(70, 780), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
-	gameObjects.push( new Prop(new Vector2(130, 850), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
-	gameObjects.push( new Prop(new Vector2(100, 970), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
-	gameObjects.push( new Prop(new Vector2(340, 1030), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
-	gameObjects.push( new Prop(new Vector2(700, 800), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
-	gameObjects.push( new Prop(new Vector2(1800, 940), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
-	gameObjects.push( new Prop(new Vector2(1720, 980), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
-	gameObjects.push( new Prop(new Vector2(1830, 740), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
-	gameObjects.push( new Prop(new Vector2(1645, 470), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
-	gameObjects.push( new Prop(new Vector2(1720, 510), 80, 20, new Sprite(spritesheet_environment, 800, 0, 200, 200, new Vector2(100, 140))) );
-
-	// Stones
-	gameObjects.push( new Prop(new Vector2(800, 780), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
-	gameObjects.push( new Prop(new Vector2(1750, 450), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
-	gameObjects.push( new Prop(new Vector2(1700, 920), 150, 20, new Sprite(spritesheet_environment, 800, 200, 200, 200, new Vector2(100, 150))) );
-
-	playerAvatar = new Player(playerId, new Vector2(1920/2-200, 1080/2-150), playerShape, playerColor, playerEyes);
+	playerAvatar = new Player(playerId, new Vector2(1920/2, 1080/2+150), playerShape, playerColor, playerEyes);
 	playerAvatar.state = "AVATAR";
+	playerAvatar.isLarge = true;
 	gameObjects.push(playerAvatar);
 
-	acceptButton = new TextButton(new Vector2(canvas.width/2-110, 136), 200, 60, "Yep", "#141414", "#FFFFFF");
+	// Announcements
+	am = new AnnouncementManager();
+	am.defaultMessage = "This is the player app!";
+	gameObjects.push(am);
+
+	acceptButton = new TextButton(new Vector2(canvas.width/2-110, 150), 200, 60, "Yep", "#141414", "#FFFFFF");
 	acceptButton.onClick = function(){acceptMatch()};
 	gameObjects.push(acceptButton);
 	acceptButton.isVisible = false;
 	acceptButton.isDisabled = true;
 
-	rejectButton = new TextButton(new Vector2(canvas.width/2+110, 136), 200, 60, "Nope", "#141414", "#FFFFFF");
+	rejectButton = new TextButton(new Vector2(canvas.width/2+110, 150), 200, 60, "Nope", "#141414", "#FFFFFF");
 	rejectButton.onClick = function(){rejectMatch()};
 	gameObjects.push(rejectButton);
 	rejectButton.isVisible = false;
@@ -1914,9 +1904,10 @@ function initializePlayer(){
 	makeBabyButton.isVisible = false;
 	makeBabyButton.isDisabled = true;
 
-	shareButton = new TextButton(new Vector2(canvas.width/2, canvas.height-50), 100, 50, "SHARE", "#3C5899", "#FFFFFF");
-	shareButton.onClick = function(){share()};
-	gameObjects.push(shareButton);
+	// shareButton = new TextButton(new Vector2(canvas.width/2, canvas.height-100), 100, 50, "SHARE", "#3C5899", "#FFFFFF");
+	// shareButton.onClick = function(){share()};
+	// gameObjects.push(shareButton);
+
 	/*
 	gameObjects.push( new Chest(new Vector2(1920/2-340, 1080/2+120)) );
 
@@ -2016,9 +2007,9 @@ function render(lagOffset){
 	//draw for clients
 	}else{
 		// Background
-		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.SKY, 1);
-		drawRectangle(ctx, -camera.interpolatedPos().x, 300-camera.interpolatedPos().y, 2000, 1000, true, color.GROUND, 1);
-		grassSprite.draw(ctx, 1920/2 -camera.interpolatedPos().x, 300-camera.interpolatedPos().y);
+		drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.GROUND, 1);
+		//drawRectangle(ctx, -camera.interpolatedPos().x, 300-camera.interpolatedPos().y, 2000, 1000, true, color.GROUND, 1);
+		//grassSprite.draw(ctx, 1920/2 -camera.interpolatedPos().x, 300-camera.interpolatedPos().y);
 
 		// Name
 		ctx.font = "36px Righteous";
@@ -2039,6 +2030,85 @@ function render(lagOffset){
 		ctx.fillText(gems.toString(), 164, canvas.height-85);
 		*/
 	}	
+}
+//*****************************************************************************************
+//	Notifications
+//*****************************************************************************************
+
+// Notification Manager
+function NotificationManager(){
+	this.type = "NotificationManager";
+	this.isAlive = true;
+
+	this.kill = function(){
+		this.isAlive = false;
+	};
+
+	this.update = function(){
+
+	};
+
+	this.render = function(lagOffset){
+
+	};
+}
+ 
+// Notification
+function Notification(message){
+	this.type = "Notification";
+	this.isAlive = true;
+
+	// Positioning
+	this.position = new Vector2(canvas.width/2, 120);
+	this.previousPos = this.position.clone();
+	this.width = canvas.width-40;
+	this.height = 200;
+
+	// Graphics
+	this.depth = -2000;
+	this.font = "Righteous";
+	this.fontSize = 40;
+
+	// Data
+	this.message = message;
+	this.text = [];
+	this.isSolid = false;
+	this.isDynamic = false;
+
+	this.getTextArray = function(){
+		var t = message.split("\n");
+		console.log(t);
+	};
+	this.text = this.getTextArray();
+
+	this.kill = function(){
+		this.isAlive = false;
+	};
+
+	this.update = function(){
+
+	};
+
+	this.render = function(lagOffset){
+		var drawX = this.previousPos.x + ((this.position.x-this.previousPos.x)*lagOffset);
+		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset);
+
+		// Textbox
+		drawRectangle(ctx, drawX-this.width/2+4, drawY-this.height/2+4, this.width, this.height, true, "#000000", 0.3);
+		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, "#FFFFFF", 1);
+
+		// Text
+		// for (var i = 0; i < this.text.length; i++) {
+		// 	ctx.font = this.font;
+		// 	ctx.fillStyle = "#FFFFFF";
+		// 	ctx.textAlign = "center";
+		// 	ctx.fillText(this.message, drawX, drawY);
+
+		// 	ctx.draw(this.text[i]);
+		// }
+		ctx.textAlign = "center";
+		drawText(ctx, drawX, drawY-this.height/2+this.fontSize+10, this.width-40, this.fontSize, this.message, this.font, this.fontSize, color.BLACK, 1);
+	};
 }
 //*****************************************************************************************
 //	Physics
@@ -2234,6 +2304,7 @@ function Player(id, position, shape, color, eyes){
 	// Graphics
 	this.depth = canvas.height-this.position.y;
 	this.body = new Sprite(spritesheet_characters, shape*120, color*120, 120, 120, new Vector2(60, 120));
+	this.bodyLarge = new Sprite(spritesheet_characters_l, shape*300, color*300, 300, 300, new Vector2(150, 300));
 	this.eyes = eyes;
 
 	this.color = color;
@@ -2246,10 +2317,10 @@ function Player(id, position, shape, color, eyes){
 	this.isSolid = true;
 	this.isDynamic = true;
 	this.state = "IDLE"; // IDLE, MOVING
+	this.isLarge = false;
 	this.babies = [];
 
 	this.emoteButtons = [];
-
 	this.drawEmote = false;
 	this.emoteTimer = 0;
 	this.emoteIndex;
@@ -2279,11 +2350,13 @@ function Player(id, position, shape, color, eyes){
 		var nextPos;
 		for (var i = 0; i < emotes; i++) {
 
-			nextPos = new Vector2(0, -140);
+			if(this.isLarge){ nextPos = new Vector2(0, -200);}
+			else{nextPos = new Vector2(0, -140);}
+
 			var r = i*(360/emotes);							
 			nextPos.rotate(r);
 
-			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-60+nextPos.y), 60, "#FFFFFF", new Sprite(spritesheet_emotes, i*150, 0, 150, 225));
+			var b = new BubbleButton(new Vector2(this.position.x+nextPos.x, this.position.y-150+nextPos.y), 60, "#FFFFFF", new Sprite(spritesheet_emotes, i*150, 0, 150, 225));
 			this.emoteButtons.push(b);
 			gameObjects.push(b);
 		}
@@ -2424,7 +2497,11 @@ function Player(id, position, shape, color, eyes){
 			case "AVATAR":
 			// TODO
 				if(highlighted === false && this.id === playerId){
-					var hitbox = new AABB(this.position.x-60, this.position.y-120, 120, 120); // Hitbox for click detection
+					var hitbox;
+
+					if(this.isLarge){ hitbox = new AABB(this.position.x-150, this.position.y-300, 300, 300); }
+					else{ hitbox = new AABB(this.position.x-60, this.position.y-120, 120, 120); /*Hitbox for click detection*/ }
+					
 
 					if(checkPointvsAABB(new Vector2(mouse.x+camera.position.x, mouse.y+camera.position.y), hitbox) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
 						console.log("player pressed");
@@ -2451,7 +2528,8 @@ function Player(id, position, shape, color, eyes){
 		var drawY = this.previousPos.y + ((this.position.y-this.previousPos.y)*lagOffset) - camera.interpolatedPos().y;
 
 		// Body
-		this.body.draw(ctx, drawX, drawY);
+		if(this.state === "AVATAR"){ this.bodyLarge.draw(ctx, drawX, drawY); }
+		else{ this.body.draw(ctx, drawX, drawY); }
 
 		// Debug
 		// ctx.textAlign = "center";
@@ -2461,15 +2539,35 @@ function Player(id, position, shape, color, eyes){
 
 		// Eyes
 		if(this.eyeTimer >= 0.1){
-			if(this.eyes === 1){ drawCircle(ctx, drawX, drawY-50, 25, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-50+randomRange(0, 2), 22, true, "#323232", 1); }
-			else if(this.eyes === 2){ 
-				drawCircle(ctx, drawX-22, drawY-50, 20, true, "#FFFFFF", 1); drawCircle(ctx, drawX-22+randomRange(0, 2), drawY-50+randomRange(0, 2), 17, true, "#323232", 1);
-				drawCircle(ctx, drawX+22, drawY-50, 20, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-50+randomRange(0, 2), 17, true, "#323232", 1);
-			}
-			else{
-				drawCircle(ctx, drawX, drawY-74, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-74+randomRange(0, 2), 15, true, "#323232", 1);
-				drawCircle(ctx, drawX-22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX-22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
-				drawCircle(ctx, drawX+22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
+			if(this.isLarge){
+				// if(this.eyes === 1){ drawCircle(ctx, drawX, drawY+(4*2.5), (25*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY+(4*2.5)+randomRange(0, 2), (22*2.5), true, "#323232", 1); }
+				// else if(this.eyes === 2){ 
+				// 	drawCircle(ctx, drawX-(22*2.5), drawY+(4*2.5), (20*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX-(22*2.5)+randomRange(0, 2), drawY+(4*2.5)+randomRange(0, 2), (17*2.5), true, "#323232", 1);
+				// 	drawCircle(ctx, drawX+(22*2.5), drawY+(4*2.5), (20*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX+(22*2.5)+randomRange(0, 2), drawY+(4*2.5)+randomRange(0, 2), (17*2.5), true, "#323232", 1);
+				// }else{
+				// 	drawCircle(ctx, drawX, drawY-(14*2.5), (18*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-(14*2.5)+randomRange(0, 2), (15*2.5), true, "#323232", 1);
+				// 	drawCircle(ctx, drawX-(22*2.5), drawY+(18*2.5), (18*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX-(22*2.5)+randomRange(0, 2), drawY+(18*2.5)+randomRange(0, 2), (15*2.5), true, "#323232", 1);
+				// 	drawCircle(ctx, drawX+(22*2.5), drawY+(18*2.5), (18*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX+(22*2.5)+randomRange(0, 2), drawY+(18*2.5)+randomRange(0, 2), (15*2.5), true, "#323232", 1);
+				// }
+				if(this.eyes === 1){ drawCircle(ctx, drawX, drawY-(50*2.5), (25*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-(50*2.5)+randomRange(0, 2), (22*2.5), true, "#323232", 1); }
+				else if(this.eyes === 2){ 
+					drawCircle(ctx, drawX-(22*2.5), drawY-(50*2.5), (20*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX-(22*2.5)+randomRange(0, 2), drawY-(50*2.5)+randomRange(0, 2), (17*2.5), true, "#323232", 1);
+					drawCircle(ctx, drawX+(22*2.5), drawY-(50*2.5), (20*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX+(22*2.5)+randomRange(0, 2), drawY-(50*2.5)+randomRange(0, 2), (17*2.5), true, "#323232", 1);
+				}else{
+					drawCircle(ctx, drawX, drawY-(74*2.5), (18*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-(74*2.5)+randomRange(0, 2), (15*2.5), true, "#323232", 1);
+					drawCircle(ctx, drawX-(22*2.5), drawY-(38*2.5), (18*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX-(22*2.5)+randomRange(0, 2), drawY-(38*2.5)+randomRange(0, 2), (15*2.5), true, "#323232", 1);
+					drawCircle(ctx, drawX+(22*2.5), drawY-(38*2.5), (18*2.5), true, "#FFFFFF", 1); drawCircle(ctx, drawX+(22*2.5)+randomRange(0, 2), drawY-(38*2.5)+randomRange(0, 2), (15*2.5), true, "#323232", 1);
+				}
+			}else{
+				if(this.eyes === 1){ drawCircle(ctx, drawX, drawY-50, 25, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-50+randomRange(0, 2), 22, true, "#323232", 1); }
+				else if(this.eyes === 2){ 
+					drawCircle(ctx, drawX-22, drawY-50, 20, true, "#FFFFFF", 1); drawCircle(ctx, drawX-22+randomRange(0, 2), drawY-50+randomRange(0, 2), 17, true, "#323232", 1);
+					drawCircle(ctx, drawX+22, drawY-50, 20, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-50+randomRange(0, 2), 17, true, "#323232", 1);
+				}else{
+					drawCircle(ctx, drawX, drawY-74, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+randomRange(0, 2), drawY-74+randomRange(0, 2), 15, true, "#323232", 1);
+					drawCircle(ctx, drawX-22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX-22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
+					drawCircle(ctx, drawX+22, drawY-38, 18, true, "#FFFFFF", 1); drawCircle(ctx, drawX+22+randomRange(0, 2), drawY-38+randomRange(0, 2), 15, true, "#323232", 1);
+				}
 			}
 		}
 
@@ -2505,7 +2603,7 @@ function Pointer(target) {
 	this.position = this.target.position.clone();
 	this.previousPos = this.position.clone();
 	this.velocity = new Vector2(0, 0);
-	this.offset = -150;
+	this.offset = -350;
 	this.min = this.offset;
 	this.max = this.offset+10; // -130
 	this.dir = 1;

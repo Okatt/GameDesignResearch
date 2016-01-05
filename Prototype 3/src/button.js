@@ -13,7 +13,7 @@ function TextButton(position, width, height, text, bgColor, textColor){
 	this.height = height;
 
 	// Graphics
-	this.depth = 0;
+	this.depth = -2001;
 	this.bgColor = bgColor;
 	this.bgAlpha = 1;
 	this.text = text;

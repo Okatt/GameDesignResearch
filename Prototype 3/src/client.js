@@ -150,10 +150,15 @@ socket.on('matchRequest', function(mID, mShape, mColor, mEyes, mCrown){
   matchEyes = mEyes;
   potentialMatchId = mID;
 
-  matchAvatar = new Player(potentialMatchId, new Vector2(1920/2+200, 1080/2-150), matchShape, matchColor, matchEyes);
+  // Potential match
+  matchAvatar = new Player(potentialMatchId, new Vector2(1920/2+300, 1080/2+150), matchShape, matchColor, matchEyes);
   matchAvatar.state = "AVATAR";
+  matchAvatar.isLarge = true;
   matchAvatar.hasCrown = mCrown;
   gameObjects.push(matchAvatar);
+
+  playerAvatar.position = new Vector2(1920/2-300, 1080/2+150);
+  playerAvatar.previousPos = playerAvatar.position.clone();
 
   clientStatus = 'Do you want to play with this person?';
 
@@ -223,6 +228,10 @@ socket.on('unMatch', function(p1ID, p2ID){
 
       console.log(playerId +' unmatched ' +p2ID);
       clientStatus = 'The match is over.';
+
+      // Set player back
+      playerAvatar.position = new Vector2(1920/2, 1080/2+150);
+      playerAvatar.previousPos = playerAvatar.position.clone();
 
       // Set camera back
       camera.setTargetPosition(new Vector2(1920/2, 1080/2));
@@ -412,7 +421,7 @@ socket.on('delayedUnreveal', function(tileNumber){
 
 socket.on('memoryBaby', function(id, shape, color, eyes){
   endMemory();
-  babyAvatar = new Baby(new Vector2(1920/2, 140), null, shape, color, eyes);
+  babyAvatar = new Baby(new Vector2(1920/2, 340), null, shape, color, eyes);
   babyAvatar.state = "AVATAR";
   babyAvatar.moving = false;
   gameObjects.push(babyAvatar);
@@ -581,7 +590,7 @@ function startMemory(){
   }
 
   // Move camera
-  camera.setTargetPosition(new Vector2(1920/2, 100));
+  camera.setTargetPosition(new Vector2(1920/2, 300));
 
   // Create turn pointer
   if(turnPlayer){ turnPointer = new Pointer(playerAvatar); gameObjects.push(turnPointer);}

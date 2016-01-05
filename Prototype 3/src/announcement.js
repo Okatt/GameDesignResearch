@@ -19,6 +19,8 @@ function AnnouncementManager(){
 	// Data
 	this.queue = [];
 	this.lastMessage = false;
+	this.defaultMessage = "JOIN THE PARTY AT  polygonpals.tk";
+	this.scrollSpeed = 5;
 	this.isSolid = false;
 	this.isDynamic = false;
 
@@ -31,7 +33,7 @@ function AnnouncementManager(){
 
 	this.nextMessage = function(){
 		if(this.queue.length >= 1){
-			this.lastMessage = new Announcement(new Vector2(this.position.x+this.width/2, this.position.y+this.height*0.25), this.queue[0]);
+			this.lastMessage = new Announcement(new Vector2(this.position.x+this.width/2, this.position.y+this.height*0.25), this.scrollSpeed, this.queue[0]);
 			gameObjects.push(this.lastMessage);
 
 			// Remove the message from the queue
@@ -41,10 +43,10 @@ function AnnouncementManager(){
 
 	this.update = function(){
 		if(!this.lastMessage){
-			if(this.queue.length === 0){this.announce("JOIN THE PARTY AT  polygonpals.tk");}
+			if(this.queue.length === 0){this.announce(this.defaultMessage);}
 			this.nextMessage();
 		}else if(this.lastMessage.position.x+this.lastMessage.measureTextWidth() <= canvas.width){
-			if(this.queue.length === 0){this.announce("JOIN THE PARTY AT  polygonpals.tk");}
+			if(this.queue.length === 0){this.announce(this.defaultMessage);}
 			this.nextMessage();
 		}
 	}
@@ -59,14 +61,14 @@ function AnnouncementManager(){
 }
 
 // Announcement
-function Announcement(position, message){
+function Announcement(position, speed, message){
 	this.isAlive = true;
 	this.type = "Announcement";
 
 	// Positioning
 	this.position = position;
 	this.previousPos = this.position.clone();
-	this.velocity = new Vector2(-2, 0);
+	this.velocity = new Vector2(-speed, 0);
 	
 	// Graphics
 	this.depth = -2001;
