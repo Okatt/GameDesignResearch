@@ -43,6 +43,8 @@ var turnPlayer = false;
 var turnPointer = false;
 var flips = 0;
 
+var highlighted = false;
+
 
 /****************************************************************************
  * Signaling server 

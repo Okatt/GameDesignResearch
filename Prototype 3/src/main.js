@@ -35,9 +35,13 @@ var acceptButton;
 var rejectButton;
 var makeBabyButton;
 
+/*
 var gemSprite;
 var gems;
 var nodeSpawner;
+*/
+
+var highlighter;
 
 var turnTimer = -1;
 
@@ -199,6 +203,15 @@ function initializePlayer(){
 	gameObjects.push(nodeSpawner);
 	nodeSpawner.spawnNew();
 	*/
+
+	highlighter = new Highlighter();
+	gameObjects.push(highlighter);
+
+	//highlighter usage:
+	//highlighter.highlight('player');
+	//highlighter.highlight('match');
+	//highlighter.highlight('emotes');
+	//highlighter.highlight('memory');
 }
 
 function run(){

@@ -43,6 +43,8 @@ function Player(id, position, shape, color, eyes){
 
 	this.hasCrown = false;
 
+	this.isHighlighted = false;
+
 	this.kill = function(){
 		this.isAlive = false;
 		for (var i = 0; i < this.babies.length; i++) {
@@ -166,7 +168,12 @@ function Player(id, position, shape, color, eyes){
 			}
 		}		
 
-		this.depth = canvas.height-this.position.y;
+		if(this.isHighlighted){
+			this.depth = -100;
+		}
+		else {
+			this.depth = canvas.height-this.position.y;
+		}
 
 		switch(this.state){
 			case "IDLE":
@@ -199,7 +206,7 @@ function Player(id, position, shape, color, eyes){
 				break;
 			case "AVATAR":
 			// TODO
-				if(this.id === playerId){
+				if(highlighted === false && this.id === playerId){
 					var hitbox = new AABB(this.position.x-60, this.position.y-120, 120, 120); // Hitbox for click detection
 
 					if(checkPointvsAABB(new Vector2(mouse.x+camera.position.x, mouse.y+camera.position.y), hitbox) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){

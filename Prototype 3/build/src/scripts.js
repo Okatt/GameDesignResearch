@@ -323,7 +323,7 @@ function TextButton(position, width, height, text, bgColor, textColor){
 		this.isPressed = false;
 
 		// Check if the button is not disabled
-		if(!this.isDisabled){
+		if(!this.isDisabled && highlighted === false){
 			// Check if the mouse is hovering over the button
 			//this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
 			
@@ -417,7 +417,7 @@ function BubbleButton(position, radius, bgColor, sprite){
 		this.isPressed = false;
 
 		// Check if the button is not disabled
-		if(!this.isDisabled){
+		if(!this.isDisabled && highlighted === false){
 			// Check if the mouse is hovering over the button
 			//this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
 			
@@ -571,9 +571,8 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 				this.position.add(d);
 			}else{ this.kill(); }
 		}		
-
 		// Check if the button is not disabled
-		if(!this.isDisabled && !this.isRevealed && turnPlayer){
+		if(highlighted === false && !this.isDisabled && !this.isRevealed && turnPlayer){
 			// Check if the mouse is hovering over the button
 			//this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
 			
@@ -736,6 +735,8 @@ var matchedTiles = [];
 var turnPlayer = false;
 var turnPointer = false;
 var flips = 0;
+
+var highlighted = false;
 
 
 /****************************************************************************
@@ -1547,6 +1548,74 @@ function drawText(ctx, x, y, maxLineWidth, lineHeight, text, font, size, color, 
 	ctx.globalAlpha = 1;
 }
 
+function Highlighter(){
+	this.type = "Highlighter";
+	this.isAlive = true;
+	this.isVisible = false;
+	this.depth = -50;
+
+	this.kill = function(){
+		this.isAlive = false;
+	}
+
+	this.highlight = function(arg){
+		switch(arg){
+			case 'player':
+				playerAvatar.isHighlighted = true;
+				break;
+			case 'match':
+				matchAvatar.isHighlighted = true;
+				break;
+			case 'emotes':
+				for(var i = 0; i < playerAvatar.emoteButtons.length; i++){
+					playerAvatar.emoteButtons[i].depth = -100;
+				}	
+				break;
+			case 'memory':
+				for(var i = 0; i < memoryTiles.length; i++){
+					memoryTiles[i].depth = -100;
+				}
+			default:
+				console.log('couldnt highlight ' +arg);
+				break;
+		}
+		this.isVisible = true;
+		highlighted = true;
+	}
+
+	this.unHighlight = function(arg){
+		switch(arg){
+			case 'player':
+				playerAvatar.isHighlighted = false;
+			case 'match':
+				matchAvatar.isHighlighted = false;
+				break;
+			case 'emotes':
+				for(var i = 0; i < playerAvatar.emoteButtons.length; i++){
+					playerAvatar.emoteButtons[i].depth = 0;
+				}	
+				break;
+			case 'memory':
+				for(var i = 0; i < memoryTiles.length; i++){
+					memoryTiles[i].depth = 0;
+				}
+			default:
+				console.log('couldnt unhighlight ' +arg);
+				break;
+		}
+		this.isVisible = false;
+		highlighted = false;
+	}
+
+	this.update = function(){
+	}
+
+	this.render = function(lagOffset){
+		if(this.isVisible){
+			drawRectangle(ctx, 0, 0, canvas.width, canvas.height, true, color.BLACK, 0.5);
+		}
+	}
+}
 //*****************************************************************************************
 //	Input
 //*****************************************************************************************
@@ -1690,9 +1759,13 @@ var acceptButton;
 var rejectButton;
 var makeBabyButton;
 
+/*
 var gemSprite;
 var gems;
 var nodeSpawner;
+*/
+
+var highlighter;
 
 var turnTimer = -1;
 
@@ -1854,6 +1927,15 @@ function initializePlayer(){
 	gameObjects.push(nodeSpawner);
 	nodeSpawner.spawnNew();
 	*/
+
+	highlighter = new Highlighter();
+	gameObjects.push(highlighter);
+
+	//highlighter usage:
+	//highlighter.highlight('player');
+	//highlighter.highlight('match');
+	//highlighter.highlight('emotes');
+	//highlighter.highlight('memory');
 }
 
 function run(){
@@ -2178,6 +2260,8 @@ function Player(id, position, shape, color, eyes){
 
 	this.hasCrown = false;
 
+	this.isHighlighted = false;
+
 	this.kill = function(){
 		this.isAlive = false;
 		for (var i = 0; i < this.babies.length; i++) {
@@ -2301,7 +2385,12 @@ function Player(id, position, shape, color, eyes){
 			}
 		}		
 
-		this.depth = canvas.height-this.position.y;
+		if(this.isHighlighted){
+			this.depth = -100;
+		}
+		else {
+			this.depth = canvas.height-this.position.y;
+		}
 
 		switch(this.state){
 			case "IDLE":
@@ -2334,7 +2423,7 @@ function Player(id, position, shape, color, eyes){
 				break;
 			case "AVATAR":
 			// TODO
-				if(this.id === playerId){
+				if(highlighted === false && this.id === playerId){
 					var hitbox = new AABB(this.position.x-60, this.position.y-120, 120, 120); // Hitbox for click detection
 
 					if(checkPointvsAABB(new Vector2(mouse.x+camera.position.x, mouse.y+camera.position.y), hitbox) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){

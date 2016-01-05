@@ -64,7 +64,7 @@ function TextButton(position, width, height, text, bgColor, textColor){
 		this.isPressed = false;
 
 		// Check if the button is not disabled
-		if(!this.isDisabled){
+		if(!this.isDisabled && highlighted === false){
 			// Check if the mouse is hovering over the button
 			//this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
 			
@@ -158,7 +158,7 @@ function BubbleButton(position, radius, bgColor, sprite){
 		this.isPressed = false;
 
 		// Check if the button is not disabled
-		if(!this.isDisabled){
+		if(!this.isDisabled && highlighted === false){
 			// Check if the mouse is hovering over the button
 			//this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
 			
@@ -312,9 +312,8 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 				this.position.add(d);
 			}else{ this.kill(); }
 		}		
-
 		// Check if the button is not disabled
-		if(!this.isDisabled && !this.isRevealed && turnPlayer){
+		if(highlighted === false && !this.isDisabled && !this.isRevealed && turnPlayer){
 			// Check if the mouse is hovering over the button
 			//this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
 			
