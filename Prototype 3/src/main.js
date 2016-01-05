@@ -45,6 +45,8 @@ var highlighter;
 
 var turnTimer = -1;
 
+var notificationSound;
+
 //change dimensions for new crown sprite
 var crownSprite = new Sprite(spritesheet_crown, 0, 0, 140, 140);
 var crownSpriteSmall = new Sprite(spritesheet_crown_small, 0, 0, 70, 70);
@@ -186,6 +188,7 @@ function initializePlayer(){
 	nodeSpawner.spawnNew();
 	*/
 
+	//highlighter (only highlights 1 object, puts dark overlay over the rest)
 	highlighter = new Highlighter();
 	gameObjects.push(highlighter);
 
@@ -194,6 +197,13 @@ function initializePlayer(){
 	//highlighter.highlight('match');
 	//highlighter.highlight('emotes');
 	//highlighter.highlight('memory');
+
+	//notifcation sound
+	notificationSound = notification_sound;
+
+	//notification sound usage:
+	//notificationSound.play();
+	
 }
 
 function run(){
