@@ -257,7 +257,7 @@ socket.on('checkNames', function(playerID, name){
 
 socket.on('codesExchanged', function(){
     socket.emit('createBaby', matchId, playerId, babyAvatar.shape, babyAvatar.color, babyAvatar.eyes);
-    socket.emit('announce', babyName+" was born!");
+    socket.emit('announce', babyName+" was created!");
     endMatch();
 });
 
