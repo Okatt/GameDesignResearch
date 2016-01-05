@@ -149,6 +149,8 @@ function initializePlayer(){
 	// Announcements
 	am = new AnnouncementManager();
 	am.defaultMessage = "This is the player app!";
+	am.height = 80;
+	am.fontSize = 40;
 	gameObjects.push(am);
 
 	acceptButton = new TextButton(new Vector2(canvas.width/2-110, 150), 200, 60, "Yep", "#141414", "#FFFFFF");
@@ -277,7 +279,7 @@ function render(lagOffset){
 		//grassSprite.draw(ctx, 1920/2 -camera.interpolatedPos().x, 300-camera.interpolatedPos().y);
 
 		// Name
-		ctx.font = "36px Righteous";
+		ctx.font = "40px Righteous";
 		ctx.fillStyle = "#000000";
 		ctx.textAlign = "center";
 		ctx.fillText(clientStatus, canvas.width/2, 60);

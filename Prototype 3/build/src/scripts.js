@@ -15,6 +15,7 @@ function AnnouncementManager(){
 
 	// Graphics
 	this.depth = -2000;
+	this.fontSize = 28;
 
 	// Data
 	this.queue = [];
@@ -33,7 +34,7 @@ function AnnouncementManager(){
 
 	this.nextMessage = function(){
 		if(this.queue.length >= 1){
-			this.lastMessage = new Announcement(new Vector2(this.position.x+this.width/2, this.position.y+this.height*0.25), this.scrollSpeed, this.queue[0]);
+			this.lastMessage = new Announcement(new Vector2(this.position.x+this.width/2, this.position.y+10), this.scrollSpeed, this.fontSize, this.queue[0]);
 			gameObjects.push(this.lastMessage);
 
 			// Remove the message from the queue
@@ -61,7 +62,7 @@ function AnnouncementManager(){
 }
 
 // Announcement
-function Announcement(position, speed, message){
+function Announcement(position, speed, fontSize, message){
 	this.isAlive = true;
 	this.type = "Announcement";
 
@@ -72,7 +73,7 @@ function Announcement(position, speed, message){
 	
 	// Graphics
 	this.depth = -2001;
-	this.font = "28px Righteous";
+	this.font = fontSize+"px Righteous";
 
 	// Measures the text width in pixels
 	this.measureTextWidth = function(){
@@ -1884,6 +1885,8 @@ function initializePlayer(){
 	// Announcements
 	am = new AnnouncementManager();
 	am.defaultMessage = "This is the player app!";
+	am.height = 80;
+	am.fontSize = 40;
 	gameObjects.push(am);
 
 	acceptButton = new TextButton(new Vector2(canvas.width/2-110, 150), 200, 60, "Yep", "#141414", "#FFFFFF");
@@ -2012,7 +2015,7 @@ function render(lagOffset){
 		//grassSprite.draw(ctx, 1920/2 -camera.interpolatedPos().x, 300-camera.interpolatedPos().y);
 
 		// Name
-		ctx.font = "36px Righteous";
+		ctx.font = "40px Righteous";
 		ctx.fillStyle = "#000000";
 		ctx.textAlign = "center";
 		ctx.fillText(clientStatus, canvas.width/2, 60);
