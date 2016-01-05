@@ -1660,6 +1660,8 @@ function initializeInputListeners(){
 //
 //*****************************************************************************************
 
+// Prototype 3 before feedback
+
 // Constants
 var UPS = 30;						// updates/second
 var UPDATE_DURATION = 1000/UPS;		// The duration of a single update in ms
@@ -1899,10 +1901,9 @@ function update(){
 		}
 	}
 
-	if(turnTimer > 0){
-		turnTimer -= UPDATE_DURATION/1000;
-		if(turnTimer === 0){socket.emit('changeTurn', playerId, matchId); turnTimer = -1;}
-	}
+	// Turn timer
+	if(turnTimer >= 0){ turnTimer -= UPDATE_DURATION/1000; }
+	else if(turnTimer < 0 && turnTimer !== -1){ turnTimer = -1; socket.emit('changeTurn', playerId, matchId); }
 
 	// Camera
 	camera.update();
