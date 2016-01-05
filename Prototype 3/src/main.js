@@ -5,6 +5,8 @@
 //
 //*****************************************************************************************
 
+// Prototype 3 before feedback
+
 // Constants
 var UPS = 30;						// updates/second
 var UPDATE_DURATION = 1000/UPS;		// The duration of a single update in ms
