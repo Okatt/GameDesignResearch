@@ -2553,13 +2553,17 @@ function ResourceNode(position, spawner, health, value){
 		return new AABB(this.position.x - this.width/2, this.position.y - this.height/2, this.width, this.height);
 	}
 
+	this.damage = function(){
+		if(this.hits < this.health){ this.hits++; this.body.frameIndex = this.hits;}
+		else{ this.kill(); }
+	}
+
 	this.update = function(){
 		this.depth = canvas.height-this.position.y;
 
 		var hitbox = this.getHitbox() // Hitbox for click detection
 			if(checkPointvsAABB(new Vector2(mouse.x+camera.position.x, mouse.y+camera.position.y), hitbox) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
-			if(this.hits < this.health){ this.hits++; this.body.frameIndex = this.hits;}
-			else{ this.kill(); }
+				this.damage();
 		}
 	}
 
