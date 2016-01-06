@@ -41,7 +41,7 @@ function Prop(position, width, height, sprite){
 		this.sprite.draw(ctx, drawX, drawY);
 
 		// Hitbox (debug)
-		//var h = this.getHitbox();
-		//drawRectangle(ctx, h.x - camera.interpolatedPos().x, h.y - camera.interpolatedPos().y, h.width, h.height, true, color.GREEN, 0.5);
+		var h = this.getHitbox();
+		drawRectangle(ctx, h.x - camera.interpolatedPos().x, h.y - camera.interpolatedPos().y, h.width, h.height, true, color.GREEN, 0.5);
 	}
 }
