@@ -6,6 +6,7 @@ var os = require('os');
 var static = require('node-static');
 var http = require('http');
 var socketIO = require('socket.io');
+var fs = require('fs'); 
 
 var fileServer = new(static.Server)();
 
@@ -13,8 +14,15 @@ var port = 2013;
 var worldID;
 
 var playerIDArray = [];
+var hourArray = [];
+var minuteArray = [];
+var secondArray = [];
+
+var highestPlayerCount = 0;
 
 var expectedAcceptArray = [];
+
+var date;
 
 var shares = 0;
 var sharedArray = [];
@@ -82,11 +90,21 @@ io.sockets.on('connection', function (socket){
 	socket.on('disconnect', function(){
 		for(var i = 0; i < playerIDArray.length; i++){
 			if(playerIDArray[i] === socket.id){
+				date = new Date();
+				var dataString = "ID: " +playerIDArray[i] +'\n' +"Time joined: " +hourArray[i] +":"+minuteArray[i] +":"+secondArray[i] +'\n' +"Time left: " +date.getHours() +":"+date.getMinutes()+":"+date.getSeconds() +'\n' +"Current Stats: " +'\n'+'Total number of players: ' +players.toString()+'\n' +"Highest number of players at one time: "+highestPlayerCount.toString()+'\n' +'Number of succesful interactions: ' +interactions.toString()+'\n' +'Number of shares: ' +shares.toString() +'\n' +'\n';
+				fs.appendFile("build/res/data/Data.txt", dataString, function(err) {
+    				if(err) {
+        			return log(err);
+    				}
+				});
+
 				playerIDArray.splice(i, 1);
+				hourArray.splice(i, 1);
+				minuteArray.splice(i, 1);
+				secondArray.splice(i, 1);
 				break;
 			}
 		}
-		log('# of players: ' +players +' # of interactions ' +interactions +' # of shares ' +shares);
 		socket.broadcast.emit('playerLeft', socket.id);
 	});
 
@@ -111,6 +129,13 @@ io.sockets.on('connection', function (socket){
 			socket.join(room);
             socket.emit('joined', room, socket.id);
             playerIDArray.push(socket.id);
+            date = new Date();
+            hourArray.push(date.getHours());
+            minuteArray.push(date.getMinutes());
+            secondArray.push(date.getSeconds());
+            if(playerIDArray.length > highestPlayerCount){
+            	highestPlayerCount = playerIDArray.length;
+            }
             players++;
         }
 	});
