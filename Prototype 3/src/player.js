@@ -46,7 +46,7 @@ function Player(id, position, shape, color, eyes){
 
 	this.isHighlighted = false;
 
-		this.unMatchButton =  new TextButton(new Vector2(this.position.x, this.position.y), 200, 60, "Unmatch?", "#FFFFFF", "#141414");
+		this.unMatchButton =  new TextButton(this.position.clone(), 200, 60, "Unmatch?", "#FFFFFF", "#141414");
 		gameObjects.push(this.unMatchButton);
 		this.unMatchButton.onClick = function(){endMatch(); this.isVisible = false; this.isDisabled = true;};
 		this.unMatchButton.isVisible = false;
@@ -246,8 +246,8 @@ function Player(id, position, shape, color, eyes){
 
 						if(checkPointvsAABB(new Vector2(mouse.x+camera.position.x, mouse.y+camera.position.y), hitbox) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
 							console.log("match pressed");
-							this.unMatchButton.position.x = this.position.x;
-							this.unMatchButton.position.y = this.position.y + this.unMatchButton.height;
+							this.unMatchButton.position.x = this.position.x - camera.interpolatedPos().x;
+							this.unMatchButton.position.y = this.position.y - camera.interpolatedPos().y + this.unMatchButton.height/2;
 							this.unMatchButton.previousPos = this.unMatchButton.position.clone();
 							this.openUnmatch();
 						}	
@@ -331,8 +331,8 @@ function Player(id, position, shape, color, eyes){
 		}
 
 		// Hitbox (debug)
-		var h = this.getHitbox();
-		drawRectangle(ctx, h.x - camera.interpolatedPos().x, h.y - camera.interpolatedPos().y, h.width, h.height, true, color.GREEN, 0.5);
+		//var h = this.getHitbox();
+		//drawRectangle(ctx, h.x - camera.interpolatedPos().x, h.y - camera.interpolatedPos().y, h.width, h.height, true, color.GREEN, 0.5);
 	}
 }
 
