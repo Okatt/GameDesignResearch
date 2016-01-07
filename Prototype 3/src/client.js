@@ -68,6 +68,16 @@ socket.on('joined', function (room, clientId) {
   //TODO client status
   clientStatus = 'Welcome to the game!';
   initializePlayer();
+
+  joinNotification();
+});
+
+socket.on('playerReady', function(id){
+  for (var i = 0; i < gameObjects.length; i++) {
+    if(gameObjects[i].type === "Player" && gameObjects[i].id === id){
+      gameObjects[i].justJoined = false;
+    }
+  }
 });
 
 socket.on('full', function (room) {
@@ -162,11 +172,14 @@ socket.on('matchRequest', function(mID, mShape, mColor, mEyes, mCrown){
 
   clientStatus = 'Do you want to play with this person?';
 
-  acceptButton.isVisible = true;
-  acceptButton.isDisabled = false;
+  if(firstMatch){ firstMatchNotification(); }
+  else{ matchNotification(); }
 
-  rejectButton.isVisible = true;
-  rejectButton.isDisabled = false;
+  // acceptButton.isVisible = true;
+  // acceptButton.isDisabled = false;
+
+  // rejectButton.isVisible = true;
+  // rejectButton.isDisabled = false;
 });
 
 socket.on('confirmedMatch', function(p1ID, p2ID, firstTurn){
@@ -249,11 +262,11 @@ socket.on('matchRejected', function(rejectedID, playerID){
     }
   }
   else {
-    acceptButton.isVisible = false;
-    acceptButton.isDisabled = true;
+    // acceptButton.isVisible = false;
+    // acceptButton.isDisabled = true;
 
-    rejectButton.isVisible = false;
-    rejectButton.isDisabled = true;
+    // rejectButton.isVisible = false;
+    // rejectButton.isDisabled = true;
 
     matchAvatar.kill();
     endMemory();
@@ -427,6 +440,8 @@ socket.on('memoryBaby', function(id, shape, color, eyes){
   babyAvatar.moving = false;
   gameObjects.push(babyAvatar);
 
+  if(firstPolygon){ firstPolygonNotification(); }
+
   makeBabyButton.isVisible = true;
   makeBabyButton.isDisabled = false;
 });
@@ -483,21 +498,21 @@ function endMatch(){
 function acceptMatch(){
   clientStatus = "Waiting for the other player...";
 
-  acceptButton.isVisible = false;
-  acceptButton.isDisabled = true;
+  // acceptButton.isVisible = false;
+  // acceptButton.isDisabled = true;
 
-  rejectButton.isVisible = false;
-  rejectButton.isDisabled = true;
+  // rejectButton.isVisible = false;
+  // rejectButton.isDisabled = true;
 
   socket.emit('acceptedMatch', playerId, potentialMatchId);
 }
 
 function rejectMatch(){
-  acceptButton.isVisible = false;
-  acceptButton.isDisabled = true;
+  // acceptButton.isVisible = false;
+  // acceptButton.isDisabled = true;
 
-  rejectButton.isVisible = false;
-  rejectButton.isDisabled = true;
+  // rejectButton.isVisible = false;
+  // rejectButton.isDisabled = true;
 
   socket.emit('rejectedMatch', playerId, potentialMatchId);
 }
@@ -595,7 +610,9 @@ function startMemory(){
 
   // Create turn pointer
   if(turnPlayer){ turnPointer = new Pointer(playerAvatar); gameObjects.push(turnPointer);}
-  else{turnPointer = new Pointer(matchAvatar); gameObjects.push(turnPointer);}   
+  else{turnPointer = new Pointer(matchAvatar); gameObjects.push(turnPointer);} 
+
+  if(firstMemory){ firstMemoryNotification(); }
 }
 
 function endMemory(){

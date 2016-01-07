@@ -24,6 +24,8 @@ function Player(id, position, shape, color, eyes){
 	this.shape = shape;
 	
 	// Data
+	this.justJoined = true;
+
 	this.id = id;
 	this.matched = false;
 	this.withoutMatchTime = 0;	// the time that has elapsed since the last match, in seconds. (used for match making)
@@ -149,7 +151,7 @@ function Player(id, position, shape, color, eyes){
 	this.findMatch = function(){
 		var bestMatch = false;
 		for (var i = 0; i < gameObjects.length; i++) {
-			if(gameObjects[i].type === "Player" && gameObjects[i].id !== this.id && !gameObjects[i].matched){
+			if(gameObjects[i].type === "Player" && !gameObjects[i].justJoined && gameObjects[i].id !== this.id && !gameObjects[i].matched){
 				if(!bestMatch){ bestMatch = gameObjects[i];	}
 				else if(gameObjects[i].withoutMatchTime > bestMatch.withoutMatchTime){ bestMatch = gameObjects[i]; }
 			}
@@ -181,12 +183,12 @@ function Player(id, position, shape, color, eyes){
 			// Update the time since the last match up.
 			this.withoutMatchTime += UPDATE_DURATION/1000;
 			if(!this.matched && this.withoutMatchTime > 8){
-				this.findMatch();
+				if(!this.justJoined){this.findMatch();}
 			}
 		}		
 
 		if(this.isHighlighted){
-			this.depth = -100;
+			this.depth = highlighter.depth-1;
 		}
 		else {
 			this.depth = canvas.height-this.position.y;

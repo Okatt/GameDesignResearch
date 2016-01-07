@@ -288,6 +288,7 @@ function TextButton(position, width, height, text, bgColor, textColor){
 	this.isToggled = false;
 	this.isDisabled = false;
 	this.isVisible = true;
+	this.isHighlighted = false;
 
 	// Destroys the object (removes it from gameObjects)
 	this.kill = function(){
@@ -325,15 +326,23 @@ function TextButton(position, width, height, text, bgColor, textColor){
 		this.mouseOver = false;
 		this.isPressed = false;
 
+		if(this.isHighlighted){
+			this.depth = highlighter.depth-3;
+		}
+		else {
+			this.depth = -2001;
+		}
+
 		// Check if the button is not disabled
-		if(!this.isDisabled && highlighted === false){
+		if(!this.isDisabled && (!highlighted || this.isHighlighted) ){
 			// Check if the mouse is hovering over the button
 			//this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
 			
 			// Call the onClick function when the button is pressed
-			if(checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox()) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+			if(checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox()) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick && !clicked){
 				console.log("Pressed");
 				this.isPressed = true;
+				clicked = true;
 				this.onClick();
 			}
 		}
@@ -349,13 +358,17 @@ function TextButton(position, width, height, text, bgColor, textColor){
 		drawRectangle(ctx, drawX-this.width/2+4, drawY-this.height/2+4, this.width, this.height, true, color.BLACK, 0.3);
 
 		// Background
-		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, this.bgColor, this.bgAlpha);
+		if(this.isDisabled){
+			drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, color.DARK_GREY, this.bgAlpha);
+		}else{
+			drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, this.bgColor, this.bgAlpha);
+		}
 
 		// Text
 		ctx.textAlign = "center";
 		ctx.textBaseline = "middle";
-		if(!this.mouseOver){drawText(ctx, drawX, drawY, this.width, 24, this.text, "Righteous", 24, this.textColor, 1);}
-		else{drawText(ctx, drawX, drawY, this.width, 24, this.text, "Righteous", 24, this.textHoverColor, 1);}
+		if(!this.mouseOver){drawText(ctx, drawX, drawY-this.height/2+40, this.width, 40, this.text, "Righteous", 40, this.textColor, 1);}
+		else{drawText(ctx, drawX, drawY-this.height/2+40, this.width, 40, this.text, "Righteous", 40, this.textHoverColor, 1);} // Super diry hack for good text positioning on button TODO: revise later
 		ctx.textBaseline = "alphabetic";
 		}
 	};
@@ -383,6 +396,7 @@ function BubbleButton(position, radius, bgColor, sprite){
 	this.isToggled = false;
 	this.isDisabled = false;
 	this.isVisible = true;
+	this.isHighlighted = false;
 
 	// Destroys the object (removes it from gameObjects)
 	this.kill = function(){
@@ -418,6 +432,13 @@ function BubbleButton(position, radius, bgColor, sprite){
 	this.update = function(){
 		this.mouseOver = false;
 		this.isPressed = false;
+
+		if(this.isHighlighted){
+			his.depth = highlighter.depth-3;
+		}
+		else {
+			this.depth = -2001;
+		}
 
 		// Check if the button is not disabled
 		if(!this.isDisabled && highlighted === false){
@@ -478,6 +499,7 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 	this.startURtimer = false;
 	this.unrevealTimer = 0;
 	this.mtm = false;
+	this.isHighlighted = false;
 
 	//sprite
 	this.card = new Sprite(memory_cards, 100*this.value, 100*this.index, 100, 100);
@@ -565,6 +587,13 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 		if(this.unrevealTimer < 0){this.startURtimer = false; this.unReveal();}
 		}
 
+		if(this.isHighlighted){
+			this.depth = highlighter.depth-1;
+		}
+		else {
+			this.depth = -2001;
+		}
+
 		//TODO if mtm = true, tile should ease to the middle of the screen and then call kill() when it arrives
 		if(this.mtm){
 			var d = this.position.getVectorTo(new Vector2(canvas.width/2, canvas.height/2));
@@ -574,8 +603,8 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 				this.position.add(d);
 			}else{ this.kill(); }
 		}		
-		// Check if the button is not disabled
-		if(highlighted === false && !this.isDisabled && !this.isRevealed && turnPlayer){
+		// Check if the button is not disabled (hack this.isHighlighted must be false so the player can not interact with the tiles during the tuttorial)
+		if(!highlighted && !this.isHighlighted && !this.isDisabled && !this.isRevealed && turnPlayer){
 			// Check if the mouse is hovering over the button
 			//this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
 			
@@ -764,6 +793,16 @@ socket.on('joined', function (room, clientId) {
   //TODO client status
   clientStatus = 'Welcome to the game!';
   initializePlayer();
+
+  joinNotification();
+});
+
+socket.on('playerReady', function(id){
+  for (var i = 0; i < gameObjects.length; i++) {
+    if(gameObjects[i].type === "Player" && gameObjects[i].id === id){
+      gameObjects[i].justJoined = false;
+    }
+  }
 });
 
 socket.on('full', function (room) {
@@ -858,11 +897,14 @@ socket.on('matchRequest', function(mID, mShape, mColor, mEyes, mCrown){
 
   clientStatus = 'Do you want to play with this person?';
 
-  acceptButton.isVisible = true;
-  acceptButton.isDisabled = false;
+  if(firstMatch){ firstMatchNotification(); }
+  else{ matchNotification(); }
 
-  rejectButton.isVisible = true;
-  rejectButton.isDisabled = false;
+  // acceptButton.isVisible = true;
+  // acceptButton.isDisabled = false;
+
+  // rejectButton.isVisible = true;
+  // rejectButton.isDisabled = false;
 });
 
 socket.on('confirmedMatch', function(p1ID, p2ID, firstTurn){
@@ -945,11 +987,11 @@ socket.on('matchRejected', function(rejectedID, playerID){
     }
   }
   else {
-    acceptButton.isVisible = false;
-    acceptButton.isDisabled = true;
+    // acceptButton.isVisible = false;
+    // acceptButton.isDisabled = true;
 
-    rejectButton.isVisible = false;
-    rejectButton.isDisabled = true;
+    // rejectButton.isVisible = false;
+    // rejectButton.isDisabled = true;
 
     matchAvatar.kill();
     endMemory();
@@ -1123,6 +1165,8 @@ socket.on('memoryBaby', function(id, shape, color, eyes){
   babyAvatar.moving = false;
   gameObjects.push(babyAvatar);
 
+  if(firstPolygon){ firstPolygonNotification(); }
+
   makeBabyButton.isVisible = true;
   makeBabyButton.isDisabled = false;
 });
@@ -1179,21 +1223,21 @@ function endMatch(){
 function acceptMatch(){
   clientStatus = "Waiting for the other player...";
 
-  acceptButton.isVisible = false;
-  acceptButton.isDisabled = true;
+  // acceptButton.isVisible = false;
+  // acceptButton.isDisabled = true;
 
-  rejectButton.isVisible = false;
-  rejectButton.isDisabled = true;
+  // rejectButton.isVisible = false;
+  // rejectButton.isDisabled = true;
 
   socket.emit('acceptedMatch', playerId, potentialMatchId);
 }
 
 function rejectMatch(){
-  acceptButton.isVisible = false;
-  acceptButton.isDisabled = true;
+  // acceptButton.isVisible = false;
+  // acceptButton.isDisabled = true;
 
-  rejectButton.isVisible = false;
-  rejectButton.isDisabled = true;
+  // rejectButton.isVisible = false;
+  // rejectButton.isDisabled = true;
 
   socket.emit('rejectedMatch', playerId, potentialMatchId);
 }
@@ -1291,7 +1335,9 @@ function startMemory(){
 
   // Create turn pointer
   if(turnPlayer){ turnPointer = new Pointer(playerAvatar); gameObjects.push(turnPointer);}
-  else{turnPointer = new Pointer(matchAvatar); gameObjects.push(turnPointer);}   
+  else{turnPointer = new Pointer(matchAvatar); gameObjects.push(turnPointer);} 
+
+  if(firstMemory){ firstMemoryNotification(); }
 }
 
 function endMemory(){
@@ -1565,31 +1611,37 @@ function Highlighter(){
 	this.type = "Highlighter";
 	this.isAlive = true;
 	this.isVisible = false;
-	this.depth = -50;
+	this.depth = -3000;
 
 	this.kill = function(){
 		this.isAlive = false;
 	}
 
 	this.highlight = function(arg){
+		if(arg === undefined){
+			this.isVisible = true;
+			highlighted = true;
+			return;
+		}
+
 		switch(arg){
-			case 'player':
+			case "player":
 				playerAvatar.isHighlighted = true;
 				break;
-			case 'match':
+			case "match":
 				matchAvatar.isHighlighted = true;
 				break;
-			case 'emotes':
+			case "emotes":
 				for(var i = 0; i < playerAvatar.emoteButtons.length; i++){
-					playerAvatar.emoteButtons[i].depth = -100;
+					playerAvatar.emoteButtons[i].isHighlighted = true;
 				}	
 				break;
-			case 'memory':
+			case "memory":
 				for(var i = 0; i < memoryTiles.length; i++){
-					memoryTiles[i].depth = -100;
+					memoryTiles[i].isHighlighted = true;
 				}
 			default:
-				console.log('couldnt highlight ' +arg);
+				console.log("couldnt highlight " +arg);
 				break;
 		}
 		this.isVisible = true;
@@ -1597,23 +1649,35 @@ function Highlighter(){
 	}
 
 	this.unHighlight = function(arg){
+		if(arg === undefined){
+			for (var i = 0; i < gameObjects.length; i++) {
+				if(gameObjects[i].isHighlighted !== undefined){
+					gameObjects[i].isHighlighted = false;
+				}
+			}
+
+			this.isVisible = false;
+			highlighted = false;
+			return;
+		}
+
 		switch(arg){
-			case 'player':
+			case "player":
 				playerAvatar.isHighlighted = false;
-			case 'match':
+			case "match":
 				matchAvatar.isHighlighted = false;
 				break;
-			case 'emotes':
+			case "emotes":
 				for(var i = 0; i < playerAvatar.emoteButtons.length; i++){
-					playerAvatar.emoteButtons[i].depth = 0;
+					playerAvatar.emoteButtons[i].isHighlighted = false;
 				}	
 				break;
-			case 'memory':
+			case "memory":
 				for(var i = 0; i < memoryTiles.length; i++){
-					memoryTiles[i].depth = 0;
+					memoryTiles[i].isHighlighted = false;
 				}
 			default:
-				console.log('couldnt unhighlight ' +arg);
+				console.log("couldnt unhighlight " +arg);
 				break;
 		}
 		this.isVisible = false;
@@ -1767,10 +1831,17 @@ var mouse;
 var keyboard;
 var previousMouse;
 var previousKeyboard;
+var clicked = false; // Dirty hack, so player can not click muliply buttons in one update
 
 var acceptButton;
 var rejectButton;
 var makeBabyButton;
+
+// Tutorial
+var justJoined = true;
+var firstMatch = true;
+var firstMemory = true;
+var firstPolygon = true;
 
 /*
 var gemSprite;
@@ -1892,19 +1963,19 @@ function initializePlayer(){
 	am.fontSize = 40;
 	gameObjects.push(am);
 
-	acceptButton = new TextButton(new Vector2(canvas.width/2-110, 150), 200, 60, "Yep", "#141414", "#FFFFFF");
-	acceptButton.onClick = function(){acceptMatch()};
-	gameObjects.push(acceptButton);
-	acceptButton.isVisible = false;
-	acceptButton.isDisabled = true;
+	// acceptButton = new TextButton(new Vector2(canvas.width/2-110, 150), 200, 60, "Yep", "#141414", "#FFFFFF");
+	// acceptButton.onClick = function(){acceptMatch()};
+	// gameObjects.push(acceptButton);
+	// acceptButton.isVisible = false;
+	// acceptButton.isDisabled = true;
 
-	rejectButton = new TextButton(new Vector2(canvas.width/2+110, 150), 200, 60, "Nope", "#141414", "#FFFFFF");
-	rejectButton.onClick = function(){rejectMatch()};
-	gameObjects.push(rejectButton);
-	rejectButton.isVisible = false;
-	rejectButton.isDisabled = true;
+	// rejectButton = new TextButton(new Vector2(canvas.width/2+110, 150), 200, 60, "Nope", "#141414", "#FFFFFF");
+	// rejectButton.onClick = function(){rejectMatch()};
+	// gameObjects.push(rejectButton);
+	// rejectButton.isVisible = false;
+	// rejectButton.isDisabled = true;
 
-	makeBabyButton = new TextButton(new Vector2(canvas.width/2, canvas.height/2+90), 380, 60, "Click here to name the polygon", "#141414", "#FFFFFF");
+	makeBabyButton = new TextButton(new Vector2(canvas.width/2, canvas.height/2+120), 380, 120, "Click here to name the polygon", "#141414", "#FFFFFF");
 	makeBabyButton.onClick = function(){confirmCode()};
 	gameObjects.push(makeBabyButton);
 	makeBabyButton.isVisible = false;
@@ -1995,12 +2066,19 @@ function update(){
 	// Camera
 	camera.update();
 
+	// Player announcements
+	if(!isWorld){
+		am.defaultMessage = clientStatus;
+		;
+	}
+
 	// Set the draw order
 	sortByDepth(gameObjects);
 
 	// Save previous mouse and keyboard state
 	previousMouse = clone(mouse);
 	previousKeyboard = clone(keyboard);
+	clicked = false;
 }
 
 function render(lagOffset){
@@ -2026,10 +2104,10 @@ function render(lagOffset){
 		//grassSprite.draw(ctx, 1920/2 -camera.interpolatedPos().x, 300-camera.interpolatedPos().y);
 
 		// Name
-		ctx.font = "40px Righteous";
-		ctx.fillStyle = "#000000";
-		ctx.textAlign = "center";
-		ctx.fillText(clientStatus, canvas.width/2, 60);
+		// ctx.font = "40px Righteous";
+		// ctx.fillStyle = "#000000";
+		// ctx.textAlign = "center";
+		// ctx.fillText(clientStatus, canvas.width/2, 60);
 
 		// Render all game objects
 		for(var ob = 0; ob < gameObjects.length; ob++){
@@ -2073,10 +2151,10 @@ function Notification(message){
 	this.isAlive = true;
 
 	// Positioning
-	this.position = new Vector2(canvas.width/2, 120);
+	this.position = new Vector2(canvas.width/2, 140);
 	this.previousPos = this.position.clone();
 	this.width = canvas.width-40;
-	this.height = 200;
+	this.height = 240;
 
 	// Graphics
 	this.depth = -2000;
@@ -2088,6 +2166,7 @@ function Notification(message){
 	this.text = [];
 	this.isSolid = false;
 	this.isDynamic = false;
+	this.isHighlighted = true;
 
 	this.getTextArray = function(){
 		var t = message.split("\n");
@@ -2100,7 +2179,11 @@ function Notification(message){
 	};
 
 	this.update = function(){
-
+		if(this.isHighlighted){
+			this.depth = -3001;
+		}else{
+			this.depth = -2000;
+		}
 	};
 
 	this.render = function(lagOffset){
@@ -2123,6 +2206,108 @@ function Notification(message){
 		ctx.textAlign = "center";
 		drawText(ctx, drawX, drawY-this.height/2+this.fontSize+10, this.width-40, this.fontSize, this.message, this.font, this.fontSize, color.BLACK, 1);
 	};
+}
+
+function joinNotification(){
+	var joinNotification = new Notification("Welcome! You have joined the world. We have generated a character for you. (explain...)");
+	gameObjects.push( joinNotification );
+
+	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");
+	okButton.onClick = function(){justJoined = false; joinNotification.kill(); this.kill(); highlighter.unHighlight(); socket.emit('ready', playerId);};
+	gameObjects.push(okButton);
+
+	highlighter.highlight("player");
+	joinNotification.isHighlighted = true;
+	okButton.isHighlighted = true;
+}
+
+function firstMatchNotification(){
+	var firstMatchNotification = new Notification("You will be matched with other players. If both players accept the match, you can play a game together to create a new polygon!");
+	gameObjects.push( firstMatchNotification );
+
+	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");
+	okButton.onClick = function(){firstMatchNotification.kill(); this.kill(); matchNotification();};
+	gameObjects.push(okButton);
+
+	highlighter.highlight("match");
+	firstMatchNotification.isHighlighted = true;
+	okButton.isHighlighted = true;
+}
+
+function matchNotification(){
+	var matchNotification;
+	if(firstMatch){
+		matchNotification = new Notification("You've got a match! Do you want to play with this person? (Please select \"Yep\")");
+	}else{
+		matchNotification = new Notification("You've got a match! Do you want to play with this person?");
+	}
+	gameObjects.push( matchNotification );
+
+	var yesButton, noButton;
+
+	yesButton = new TextButton(new Vector2(canvas.width/2-140, 200), 240, 80, "Yep", "#141414", "#FFFFFF");
+	yesButton.onClick = function(){acceptMatch(); matchNotification.kill(); noButton.kill(); this.kill(); highlighter.unHighlight("match"); firstMatch = false; /*maybe after both layers accepted*/};
+	gameObjects.push(yesButton);
+
+	noButton = new TextButton(new Vector2(canvas.width/2+140, 200), 240, 80, "Nope", "#141414", "#FFFFFF");
+	noButton.onClick = function(){rejectMatch(); matchNotification.kill(); yesButton.kill(); this.kill();};
+	gameObjects.push(noButton);
+	if(firstMatch){ noButton.isDisabled = true; }
+
+	yesButton.isHighlighted = true;
+	noButton.isHighlighted = true;
+}
+
+function firstMemoryNotification(){
+	var firstMemoryNotification = new Notification("You will work together to create a new polygon that will follow you around. The shape, color and number of eyes will be determined by a game of memory.");
+	gameObjects.push( firstMemoryNotification );
+
+	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");
+	okButton.onClick = function(){firstMemory = false; firstMemoryNotification.kill(); this.kill(); secondMemoryNotification()};
+	gameObjects.push(okButton);
+
+	highlighter.highlight();
+	firstMemoryNotification.isHighlighted = true;
+	okButton.isHighlighted = true;
+}
+
+function secondMemoryNotification(){
+	var secondMemoryNotification = new Notification("The titles are determined by the two characters \"DNA\". Both players add their features (shape, color and number of eyes) to the memory game.");
+	gameObjects.push( secondMemoryNotification );
+
+	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");
+	okButton.onClick = function(){firstMemory = false; secondMemoryNotification.kill(); this.kill(); thirdMemoryNotification()};
+	gameObjects.push(okButton);
+
+	highlighter.highlight("memory");
+	secondMemoryNotification.isHighlighted = true;
+	okButton.isHighlighted = true;
+}
+
+function thirdMemoryNotification(){
+	var thirdMemoryNotification = new Notification("During your turn you can select two tiles. When both tiles match, that feature (colour, shape and the number of eyes) will be used to create a new polygon. Other tiles that effect the same feature will be discarded.");
+	gameObjects.push( thirdMemoryNotification );
+
+	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");
+	okButton.onClick = function(){firstMemory = false; thirdMemoryNotification.kill(); this.kill(); highlighter.unHighlight("memory")};
+	gameObjects.push(okButton);
+
+	highlighter.highlight("memory");
+	thirdMemoryNotification.isHighlighted = true;
+	okButton.isHighlighted = true;
+}
+
+function firstPolygonNotification(){
+	var firstPolygonNotification = new Notification("You have created your first polygon! Find the other person to name the new polygon. You must enter the same name to finish the creation process.");
+	gameObjects.push( firstPolygonNotification );
+
+	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");
+	okButton.onClick = function(){firstPolygon = false; firstPolygonNotification.kill(); this.kill(); highlighter.unHighlight();};
+	gameObjects.push(okButton);
+
+	highlighter.highlight();
+	firstPolygonNotification.isHighlighted = true;
+	okButton.isHighlighted = true;
 }
 //*****************************************************************************************
 //	Physics
@@ -2325,6 +2510,8 @@ function Player(id, position, shape, color, eyes){
 	this.shape = shape;
 	
 	// Data
+	this.justJoined = true;
+
 	this.id = id;
 	this.matched = false;
 	this.withoutMatchTime = 0;	// the time that has elapsed since the last match, in seconds. (used for match making)
@@ -2450,7 +2637,7 @@ function Player(id, position, shape, color, eyes){
 	this.findMatch = function(){
 		var bestMatch = false;
 		for (var i = 0; i < gameObjects.length; i++) {
-			if(gameObjects[i].type === "Player" && gameObjects[i].id !== this.id && !gameObjects[i].matched){
+			if(gameObjects[i].type === "Player" && !gameObjects[i].justJoined && gameObjects[i].id !== this.id && !gameObjects[i].matched){
 				if(!bestMatch){ bestMatch = gameObjects[i];	}
 				else if(gameObjects[i].withoutMatchTime > bestMatch.withoutMatchTime){ bestMatch = gameObjects[i]; }
 			}
@@ -2482,12 +2669,12 @@ function Player(id, position, shape, color, eyes){
 			// Update the time since the last match up.
 			this.withoutMatchTime += UPDATE_DURATION/1000;
 			if(!this.matched && this.withoutMatchTime > 8){
-				this.findMatch();
+				if(!this.justJoined){this.findMatch();}
 			}
 		}		
 
 		if(this.isHighlighted){
-			this.depth = -100;
+			this.depth = highlighter.depth-1;
 		}
 		else {
 			this.depth = canvas.height-this.position.y;

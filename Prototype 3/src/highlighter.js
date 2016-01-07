@@ -2,31 +2,37 @@ function Highlighter(){
 	this.type = "Highlighter";
 	this.isAlive = true;
 	this.isVisible = false;
-	this.depth = -50;
+	this.depth = -3000;
 
 	this.kill = function(){
 		this.isAlive = false;
 	}
 
 	this.highlight = function(arg){
+		if(arg === undefined){
+			this.isVisible = true;
+			highlighted = true;
+			return;
+		}
+
 		switch(arg){
-			case 'player':
+			case "player":
 				playerAvatar.isHighlighted = true;
 				break;
-			case 'match':
+			case "match":
 				matchAvatar.isHighlighted = true;
 				break;
-			case 'emotes':
+			case "emotes":
 				for(var i = 0; i < playerAvatar.emoteButtons.length; i++){
-					playerAvatar.emoteButtons[i].depth = -100;
+					playerAvatar.emoteButtons[i].isHighlighted = true;
 				}	
 				break;
-			case 'memory':
+			case "memory":
 				for(var i = 0; i < memoryTiles.length; i++){
-					memoryTiles[i].depth = -100;
+					memoryTiles[i].isHighlighted = true;
 				}
 			default:
-				console.log('couldnt highlight ' +arg);
+				console.log("couldnt highlight " +arg);
 				break;
 		}
 		this.isVisible = true;
@@ -34,23 +40,35 @@ function Highlighter(){
 	}
 
 	this.unHighlight = function(arg){
+		if(arg === undefined){
+			for (var i = 0; i < gameObjects.length; i++) {
+				if(gameObjects[i].isHighlighted !== undefined){
+					gameObjects[i].isHighlighted = false;
+				}
+			}
+
+			this.isVisible = false;
+			highlighted = false;
+			return;
+		}
+
 		switch(arg){
-			case 'player':
+			case "player":
 				playerAvatar.isHighlighted = false;
-			case 'match':
+			case "match":
 				matchAvatar.isHighlighted = false;
 				break;
-			case 'emotes':
+			case "emotes":
 				for(var i = 0; i < playerAvatar.emoteButtons.length; i++){
-					playerAvatar.emoteButtons[i].depth = 0;
+					playerAvatar.emoteButtons[i].isHighlighted = false;
 				}	
 				break;
-			case 'memory':
+			case "memory":
 				for(var i = 0; i < memoryTiles.length; i++){
-					memoryTiles[i].depth = 0;
+					memoryTiles[i].isHighlighted = false;
 				}
 			default:
-				console.log('couldnt unhighlight ' +arg);
+				console.log("couldnt unhighlight " +arg);
 				break;
 		}
 		this.isVisible = false;

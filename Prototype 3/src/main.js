@@ -30,10 +30,17 @@ var mouse;
 var keyboard;
 var previousMouse;
 var previousKeyboard;
+var clicked = false; // Dirty hack, so player can not click muliply buttons in one update
 
 var acceptButton;
 var rejectButton;
 var makeBabyButton;
+
+// Tutorial
+var justJoined = true;
+var firstMatch = true;
+var firstMemory = true;
+var firstPolygon = true;
 
 /*
 var gemSprite;
@@ -155,19 +162,19 @@ function initializePlayer(){
 	am.fontSize = 40;
 	gameObjects.push(am);
 
-	acceptButton = new TextButton(new Vector2(canvas.width/2-110, 150), 200, 60, "Yep", "#141414", "#FFFFFF");
-	acceptButton.onClick = function(){acceptMatch()};
-	gameObjects.push(acceptButton);
-	acceptButton.isVisible = false;
-	acceptButton.isDisabled = true;
+	// acceptButton = new TextButton(new Vector2(canvas.width/2-110, 150), 200, 60, "Yep", "#141414", "#FFFFFF");
+	// acceptButton.onClick = function(){acceptMatch()};
+	// gameObjects.push(acceptButton);
+	// acceptButton.isVisible = false;
+	// acceptButton.isDisabled = true;
 
-	rejectButton = new TextButton(new Vector2(canvas.width/2+110, 150), 200, 60, "Nope", "#141414", "#FFFFFF");
-	rejectButton.onClick = function(){rejectMatch()};
-	gameObjects.push(rejectButton);
-	rejectButton.isVisible = false;
-	rejectButton.isDisabled = true;
+	// rejectButton = new TextButton(new Vector2(canvas.width/2+110, 150), 200, 60, "Nope", "#141414", "#FFFFFF");
+	// rejectButton.onClick = function(){rejectMatch()};
+	// gameObjects.push(rejectButton);
+	// rejectButton.isVisible = false;
+	// rejectButton.isDisabled = true;
 
-	makeBabyButton = new TextButton(new Vector2(canvas.width/2, canvas.height/2+90), 380, 60, "Click here to name the polygon", "#141414", "#FFFFFF");
+	makeBabyButton = new TextButton(new Vector2(canvas.width/2, canvas.height/2+120), 380, 120, "Click here to name the polygon", "#141414", "#FFFFFF");
 	makeBabyButton.onClick = function(){confirmCode()};
 	gameObjects.push(makeBabyButton);
 	makeBabyButton.isVisible = false;
@@ -258,12 +265,19 @@ function update(){
 	// Camera
 	camera.update();
 
+	// Player announcements
+	if(!isWorld){
+		am.defaultMessage = clientStatus;
+		;
+	}
+
 	// Set the draw order
 	sortByDepth(gameObjects);
 
 	// Save previous mouse and keyboard state
 	previousMouse = clone(mouse);
 	previousKeyboard = clone(keyboard);
+	clicked = false;
 }
 
 function render(lagOffset){
@@ -289,10 +303,10 @@ function render(lagOffset){
 		//grassSprite.draw(ctx, 1920/2 -camera.interpolatedPos().x, 300-camera.interpolatedPos().y);
 
 		// Name
-		ctx.font = "40px Righteous";
-		ctx.fillStyle = "#000000";
-		ctx.textAlign = "center";
-		ctx.fillText(clientStatus, canvas.width/2, 60);
+		// ctx.font = "40px Righteous";
+		// ctx.fillStyle = "#000000";
+		// ctx.textAlign = "center";
+		// ctx.fillText(clientStatus, canvas.width/2, 60);
 
 		// Render all game objects
 		for(var ob = 0; ob < gameObjects.length; ob++){

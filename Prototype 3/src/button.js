@@ -26,6 +26,7 @@ function TextButton(position, width, height, text, bgColor, textColor){
 	this.isToggled = false;
 	this.isDisabled = false;
 	this.isVisible = true;
+	this.isHighlighted = false;
 
 	// Destroys the object (removes it from gameObjects)
 	this.kill = function(){
@@ -63,15 +64,23 @@ function TextButton(position, width, height, text, bgColor, textColor){
 		this.mouseOver = false;
 		this.isPressed = false;
 
+		if(this.isHighlighted){
+			this.depth = highlighter.depth-3;
+		}
+		else {
+			this.depth = -2001;
+		}
+
 		// Check if the button is not disabled
-		if(!this.isDisabled && highlighted === false){
+		if(!this.isDisabled && (!highlighted || this.isHighlighted) ){
 			// Check if the mouse is hovering over the button
 			//this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
 			
 			// Call the onClick function when the button is pressed
-			if(checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox()) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick){
+			if(checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox()) && mouse.buttonState.leftClick && !previousMouse.buttonState.leftClick && !clicked){
 				console.log("Pressed");
 				this.isPressed = true;
+				clicked = true;
 				this.onClick();
 			}
 		}
@@ -87,13 +96,17 @@ function TextButton(position, width, height, text, bgColor, textColor){
 		drawRectangle(ctx, drawX-this.width/2+4, drawY-this.height/2+4, this.width, this.height, true, color.BLACK, 0.3);
 
 		// Background
-		drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, this.bgColor, this.bgAlpha);
+		if(this.isDisabled){
+			drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, color.DARK_GREY, this.bgAlpha);
+		}else{
+			drawRectangle(ctx, drawX-this.width/2, drawY-this.height/2, this.width, this.height, true, this.bgColor, this.bgAlpha);
+		}
 
 		// Text
 		ctx.textAlign = "center";
 		ctx.textBaseline = "middle";
-		if(!this.mouseOver){drawText(ctx, drawX, drawY, this.width, 24, this.text, "Righteous", 24, this.textColor, 1);}
-		else{drawText(ctx, drawX, drawY, this.width, 24, this.text, "Righteous", 24, this.textHoverColor, 1);}
+		if(!this.mouseOver){drawText(ctx, drawX, drawY-this.height/2+40, this.width, 40, this.text, "Righteous", 40, this.textColor, 1);}
+		else{drawText(ctx, drawX, drawY-this.height/2+40, this.width, 40, this.text, "Righteous", 40, this.textHoverColor, 1);} // Super diry hack for good text positioning on button TODO: revise later
 		ctx.textBaseline = "alphabetic";
 		}
 	};
@@ -121,6 +134,7 @@ function BubbleButton(position, radius, bgColor, sprite){
 	this.isToggled = false;
 	this.isDisabled = false;
 	this.isVisible = true;
+	this.isHighlighted = false;
 
 	// Destroys the object (removes it from gameObjects)
 	this.kill = function(){
@@ -156,6 +170,13 @@ function BubbleButton(position, radius, bgColor, sprite){
 	this.update = function(){
 		this.mouseOver = false;
 		this.isPressed = false;
+
+		if(this.isHighlighted){
+			his.depth = highlighter.depth-3;
+		}
+		else {
+			this.depth = -2001;
+		}
 
 		// Check if the button is not disabled
 		if(!this.isDisabled && highlighted === false){
@@ -216,6 +237,7 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 	this.startURtimer = false;
 	this.unrevealTimer = 0;
 	this.mtm = false;
+	this.isHighlighted = false;
 
 	//sprite
 	this.card = new Sprite(memory_cards, 100*this.value, 100*this.index, 100, 100);
@@ -303,6 +325,13 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 		if(this.unrevealTimer < 0){this.startURtimer = false; this.unReveal();}
 		}
 
+		if(this.isHighlighted){
+			this.depth = highlighter.depth-1;
+		}
+		else {
+			this.depth = -2001;
+		}
+
 		//TODO if mtm = true, tile should ease to the middle of the screen and then call kill() when it arrives
 		if(this.mtm){
 			var d = this.position.getVectorTo(new Vector2(canvas.width/2, canvas.height/2));
@@ -312,8 +341,8 @@ function MemoryButton(position, width, height, index, value, number, bgColor){
 				this.position.add(d);
 			}else{ this.kill(); }
 		}		
-		// Check if the button is not disabled
-		if(highlighted === false && !this.isDisabled && !this.isRevealed && turnPlayer){
+		// Check if the button is not disabled (hack this.isHighlighted must be false so the player can not interact with the tiles during the tuttorial)
+		if(!highlighted && !this.isHighlighted && !this.isDisabled && !this.isRevealed && turnPlayer){
 			// Check if the mouse is hovering over the button
 			//this.mouseOver = checkPointvsAABB(new Vector2(mouse.x, mouse.y), this.getHitbox());
 			

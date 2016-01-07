@@ -115,6 +115,10 @@ io.sockets.on('connection', function (socket){
         }
 	});
 
+	socket.on('ready', function(id){
+		io.sockets.socket(worldID).emit('playerReady', id);
+	});
+
 	socket.on('announce', function(message){
 		io.sockets.socket(worldID).emit('announce', message);
 	});
