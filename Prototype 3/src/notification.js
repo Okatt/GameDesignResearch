@@ -84,15 +84,42 @@ function Notification(message){
 }
 
 function joinNotification(){
-	var joinNotification = new Notification("Welcome! You have joined the world. We have generated a character for you. (explain...)");
+	var joinNotification = new Notification("Welcome! You have joined the world. We have generated a character for you.");
 	gameObjects.push( joinNotification );
 
 	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");
-	okButton.onClick = function(){justJoined = false; joinNotification.kill(); this.kill(); highlighter.unHighlight(); socket.emit('ready', playerId);};
+	okButton.onClick = function(){justJoined = false; joinNotification.kill(); this.kill(); joinNotification2();};
 	gameObjects.push(okButton);
 
 	highlighter.highlight("player");
 	joinNotification.isHighlighted = true;
+	okButton.isHighlighted = true;
+}
+
+function joinNotification2(){
+	var joinNotification2 = new Notification("You can click on your character to open your emote menu.\n(Clicking your character again will close your emote menu)");
+	gameObjects.push( joinNotification2 );
+
+	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");
+	okButton.onClick = function(){joinNotification2.kill(); this.kill(); highlighter.unHighlight(); socket.emit('ready', playerId);};
+	gameObjects.push(okButton);
+
+	joinNotification2.isHighlighted = true;
+	okButton.isHighlighted = true;
+
+	clientStatus = "Searching for a match...";
+}
+
+function firstEmoteNotification(){
+	var firstEmoteNotification = new Notification("Click on one of the emotes to express it to the world.");
+	gameObjects.push( firstEmoteNotification );
+
+	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");
+	okButton.onClick = function(){firstEmote = false; firstEmoteNotification.kill(); this.kill(); highlighter.unHighlight();};
+	gameObjects.push(okButton);
+
+	highlighter.highlight("emotes");
+	firstEmoteNotification.isHighlighted = true;
 	okButton.isHighlighted = true;
 }
 

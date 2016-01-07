@@ -172,7 +172,7 @@ function BubbleButton(position, radius, bgColor, sprite){
 		this.isPressed = false;
 
 		if(this.isHighlighted){
-			his.depth = highlighter.depth-3;
+			this.depth = highlighter.depth-3;
 		}
 		else {
 			this.depth = -2001;

@@ -434,7 +434,7 @@ function BubbleButton(position, radius, bgColor, sprite){
 		this.isPressed = false;
 
 		if(this.isHighlighted){
-			his.depth = highlighter.depth-3;
+			this.depth = highlighter.depth-3;
 		}
 		else {
 			this.depth = -2001;
@@ -1243,7 +1243,7 @@ function rejectMatch(){
 }
 
 function confirmCode(){
-  babyName = prompt('Kies een naam voor jullie creatie: ');
+  babyName = prompt('Choose a name for your polygon:');
   socket.emit('enteredName', playerId, matchId, babyName);
 }
 
@@ -1325,6 +1325,8 @@ function checkCrown(exclude){
 }
 
 function startMemory(){
+  clientStatus = "Play a game of memory to create a new polygon.";
+
   for (var i = 0; i < memoryTiles.length; i++) {
       memoryTiles[i].isVisible = true;
       memoryTiles[i].isDisabled = false;
@@ -1341,6 +1343,8 @@ function startMemory(){
 }
 
 function endMemory(){
+  clientStatus = "Find eachother to name the new polygon. You both need to enter the same";
+
   for (var i = 0; i < memoryTiles.length; i++) {
       memoryTiles[i].kill();
   }
@@ -1842,6 +1846,7 @@ var justJoined = true;
 var firstMatch = true;
 var firstMemory = true;
 var firstPolygon = true;
+var firstEmote = true;
 
 /*
 var gemSprite;
@@ -2209,15 +2214,42 @@ function Notification(message){
 }
 
 function joinNotification(){
-	var joinNotification = new Notification("Welcome! You have joined the world. We have generated a character for you. (explain...)");
+	var joinNotification = new Notification("Welcome! You have joined the world. We have generated a character for you.");
 	gameObjects.push( joinNotification );
 
 	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");
-	okButton.onClick = function(){justJoined = false; joinNotification.kill(); this.kill(); highlighter.unHighlight(); socket.emit('ready', playerId);};
+	okButton.onClick = function(){justJoined = false; joinNotification.kill(); this.kill(); joinNotification2();};
 	gameObjects.push(okButton);
 
 	highlighter.highlight("player");
 	joinNotification.isHighlighted = true;
+	okButton.isHighlighted = true;
+}
+
+function joinNotification2(){
+	var joinNotification2 = new Notification("You can click on your character to open your emote menu.\n(Clicking your character again will close your emote menu)");
+	gameObjects.push( joinNotification2 );
+
+	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");
+	okButton.onClick = function(){joinNotification2.kill(); this.kill(); highlighter.unHighlight(); socket.emit('ready', playerId);};
+	gameObjects.push(okButton);
+
+	joinNotification2.isHighlighted = true;
+	okButton.isHighlighted = true;
+
+	clientStatus = "Searching for a match...";
+}
+
+function firstEmoteNotification(){
+	var firstEmoteNotification = new Notification("Click on one of the emotes to express it to the world.");
+	gameObjects.push( firstEmoteNotification );
+
+	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");
+	okButton.onClick = function(){firstEmote = false; firstEmoteNotification.kill(); this.kill(); highlighter.unHighlight();};
+	gameObjects.push(okButton);
+
+	highlighter.highlight("emotes");
+	firstEmoteNotification.isHighlighted = true;
 	okButton.isHighlighted = true;
 }
 
@@ -2570,6 +2602,7 @@ function Player(id, position, shape, color, eyes){
 			this.emoteButtons.push(b);
 			gameObjects.push(b);
 		}
+		if(firstEmote){ firstEmoteNotification(); }
 	}
 
 	// Close the emotes menu
@@ -2667,7 +2700,7 @@ function Player(id, position, shape, color, eyes){
 
 		if(isWorld){
 			// Update the time since the last match up.
-			this.withoutMatchTime += UPDATE_DURATION/1000;
+			if(!this.justJoined){ this.withoutMatchTime += UPDATE_DURATION/1000; }
 			if(!this.matched && this.withoutMatchTime > 8){
 				if(!this.justJoined){this.findMatch();}
 			}
@@ -2803,19 +2836,25 @@ function Player(id, position, shape, color, eyes){
 		}
 
 		if(this.hasCrown){
+			var om;
+			om = this.isLarge ? 2.5 : 1;
+
 			if(this.eyes === 1){
-				crownSprite.draw(ctx, drawX+2, drawY-120);
+				crownSprite.draw(ctx, drawX+2, drawY-120*om);
 			}
 			else if(this.eyes === 2){
-				crownSprite.draw(ctx, drawX+2, drawY-120);
+				crownSprite.draw(ctx, drawX+2, drawY-120*om);
 			}
 			else {
-				crownSprite.draw(ctx, drawX+2, drawY-130);
+				crownSprite.draw(ctx, drawX+2, drawY-130*om);
 			}
 		}
 
 		if(this.drawEmote){
-			this.emoteSprite.draw(ctx, drawX, drawY-160);
+			var om;
+			om = this.isLarge ? 2.5 : 1;
+
+			this.emoteSprite.draw(ctx, drawX, drawY-160*om);
 		}
 
 		// Hitbox (debug)

@@ -518,7 +518,7 @@ function rejectMatch(){
 }
 
 function confirmCode(){
-  babyName = prompt('Kies een naam voor jullie creatie: ');
+  babyName = prompt('Choose a name for your polygon:');
   socket.emit('enteredName', playerId, matchId, babyName);
 }
 
@@ -600,6 +600,8 @@ function checkCrown(exclude){
 }
 
 function startMemory(){
+  clientStatus = "Play a game of memory to create a new polygon.";
+
   for (var i = 0; i < memoryTiles.length; i++) {
       memoryTiles[i].isVisible = true;
       memoryTiles[i].isDisabled = false;
@@ -616,6 +618,8 @@ function startMemory(){
 }
 
 function endMemory(){
+  clientStatus = "Find eachother to name the new polygon. You both need to enter the same";
+
   for (var i = 0; i < memoryTiles.length; i++) {
       memoryTiles[i].kill();
   }

@@ -41,6 +41,7 @@ var justJoined = true;
 var firstMatch = true;
 var firstMemory = true;
 var firstPolygon = true;
+var firstEmote = true;
 
 /*
 var gemSprite;

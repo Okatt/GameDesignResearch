@@ -84,6 +84,7 @@ function Player(id, position, shape, color, eyes){
 			this.emoteButtons.push(b);
 			gameObjects.push(b);
 		}
+		if(firstEmote){ firstEmoteNotification(); }
 	}
 
 	// Close the emotes menu
@@ -181,7 +182,7 @@ function Player(id, position, shape, color, eyes){
 
 		if(isWorld){
 			// Update the time since the last match up.
-			this.withoutMatchTime += UPDATE_DURATION/1000;
+			if(!this.justJoined){ this.withoutMatchTime += UPDATE_DURATION/1000; }
 			if(!this.matched && this.withoutMatchTime > 8){
 				if(!this.justJoined){this.findMatch();}
 			}
@@ -317,19 +318,25 @@ function Player(id, position, shape, color, eyes){
 		}
 
 		if(this.hasCrown){
+			var om;
+			om = this.isLarge ? 2.5 : 1;
+
 			if(this.eyes === 1){
-				crownSprite.draw(ctx, drawX+2, drawY-120);
+				crownSprite.draw(ctx, drawX+2, drawY-120*om);
 			}
 			else if(this.eyes === 2){
-				crownSprite.draw(ctx, drawX+2, drawY-120);
+				crownSprite.draw(ctx, drawX+2, drawY-120*om);
 			}
 			else {
-				crownSprite.draw(ctx, drawX+2, drawY-130);
+				crownSprite.draw(ctx, drawX+2, drawY-130*om);
 			}
 		}
 
 		if(this.drawEmote){
-			this.emoteSprite.draw(ctx, drawX, drawY-160);
+			var om;
+			om = this.isLarge ? 2.5 : 1;
+
+			this.emoteSprite.draw(ctx, drawX, drawY-160*om);
 		}
 
 		// Hitbox (debug)
