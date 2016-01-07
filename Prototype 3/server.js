@@ -28,6 +28,9 @@ var shares = 0;
 var sharedArray = [];
 var players = 0;
 var interactions = 0;
+var acceptedMatches = 0;
+var attemptedMatches = 0;
+var rejectedMatches = 0;
 
 var app = http.createServer(function (req, res) {
   fileServer.serve(req, res);
@@ -91,7 +94,7 @@ io.sockets.on('connection', function (socket){
 		for(var i = 0; i < playerIDArray.length; i++){
 			if(playerIDArray[i] === socket.id){
 				date = new Date();
-				var dataString = "ID: " +playerIDArray[i] +'\n' +"Time joined: " +hourArray[i] +":"+minuteArray[i] +":"+secondArray[i] +'\n' +"Time left: " +date.getHours() +":"+date.getMinutes()+":"+date.getSeconds() +'\n' +"Current Stats: " +'\n'+'Total number of players: ' +players.toString()+'\n' +"Highest number of players at one time: "+highestPlayerCount.toString()+'\n' +'Number of succesful interactions: ' +interactions.toString()+'\n' +'Number of shares: ' +shares.toString() +'\n' +'\n';
+				var dataString = "ID: " +playerIDArray[i] +'\n' +"Time joined: " +hourArray[i] +":"+minuteArray[i] +":"+secondArray[i] +'\n' +"Time left: " +date.getHours() +":"+date.getMinutes()+":"+date.getSeconds() +'\n' +"Current Stats: " +'\n'+'Total number of players: ' +players.toString()+'\n' +"Highest number of players at one time: "+highestPlayerCount.toString()+'\n' +'Number of succesful interactions: ' +interactions.toString()+'\n' +'Number of shares: ' +shares.toString() +'\n' +"Total number of attempted matches: " +attemptedMatches.toString() +'\n' +"Total number of accepted matches: " +acceptedMatches.toString() +'\n' +"Total number of rejected matches: " +rejectedMatches.toString() +'\n' +'\n';
 				fs.appendFile("build/res/data/Data.txt", dataString, function(err) {
     				if(err) {
         			return log(err);
@@ -161,6 +164,8 @@ io.sockets.on('connection', function (socket){
 			io.sockets.socket(p1id).emit('memoryCard', memoryArray[i], i);
 			io.sockets.socket(p2id).emit('memoryCard', memoryArray[i], i);
 		}
+
+		attemptedMatches++;
 	});
 
 	socket.on('emitBaby', function(id, shape, color, eyes, hasCrown){
@@ -179,6 +184,8 @@ io.sockets.on('connection', function (socket){
 					expectedAcceptArray.splice(i, 1);
 				}
 			}
+
+			acceptedMatches ++;
 		}
 		else {
 			expectedAcceptArray.push(matchID);
@@ -196,6 +203,8 @@ io.sockets.on('connection', function (socket){
 		io.sockets.socket(matchID).emit('matchRejected', matchID, playerID);
 		io.sockets.socket(playerID).emit('matchRejected', matchID, playerID);
 		io.sockets.socket(worldID).emit('matchRejected', matchID, playerID);
+
+		rejectedMatches++;
 	});
 
 	socket.on('unMatch', function(p1ID, p2ID){
