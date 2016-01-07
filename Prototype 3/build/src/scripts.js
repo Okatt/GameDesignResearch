@@ -2155,6 +2155,8 @@ function Notification(message){
 	this.type = "Notification";
 	this.isAlive = true;
 
+	notificationSound.play();
+
 	// Positioning
 	this.position = new Vector2(canvas.width/2, 140);
 	this.previousPos = this.position.clone();
