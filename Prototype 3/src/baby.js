@@ -114,7 +114,12 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 		
 		// If avatar
 		if(this.state === "AVATAR"){
-			// Draw some background polygon 
+			if(babyName !== undefined && babyName !== null){
+				ctx.font = "40px Righteous";
+				ctx.fillStyle = "#FFFFFF";
+				ctx.textAlign = "center";
+				ctx.fillText(babyName, drawX, drawY-this.height-40);
+			}
 		}
 
 		// Body
