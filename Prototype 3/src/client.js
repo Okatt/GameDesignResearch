@@ -175,6 +175,8 @@ socket.on('matchRequest', function(mID, mShape, mColor, mEyes, mCrown){
   playerAvatar.position = new Vector2(1920/2-300, 1080/2+150);
   playerAvatar.previousPos = playerAvatar.position.clone();
 
+  playerAvatar.closeEmotes();
+
   clientStatus = 'Do you want to play with this person?';
 
   if(firstMatch){ firstMatchNotification(); }
@@ -284,6 +286,10 @@ socket.on('matchRejected', function(rejectedID, playerID){
     noButton.kill();
     endMemory();
     clientStatus = 'The match was no success.';
+
+    // Set player back
+    playerAvatar.position = new Vector2(1920/2, 1080/2+150);
+    playerAvatar.previousPos = playerAvatar.position.clone();
   }
 });
 

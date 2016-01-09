@@ -70,3 +70,41 @@ Total number of attempted matches: 4
 Total number of accepted matches: 2
 Total number of rejected matches: 4
 
+Total Stats: 
+Total number of players: 0
+Highest number of players at one time: 0
+Number of completed interactions: 0
+Number of babies shared: 0
+Total number of attempted matches: 0
+Total number of accepted matches: 0
+Total number of rejected matches: 0
+
+ID: 8hrJ4-yunJNa-7OtNuYI
+Time joined: 17:27:52
+Time left: 17:29:25
+Number of succesful interactions by this player: 1
+Number of potential matches this player had: 4
+Number of matches accepted by this player: 1
+Number of matches rejected by this player: 2
+Number of times this player was rejected: 1
+Number of babies shared by this player: 1
+
+ID: vqHFcZsUdxnmondxNuYH
+Time joined: 17:27:46
+Time left: 17:29:26
+Number of succesful interactions by this player: 1
+Number of potential matches this player had: 4
+Number of matches accepted by this player: 1
+Number of matches rejected by this player: 1
+Number of times this player was rejected: 2
+Number of babies shared by this player: 1
+
+Total Stats: 
+Total number of players: 2
+Highest number of players at one time: 2
+Number of completed interactions: 1
+Number of babies shared: 2
+Total number of attempted matches: 4
+Total number of accepted matches: 1
+Total number of rejected matches: 3
+
