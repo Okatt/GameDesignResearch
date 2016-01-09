@@ -784,6 +784,9 @@ var highlighted = false;
 
 var isMother = false;
 
+// Data collection
+var joinedAtServerTime;
+
 
 /****************************************************************************
  * Signaling server 
@@ -1405,6 +1408,50 @@ function gotRemoteStream(event) {
 }
 
 //*****************************************************************************************
+//	Data collection
+//*****************************************************************************************
+
+// Logs a label to identify the test results
+function startLog(){
+	var dataString = "#### New data Log ####";
+	socket.emit('logData', dataString);
+}
+
+// Logs data with a timestamp label
+function logData(){
+	socket.emit('setServerTime', getTimeString(time));
+
+	var dataString = "Time: "+getTimeString(time)+" - Players online: "+getPlayersOnline();
+	socket.emit('logData', dataString);
+}
+
+// Get the amount of players currently playing
+function getPlayersOnline(){
+	var c = 0;
+	for (var i = 0; i < gameObjects.length; i++){
+		if(gameObjects[i].type === "Player"){
+			c++;
+		}
+	}
+	return c;
+}
+
+function getTimeString(seconds){
+	var t, h, m, s;
+	var ts = "";
+
+	// Get the hours, minutes and seconds
+	t = time;
+	h = Math.floor(t/3600); t -= h*3600;
+	m = Math.floor(t/60); t -= m*60;
+	s = t;
+
+	if(h < 10){ ts += "0"+h; }else{ ts += h; } ts += ":";
+	if(m < 10){ ts += "0"+m; }else{ ts += m; } ts += ":";
+	if(s < 10){ ts += "0"+s; }else{ ts += s; }
+	return ts;
+}
+//*****************************************************************************************
 //	Graphics
 //*****************************************************************************************
 
@@ -1883,6 +1930,11 @@ var firstMemory = true;
 var firstPolygon = true;
 var firstEmote = true;
 
+
+// Data collection
+var dt = 0;
+var time = 0;		// In minutes
+
 /*
 var gemSprite;
 var gems;
@@ -1890,9 +1942,7 @@ var nodeSpawner;
 */
 
 var highlighter;
-
 var turnTimer = -1;
-
 var notificationSound;
 
 //change dimensions for new crown sprite
@@ -1967,6 +2017,9 @@ function initializeWorld(){
 	// Announcements
 	am = new AnnouncementManager();
 	gameObjects.push(am);
+
+	// Data collection
+	startLog();
 
 	// Sprite testing
 	// var p = new Player(12345, new Vector2(500, 500), Math.floor(randomRange(0, 3.99)), 3, 1);
@@ -2085,6 +2138,12 @@ function run(){
 }
 
 function update(){
+	// World time
+	if(isWorld){
+		dt += UPDATE_DURATION/1000;
+		if(dt >= 10){dt -= 10; time += 10; logData();}
+	}	
+
 	// Apply physics
 	applyPhysics();
 
@@ -2251,7 +2310,7 @@ function Notification(message){
 }
 
 function joinNotification(){
-	var joinNotification = new Notification("Welcome! You have joined the world. We have generated a character for you.");
+	var joinNotification = new Notification("Welcome! This is your character.");
 	gameObjects.push( joinNotification );
 
 	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");
@@ -2264,7 +2323,7 @@ function joinNotification(){
 }
 
 function joinNotification2(){
-	var joinNotification2 = new Notification("You can click on your character to open your emote menu.\n(Clicking your character again will close your emote menu)");
+	var joinNotification2 = new Notification("Click on your character.");
 	gameObjects.push( joinNotification2 );
 
 	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");
@@ -2328,7 +2387,7 @@ function matchNotification(){
 }
 
 function firstMemoryNotification(){
-	var firstMemoryNotification = new Notification("You will work together to create a new polygon that will follow you around. The shape, color and number of eyes will be determined by a game of memory.");
+	var firstMemoryNotification = new Notification("You will work together to create a new polygon that will follow you around.");
 	gameObjects.push( firstMemoryNotification );
 
 	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");

@@ -32,6 +32,9 @@ var acceptedMatches = 0;
 var attemptedMatches = 0;
 var rejectedMatches = 0;
 
+// Data collection (world updates server time)
+var serverTime = "00:00:00";
+
 var app = http.createServer(function (req, res) {
   fileServer.serve(req, res);
 }).listen(port);
@@ -90,6 +93,17 @@ io.sockets.on('connection', function (socket){
 		return r > 0.5 ? var1 : var2;
 	}
 
+	socket.on('setServerTimr', function(timeString){
+		serverTime = timeString;
+	});
+
+	socket.on('logData', function(dataString){
+		dataString += "\n";
+		fs.appendFile("build/res/data/WorldData.txt", dataString, function(err) {
+			if(err){ return log(err); }
+		});
+	});
+
 	socket.on('disconnect', function(){
 		for(var i = 0; i < playerIDArray.length; i++){
 			if(playerIDArray[i] === socket.id){
@@ -140,6 +154,7 @@ io.sockets.on('connection', function (socket){
             	highestPlayerCount = playerIDArray.length;
             }
             players++;
+           	joinedAtServerTime = serverTime;
         }
 	});
 

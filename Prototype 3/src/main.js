@@ -43,6 +43,11 @@ var firstMemory = true;
 var firstPolygon = true;
 var firstEmote = true;
 
+
+// Data collection
+var dt = 0;
+var time = 0;		// In minutes
+
 /*
 var gemSprite;
 var gems;
@@ -50,9 +55,7 @@ var nodeSpawner;
 */
 
 var highlighter;
-
 var turnTimer = -1;
-
 var notificationSound;
 
 //change dimensions for new crown sprite
@@ -127,6 +130,9 @@ function initializeWorld(){
 	// Announcements
 	am = new AnnouncementManager();
 	gameObjects.push(am);
+
+	// Data collection
+	startLog();
 
 	// Sprite testing
 	// var p = new Player(12345, new Vector2(500, 500), Math.floor(randomRange(0, 3.99)), 3, 1);
@@ -245,6 +251,12 @@ function run(){
 }
 
 function update(){
+	// World time
+	if(isWorld){
+		dt += UPDATE_DURATION/1000;
+		if(dt >= 10){dt -= 10; time += 10; logData();}
+	}	
+
 	// Apply physics
 	applyPhysics();
 

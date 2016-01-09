@@ -47,6 +47,9 @@ var highlighted = false;
 
 var isMother = false;
 
+// Data collection
+var joinedAtServerTime;
+
 
 /****************************************************************************
  * Signaling server 

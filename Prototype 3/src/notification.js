@@ -86,7 +86,7 @@ function Notification(message){
 }
 
 function joinNotification(){
-	var joinNotification = new Notification("Welcome! You have joined the world. We have generated a character for you.");
+	var joinNotification = new Notification("Welcome! This is your character.");
 	gameObjects.push( joinNotification );
 
 	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");
@@ -99,7 +99,7 @@ function joinNotification(){
 }
 
 function joinNotification2(){
-	var joinNotification2 = new Notification("You can click on your character to open your emote menu.\n(Clicking your character again will close your emote menu)");
+	var joinNotification2 = new Notification("Click on your character.");
 	gameObjects.push( joinNotification2 );
 
 	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");
@@ -163,7 +163,7 @@ function matchNotification(){
 }
 
 function firstMemoryNotification(){
-	var firstMemoryNotification = new Notification("You will work together to create a new polygon that will follow you around. The shape, color and number of eyes will be determined by a game of memory.");
+	var firstMemoryNotification = new Notification("You will work together to create a new polygon that will follow you around.");
 	gameObjects.push( firstMemoryNotification );
 
 	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");
