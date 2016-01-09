@@ -100,7 +100,7 @@ io.sockets.on('connection', function (socket){
 		return r > 0.5 ? var1 : var2;
 	}
 
-	socket.on('setServerTimr', function(timeString){
+	socket.on('setServerTime', function(timeString){
 		serverTime = timeString;
 	});
 
@@ -113,7 +113,7 @@ io.sockets.on('connection', function (socket){
 
 	socket.on('disconnect', function(){
 		if(socket.id === worldID){
-			var dataString = "Total Stats: "+'\n'+'Server time joined: '+joinedAtServerTime+'\n'+'Total number of players: ' +players.toString()+'\n' +"Highest number of players at one time: "+highestPlayerCount.toString()+'\n' +'Number of completed interactions: ' +interactions.toString()+'\n' +'Number of babies shared: ' +shares.toString() +'\n' +"Total number of attempted matches: " +attemptedMatches.toString() +'\n' +"Total number of accepted matches: " +acceptedMatches.toString() +'\n' +"Total number of rejected matches: " +rejectedMatches.toString() +'\n' +'\n';
+			var dataString = "Total Stats: "+'\n'+'Total number of players: ' +players.toString()+'\n' +"Highest number of players at one time: "+highestPlayerCount.toString()+'\n' +'Number of completed interactions: ' +interactions.toString()+'\n' +'Number of babies shared: ' +shares.toString() +'\n' +"Total number of attempted matches: " +attemptedMatches.toString() +'\n' +"Total number of accepted matches: " +acceptedMatches.toString() +'\n' +"Total number of rejected matches: " +rejectedMatches.toString() +'\n' +'\n';
 				fs.appendFile("build/res/data/Data.txt", dataString, function(err) {
     				if(err) {
         			return log(err);
@@ -136,7 +136,16 @@ io.sockets.on('connection', function (socket){
 				rejectsPerPlayerArray[i] += diff;
 
 				date = new Date();
-				var dataString = "ID: " +playerIDArray[i] +'\n' +"Time joined: " +hourArray[i] +":"+minuteArray[i] +":"+secondArray[i] +'\n' +"Time left: " +date.getHours() +":"+date.getMinutes()+":"+date.getSeconds() +'\n' +'Number of succesful interactions by this player: '+sucInteractionsPerPlayerArray[i] +'\n' +'Number of potential matches this player had: '+attemptedMatchesPerPlayerArray[i] +'\n' +'Number of matches accepted by this player: '+acceptsPerPlayerArray[i] +'\n' +'Number of matches rejected by this player: ' +rejectsPerPlayerArray[i] +'\n' +'Number of times this player was rejected: ' +timesRejectedArray[i] +'\n' +'Number of babies shared by this player: ' +sharesPerPlayerArray[i] +'\n' +'\n';
+
+				var ds = hourArray[i]*3600;
+				ds += minuteArray[i]*60;
+				ds += secondArray[i];
+				var tp = date.getHours()*3600;
+				tp += date.getMinutes()*60;
+				tp += date.getSeconds();
+				tp -= ds;
+
+				var dataString = "ID: " +playerIDArray[i] +'\n'+'Server time joined: '+joinedAtServerTime+' - seconds connected: '+tp+'\n'+"Time joined: " +hourArray[i] +":"+minuteArray[i] +":"+secondArray[i] +'\n' +"Time left: " +date.getHours() +":"+date.getMinutes()+":"+date.getSeconds() +'\n' +'Number of succesful interactions by this player: '+sucInteractionsPerPlayerArray[i] +'\n' +'Number of potential matches this player had: '+attemptedMatchesPerPlayerArray[i] +'\n' +'Number of matches accepted by this player: '+acceptsPerPlayerArray[i] +'\n' +'Number of matches rejected by this player: ' +rejectsPerPlayerArray[i] +'\n' +'Number of times this player was rejected: ' +timesRejectedArray[i] +'\n' +'Number of babies shared by this player: ' +sharesPerPlayerArray[i] +'\n' +'\n';
 				fs.appendFile("build/res/data/Data.txt", dataString, function(err) {
     				if(err) {
         			return log(err);
