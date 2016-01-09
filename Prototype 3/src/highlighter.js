@@ -31,6 +31,10 @@ function Highlighter(){
 				for(var i = 0; i < memoryTiles.length; i++){
 					memoryTiles[i].isHighlighted = true;
 				}
+				break;
+			case "baby":
+				babyAvatar.isHighlighted = true;
+				break;
 			default:
 				console.log("couldnt highlight " +arg);
 				break;

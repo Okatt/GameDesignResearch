@@ -47,12 +47,6 @@ var highlighted = false;
 
 var isMother = false;
 
-var matchNotificationVar;
-var yesButton, noButton;
-
-// Data collection
-var joinedAtServerTime;
-
 
 /****************************************************************************
  * Signaling server 
@@ -116,7 +110,7 @@ socket.on('playerLeft', function(id){
   else {
     if(id === potentialMatchId){
       clientStatus = 'We\'re sorry, but the other player has left the game...';
-      rejectMatch(true);
+      rejectMatch();
     } 
     else if(id === matchId){
       clientStatus = 'We\'re sorry, but the other player has left the game...';
@@ -244,9 +238,6 @@ socket.on('unMatch', function(p1ID, p2ID){
 
       makeBabyButton.isVisible = false;
       makeBabyButton.isDisabled = true;
-
-      shareButton.isVisible = false;
-    shareButton.isDisabled = true;
       isMatched = false;
       matchId = null;
       matchColor = null;
@@ -284,9 +275,6 @@ socket.on('matchRejected', function(rejectedID, playerID){
     // rejectButton.isDisabled = true;
 
     matchAvatar.kill();
-    matchNotificationVar.kill(); 
-    yesButton.kill(); 
-    noButton.kill();
     endMemory();
     clientStatus = 'The match was no success.';
 
@@ -478,9 +466,6 @@ socket.on('memoryBaby', function(id, shape, color, eyes){
 
   makeBabyButton.isVisible = true;
   makeBabyButton.isDisabled = false;
-
-  shareButton.isVisible = true;
-  shareButton.isDisabled = false;
 });
 
 socket.on('ipaddr', function(ip){
@@ -544,15 +529,14 @@ function acceptMatch(){
   socket.emit('acceptedMatch', playerId, potentialMatchId);
 }
 
-function rejectMatch(otherDC){
-  var noChoice = otherDC || false;
+function rejectMatch(){
   // acceptButton.isVisible = false;
   // acceptButton.isDisabled = true;
 
   // rejectButton.isVisible = false;
   // rejectButton.isDisabled = true;
 
-  socket.emit('rejectedMatch', playerId, potentialMatchId, noChoice);
+  socket.emit('rejectedMatch', playerId, potentialMatchId);
 }
 
 function confirmCode(){
@@ -564,9 +548,6 @@ function confirmCode(){
 
 function share(){
   socket.emit('shared', playerId);
-  shareButton.isVisible = false;
-  shareButton.isDisabled = true;
-  shareNotification();
 }
 
 function checkCrown(exclude){

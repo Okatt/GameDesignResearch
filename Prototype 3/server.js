@@ -22,6 +22,13 @@ var highestPlayerCount = 0;
 
 var expectedAcceptArray = [];
 
+var sharesPerPlayerArray = [];
+var sucInteractionsPerPlayerArray = [];
+var acceptsPerPlayerArray = [];
+var rejectsPerPlayerArray = [];
+var attemptedMatchesPerPlayerArray = [];
+var timesRejectedArray = [];
+
 var date;
 
 var shares = 0;
@@ -105,10 +112,31 @@ io.sockets.on('connection', function (socket){
 	});
 
 	socket.on('disconnect', function(){
-		for(var i = 0; i < playerIDArray.length; i++){
+		if(socket.id === worldID){
+			var dataString = "Total Stats: " +'\n'+'Total number of players: ' +players.toString()+'\n' +"Highest number of players at one time: "+highestPlayerCount.toString()+'\n' +'Number of completed interactions: ' +interactions.toString()+'\n' +'Number of babies shared: ' +shares.toString() +'\n' +"Total number of attempted matches: " +attemptedMatches.toString() +'\n' +"Total number of accepted matches: " +acceptedMatches.toString() +'\n' +"Total number of rejected matches: " +rejectedMatches.toString() +'\n' +'\n';
+				fs.appendFile("build/res/data/Data.txt", dataString, function(err) {
+    				if(err) {
+        			return log(err);
+    				}
+				});
+		}
+		else {
+			for(var i = 0; i < playerIDArray.length; i++){
 			if(playerIDArray[i] === socket.id){
+
+				var rej, acc, tot, timesRej, diff;
+
+				rej = rejectsPerPlayerArray[i];
+				acc = acceptsPerPlayerArray[i];
+				tot = attemptedMatchesPerPlayerArray[i];
+				timesRej = timesRejectedArray[i];
+
+				diff = (tot-rej-acc-timesRej);
+
+				rejectsPerPlayerArray[i] += diff;
+
 				date = new Date();
-				var dataString = "ID: " +playerIDArray[i] +'\n' +"Time joined: " +hourArray[i] +":"+minuteArray[i] +":"+secondArray[i] +'\n' +"Time left: " +date.getHours() +":"+date.getMinutes()+":"+date.getSeconds() +'\n' +"Current Stats: " +'\n'+'Total number of players: ' +players.toString()+'\n' +"Highest number of players at one time: "+highestPlayerCount.toString()+'\n' +'Number of succesful interactions: ' +interactions.toString()+'\n' +'Number of shares: ' +shares.toString() +'\n' +"Total number of attempted matches: " +attemptedMatches.toString() +'\n' +"Total number of accepted matches: " +acceptedMatches.toString() +'\n' +"Total number of rejected matches: " +rejectedMatches.toString() +'\n' +'\n';
+				var dataString = "ID: " +playerIDArray[i] +'\n' +"Time joined: " +hourArray[i] +":"+minuteArray[i] +":"+secondArray[i] +'\n' +"Time left: " +date.getHours() +":"+date.getMinutes()+":"+date.getSeconds() +'\n' +'Number of succesful interactions by this player: '+sucInteractionsPerPlayerArray[i] +'\n' +'Number of potential matches this player had: '+attemptedMatchesPerPlayerArray[i] +'\n' +'Number of matches accepted by this player: '+acceptsPerPlayerArray[i] +'\n' +'Number of matches rejected by this player: ' +rejectsPerPlayerArray[i] +'\n' +'Number of times this player was rejected: ' +timesRejectedArray[i] +'\n' +'Number of babies shared by this player: ' +sharesPerPlayerArray[i] +'\n' +'\n';
 				fs.appendFile("build/res/data/Data.txt", dataString, function(err) {
     				if(err) {
         			return log(err);
@@ -119,7 +147,16 @@ io.sockets.on('connection', function (socket){
 				hourArray.splice(i, 1);
 				minuteArray.splice(i, 1);
 				secondArray.splice(i, 1);
+
+				sharesPerPlayerArray.splice(i, 1);
+				sucInteractionsPerPlayerArray.splice(i, 1);
+				acceptsPerPlayerArray.splice(i, 1);
+				rejectsPerPlayerArray.splice(i, 1);
+				attemptedMatchesPerPlayerArray.splice(i, 1);
+				timesRejectedArray.splice(i, 1);
+
 				break;
+			}
 			}
 		}
 		socket.broadcast.emit('playerLeft', socket.id);
@@ -146,6 +183,14 @@ io.sockets.on('connection', function (socket){
 			socket.join(room);
             socket.emit('joined', room, socket.id);
             playerIDArray.push(socket.id);
+            sharesPerPlayerArray.push(0);
+            sucInteractionsPerPlayerArray.push(0);
+			acceptsPerPlayerArray.push(0);
+			rejectsPerPlayerArray.push(0);
+			attemptedMatchesPerPlayerArray.push(0);
+			timesRejectedArray.push(0);
+
+
             date = new Date();
             hourArray.push(date.getHours());
             minuteArray.push(date.getMinutes());
@@ -174,13 +219,19 @@ io.sockets.on('connection', function (socket){
 		io.sockets.socket(p1id).emit('matchRequest', p2id, p2shape, p2color, p2eyes, p2crown);
 		io.sockets.socket(p2id).emit('matchRequest', p1id, p1shape, p1color, p1eyes, p1crown);
 
+		attemptedMatches++;
+
 		var memoryArray = fillArray({index: 0, value: p1shape}, {index: 1, value: p1color}, {index: 2, value: p1eyes}, {index: 0, value: p2shape}, {index: 1, value: p2color}, {index: 2, value: p2eyes});
 		for(var i = 0; i < memoryArray.length; i++){
 			io.sockets.socket(p1id).emit('memoryCard', memoryArray[i], i);
 			io.sockets.socket(p2id).emit('memoryCard', memoryArray[i], i);
 		}
 
-		attemptedMatches++;
+		for(var i = 0; i < playerIDArray.length; i++){
+			if(playerIDArray[i] === p1id || playerIDArray[i] === p2id){
+				attemptedMatchesPerPlayerArray[i]++;
+			}
+		}
 	});
 
 	socket.on('emitBaby', function(id, shape, color, eyes, hasCrown){
@@ -201,13 +252,19 @@ io.sockets.on('connection', function (socket){
 			}
 
 			acceptedMatches ++;
+
+			for(var i = 0; i < playerIDArray.length; i++){
+			if(playerIDArray[i] === playerID || playerIDArray[i] === matchID){
+				acceptsPerPlayerArray[i]++;
+			}
+			}
 		}
 		else {
 			expectedAcceptArray.push(matchID);
 		}
 	});
 
-	socket.on('rejectedMatch', function(playerID, matchID){
+	socket.on('rejectedMatch', function(playerID, matchID, noChoice){
 		for(var i = expectedAcceptArray.length; i >= 0; i--){
 			if(expectedAcceptArray[i] === playerID || expectedAcceptArray[i] === matchID){
 				expectedAcceptArray.splice(i, 1);
@@ -220,6 +277,26 @@ io.sockets.on('connection', function (socket){
 		io.sockets.socket(worldID).emit('matchRejected', matchID, playerID);
 
 		rejectedMatches++;
+
+		if(noChoice === false){
+			for(var i = 0; i < playerIDArray.length; i++){
+				if(playerIDArray[i] === playerID){
+					rejectsPerPlayerArray[i]++;
+				}
+			}
+			for(var i = 0; i < playerIDArray.length; i++){
+				if(playerIDArray[i] === matchID){
+					timesRejectedArray[i]++;
+				}
+			}
+		}
+		else {
+			for(var i = 0; i < playerIDArray.length; i++){
+				if(playerIDArray[i] === playerID){
+					timesRejectedArray[i]++;
+				}
+			}
+		}
 	});
 
 	socket.on('unMatch', function(p1ID, p2ID){
@@ -254,12 +331,19 @@ io.sockets.on('connection', function (socket){
 		io.sockets.socket(p1ID).emit('createAppBaby', p1ID, shape, color, eyes);
 		io.sockets.socket(p2ID).emit('createAppBaby', p2ID, shape, color, eyes);
 		interactions++;
+		for(var i = 0; i < playerIDArray.length; i++){
+			if(playerIDArray[i] === p1ID || playerIDArray[i] === p2ID){
+				sucInteractionsPerPlayerArray[i]++;
+			}
+		}
 	});
 
 	socket.on('shared', function(playerID){
-		if(contains(sharedArray, playerID) === false){
-			sharedArray.push(playerID);
-			shares++;
+		shares++;
+		for(var i = 0; i < playerIDArray.length; i++){
+			if(playerIDArray[i] === playerID){
+				sharesPerPlayerArray[i]++;
+			}
 		}
 	});
 

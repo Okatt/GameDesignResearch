@@ -48,10 +48,7 @@ var highlighted = false;
 var isMother = false;
 
 var matchNotificationVar;
-var yesButton, noButton;
-
-// Data collection
-var joinedAtServerTime;
+  var yesButton, noButton;
 
 
 /****************************************************************************
