@@ -113,7 +113,7 @@ io.sockets.on('connection', function (socket){
 
 	socket.on('disconnect', function(){
 		if(socket.id === worldID){
-			var dataString = "Total Stats: " +'\n'+'Total number of players: ' +players.toString()+'\n' +"Highest number of players at one time: "+highestPlayerCount.toString()+'\n' +'Number of completed interactions: ' +interactions.toString()+'\n' +'Number of babies shared: ' +shares.toString() +'\n' +"Total number of attempted matches: " +attemptedMatches.toString() +'\n' +"Total number of accepted matches: " +acceptedMatches.toString() +'\n' +"Total number of rejected matches: " +rejectedMatches.toString() +'\n' +'\n';
+			var dataString = "Total Stats: "+'\n'+'Server time joined: '+joinedAtServerTime+'\n'+'Total number of players: ' +players.toString()+'\n' +"Highest number of players at one time: "+highestPlayerCount.toString()+'\n' +'Number of completed interactions: ' +interactions.toString()+'\n' +'Number of babies shared: ' +shares.toString() +'\n' +"Total number of attempted matches: " +attemptedMatches.toString() +'\n' +"Total number of accepted matches: " +acceptedMatches.toString() +'\n' +"Total number of rejected matches: " +rejectedMatches.toString() +'\n' +'\n';
 				fs.appendFile("build/res/data/Data.txt", dataString, function(err) {
     				if(err) {
         			return log(err);
