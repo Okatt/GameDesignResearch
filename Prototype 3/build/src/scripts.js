@@ -784,6 +784,9 @@ var highlighted = false;
 
 var isMother = false;
 
+var matchNotificationVar;
+  var yesButton, noButton;
+
 
 /****************************************************************************
  * Signaling server 
@@ -847,7 +850,7 @@ socket.on('playerLeft', function(id){
   else {
     if(id === potentialMatchId){
       clientStatus = 'We\'re sorry, but the other player has left the game...';
-      rejectMatch();
+      rejectMatch(true);
     } 
     else if(id === matchId){
       clientStatus = 'We\'re sorry, but the other player has left the game...';
@@ -908,8 +911,6 @@ socket.on('matchRequest', function(mID, mShape, mColor, mEyes, mCrown){
 
   playerAvatar.position = new Vector2(1920/2-300, 1080/2+150);
   playerAvatar.previousPos = playerAvatar.position.clone();
-
-  playerAvatar.closeEmotes();
 
   clientStatus = 'Do you want to play with this person?';
 
@@ -975,6 +976,9 @@ socket.on('unMatch', function(p1ID, p2ID){
 
       makeBabyButton.isVisible = false;
       makeBabyButton.isDisabled = true;
+
+      shareButton.isVisible = false;
+    shareButton.isDisabled = true;
       isMatched = false;
       matchId = null;
       matchColor = null;
@@ -1012,12 +1016,11 @@ socket.on('matchRejected', function(rejectedID, playerID){
     // rejectButton.isDisabled = true;
 
     matchAvatar.kill();
+    matchNotificationVar.kill(); 
+    yesButton.kill(); 
+    noButton.kill();
     endMemory();
     clientStatus = 'The match was no success.';
-
-    // Set player back
-    playerAvatar.position = new Vector2(1920/2, 1080/2+150);
-    playerAvatar.previousPos = playerAvatar.position.clone();
   }
 });
 
@@ -1203,6 +1206,9 @@ socket.on('memoryBaby', function(id, shape, color, eyes){
 
   makeBabyButton.isVisible = true;
   makeBabyButton.isDisabled = false;
+
+  shareButton.isVisible = true;
+  shareButton.isDisabled = false;
 });
 
 socket.on('ipaddr', function(ip){
@@ -1266,14 +1272,15 @@ function acceptMatch(){
   socket.emit('acceptedMatch', playerId, potentialMatchId);
 }
 
-function rejectMatch(){
+function rejectMatch(otherDC){
+  var noChoice = otherDC || false;
   // acceptButton.isVisible = false;
   // acceptButton.isDisabled = true;
 
   // rejectButton.isVisible = false;
   // rejectButton.isDisabled = true;
 
-  socket.emit('rejectedMatch', playerId, potentialMatchId);
+  socket.emit('rejectedMatch', playerId, potentialMatchId, noChoice);
 }
 
 function confirmCode(){
@@ -1285,6 +1292,9 @@ function confirmCode(){
 
 function share(){
   socket.emit('shared', playerId);
+  shareButton.isVisible = false;
+  shareButton.isDisabled = true;
+  shareNotification();
 }
 
 function checkCrown(exclude){
@@ -1679,6 +1689,10 @@ function Highlighter(){
 				for(var i = 0; i < memoryTiles.length; i++){
 					memoryTiles[i].isHighlighted = true;
 				}
+				break;
+			case "baby":
+				babyAvatar.isHighlighted = true;
+				break;
 			default:
 				console.log("couldnt highlight " +arg);
 				break;
@@ -2021,9 +2035,11 @@ function initializePlayer(){
 	makeBabyButton.isVisible = false;
 	makeBabyButton.isDisabled = true;
 
-	// shareButton = new TextButton(new Vector2(canvas.width/2, canvas.height-100), 100, 50, "SHARE", "#3C5899", "#FFFFFF");
-	// shareButton.onClick = function(){share()};
-	// gameObjects.push(shareButton);
+	shareButton = new TextButton(new Vector2(canvas.width/2, canvas.height-100), 380, 90, "SHARE THIS POLYGON?", "#3C5899", "#FFFFFF");
+	shareButton.onClick = function(){share()};
+	gameObjects.push(shareButton);
+	shareButton.isVisible = false;
+	shareButton.isDisabled = true;
 
 	/*
 	gameObjects.push( new Chest(new Vector2(1920/2-340, 1080/2+120)) );
@@ -2304,22 +2320,19 @@ function firstMatchNotification(){
 }
 
 function matchNotification(){
-	var matchNotification;
 	if(firstMatch){
-		matchNotification = new Notification("You've got a match! Do you want to play with this person? (Please select \"Yep\")");
+		matchNotificationVar = new Notification("You've got a match! Do you want to play with this person? (Please select \"Yep\")");
 	}else{
-		matchNotification = new Notification("You've got a match! Do you want to play with this person?");
+		matchNotificationVar = new Notification("You've got a match! Do you want to play with this person?");
 	}
-	gameObjects.push( matchNotification );
-
-	var yesButton, noButton;
+	gameObjects.push( matchNotificationVar );
 
 	yesButton = new TextButton(new Vector2(canvas.width/2-140, 200), 240, 80, "Yep", "#141414", "#FFFFFF");
-	yesButton.onClick = function(){acceptMatch(); matchNotification.kill(); noButton.kill(); this.kill(); highlighter.unHighlight("match"); firstMatch = false; /*maybe after both layers accepted*/};
+	yesButton.onClick = function(){acceptMatch(); matchNotificationVar.kill(); noButton.kill(); this.kill(); highlighter.unHighlight("match"); firstMatch = false; /*maybe after both layers accepted*/};
 	gameObjects.push(yesButton);
 
 	noButton = new TextButton(new Vector2(canvas.width/2+140, 200), 240, 80, "Nope", "#141414", "#FFFFFF");
-	noButton.onClick = function(){rejectMatch(); matchNotification.kill(); yesButton.kill(); this.kill();};
+	noButton.onClick = function(){rejectMatch(); matchNotificationVar.kill(); yesButton.kill(); this.kill();};
 	gameObjects.push(noButton);
 	if(firstMatch){ noButton.isDisabled = true; }
 
@@ -2389,6 +2402,19 @@ function wrongNameNotification(){
 
 	highlighter.highlight();
 	wrongNameNotification.isHighlighted = true;
+	okButton.isHighlighted = true;
+}
+
+function shareNotification(){
+	var shareNotification = new Notification("Thank you for sharing this polygon!");
+	gameObjects.push(shareNotification);
+
+	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");
+	okButton.onClick = function(){shareNotification.kill(); this.kill(); highlighter.unHighlight();};
+	gameObjects.push(okButton);
+
+	highlighter.highlight("baby");
+	shareNotification.isHighlighted = true;
 	okButton.isHighlighted = true;
 }
 //*****************************************************************************************

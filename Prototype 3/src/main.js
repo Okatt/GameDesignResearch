@@ -181,9 +181,11 @@ function initializePlayer(){
 	makeBabyButton.isVisible = false;
 	makeBabyButton.isDisabled = true;
 
-	// shareButton = new TextButton(new Vector2(canvas.width/2, canvas.height-100), 100, 50, "SHARE", "#3C5899", "#FFFFFF");
-	// shareButton.onClick = function(){share()};
-	// gameObjects.push(shareButton);
+	shareButton = new TextButton(new Vector2(canvas.width/2, canvas.height-100), 380, 90, "SHARE THIS POLYGON?", "#3C5899", "#FFFFFF");
+	shareButton.onClick = function(){share()};
+	gameObjects.push(shareButton);
+	shareButton.isVisible = false;
+	shareButton.isDisabled = true;
 
 	/*
 	gameObjects.push( new Chest(new Vector2(1920/2-340, 1080/2+120)) );
