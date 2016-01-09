@@ -118,3 +118,12 @@ Total number of attempted matches: 2
 Total number of accepted matches: 0
 Total number of rejected matches: 2
 
+Total Stats: 
+Total number of players: 0
+Highest number of players at one time: 0
+Number of completed interactions: 0
+Number of babies shared: 0
+Total number of attempted matches: 0
+Total number of accepted matches: 0
+Total number of rejected matches: 0
+
