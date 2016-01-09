@@ -213,3 +213,16 @@ function firstPolygonNotification(){
 	firstPolygonNotification.isHighlighted = true;
 	okButton.isHighlighted = true;
 }
+
+function wrongNameNotification(){
+	var wrongNameNotification = new Notification("The name you entered did not match!");
+	gameObjects.push(wrongNameNotification);
+
+	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");
+	okButton.onClick = function(){wrongNameNotification.kill(); this.kill(); highlighter.unHighlight();};
+	gameObjects.push(okButton);
+
+	highlighter.highlight();
+	wrongNameNotification.isHighlighted = true;
+	okButton.isHighlighted = true;
+}

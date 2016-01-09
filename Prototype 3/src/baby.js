@@ -35,7 +35,14 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 	this.emoteSprite;
 
 	this.moving = true;
-	this.hasCrown = false;
+
+	if(player !== null){
+		this.hasCrown = player.hasCrown;
+	}
+	else {
+		this.hasCrown = false;
+	}
+	
 
 	this.kill = function(){
 		this.isAlive = false;

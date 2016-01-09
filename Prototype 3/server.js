@@ -175,8 +175,8 @@ io.sockets.on('connection', function (socket){
 	socket.on('acceptedMatch', function(playerID, matchID){
 		if(contains(expectedAcceptArray, playerID)){
 
-			io.sockets.socket(matchID).emit('confirmedMatch', matchID, playerID);
-			io.sockets.socket(playerID).emit('confirmedMatch', matchID, playerID, true);
+			io.sockets.socket(matchID).emit('confirmedMatch', matchID, playerID, false, true);
+			io.sockets.socket(playerID).emit('confirmedMatch', matchID, playerID, true, false);
 			io.sockets.socket(worldID).emit('confirmedMatch', matchID, playerID);
 
 			for(var i = expectedAcceptArray.length; i >= 0; i--){
@@ -221,8 +221,9 @@ io.sockets.on('connection', function (socket){
 		io.sockets.socket(matchID).emit('checkNames', playerID, babyName);
 	});
 
-	socket.on('namesMatch', function(playerID){
-		io.sockets.socket(playerID).emit('codesExchanged');
+	socket.on('wrongNames', function(matchID, playerID){
+		io.sockets.socket(matchID).emit('wrongNames');
+		io.sockets.socket(playerID).emit('wrongNames');
 	});
 
 	socket.on('pressedEmote', function(emoteID, playerID, matchID){

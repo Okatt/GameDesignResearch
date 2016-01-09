@@ -145,7 +145,14 @@ function Baby(position, player, shapeIndex, colorIndex, eyes){
 	this.emoteSprite;
 
 	this.moving = true;
-	this.hasCrown = false;
+
+	if(player !== null){
+		this.hasCrown = player.hasCrown;
+	}
+	else {
+		this.hasCrown = false;
+	}
+	
 
 	this.kill = function(){
 		this.isAlive = false;
@@ -775,6 +782,8 @@ var flips = 0;
 
 var highlighted = false;
 
+var isMother = false;
+
 
 /****************************************************************************
  * Signaling server 
@@ -912,7 +921,7 @@ socket.on('matchRequest', function(mID, mShape, mColor, mEyes, mCrown){
   // rejectButton.isDisabled = false;
 });
 
-socket.on('confirmedMatch', function(p1ID, p2ID, firstTurn){
+socket.on('confirmedMatch', function(p1ID, p2ID, firstTurn, mother){
 
   var turn = firstTurn || false;
 
@@ -928,6 +937,7 @@ socket.on('confirmedMatch', function(p1ID, p2ID, firstTurn){
     console.log(p1ID +' matched with ' +p2ID);
 
     turnPlayer = turn;
+    isMother = mother;
     matchAvatar.showUnmatch = true;
 
     if(p1ID === playerId){
@@ -969,6 +979,7 @@ socket.on('unMatch', function(p1ID, p2ID){
       matchShape = null;
       matchName = null;
       matchEyes = null;
+      isMother = false;
 
       console.log(playerId +' unmatched ' +p2ID);
       clientStatus = 'The match is over.';
@@ -1005,15 +1016,25 @@ socket.on('matchRejected', function(rejectedID, playerID){
 });
 
 socket.on('checkNames', function(playerID, name){
-  if(name.toLowerCase() === babyName.toLowerCase()){
-    socket.emit('namesMatch', playerID);
+  if(isMother && babyName !== null){
+    if(name.toLowerCase() === babyName.toLowerCase()){
+      socket.emit('createBaby', matchId, playerId, babyAvatar.shape, babyAvatar.color, babyAvatar.eyes);
+      socket.emit('announce', babyName+" was created!");
+      babyName = null;
+      endMatch();
+    }
+    else {
+      socket.emit('wrongNames', matchId, playerId);
+    }
+  }
+  else{
+    socket.emit('enteredName', playerId, matchId, babyName);
   }
 });
 
-socket.on('codesExchanged', function(){
-    socket.emit('createBaby', matchId, playerId, babyAvatar.shape, babyAvatar.color, babyAvatar.eyes);
-    socket.emit('announce', babyName+" was created!");
-    endMatch();
+socket.on('wrongNames', function(){
+  babyName = null;
+  wrongNameNotification();
 });
 
 socket.on('displayEmote', function(emoteID, playerID, matchID){
@@ -1046,7 +1067,9 @@ socket.on('createWorldBaby', function(ID1, ID2, shape, color, eyes){
 socket.on('createAppBaby', function(ID, shape, color, eyes){
     playerAvatar.addBaby(shape, color, eyes);
     babyName = null;
-    babyAvatar.kill();
+    if(babyAvatar !== undefined){
+      babyAvatar.kill();
+    }
     babyAvatar = false;
 });
 
@@ -1249,7 +1272,9 @@ function rejectMatch(){
 
 function confirmCode(){
   babyName = prompt('Choose a name for your polygon:');
-  socket.emit('enteredName', playerId, matchId, babyName);
+  if(babyName !== null){
+      socket.emit('enteredName', playerId, matchId, babyName);
+  }
 }
 
 function share(){
@@ -1354,7 +1379,6 @@ function endMemory(){
       memoryTiles[i].kill();
   }
   memoryTiles = [];
-  console.log(matchedTiles);
   for( var i = 0; i < matchedTiles.length; i++){
     matchedTiles[i].mtm = true;
   }
@@ -2346,6 +2370,19 @@ function firstPolygonNotification(){
 
 	highlighter.highlight();
 	firstPolygonNotification.isHighlighted = true;
+	okButton.isHighlighted = true;
+}
+
+function wrongNameNotification(){
+	var wrongNameNotification = new Notification("The name you entered did not match!");
+	gameObjects.push(wrongNameNotification);
+
+	var okButton = new TextButton(new Vector2(canvas.width/2, 200), 240, 80, "OK", "#141414", "#FFFFFF");
+	okButton.onClick = function(){wrongNameNotification.kill(); this.kill(); highlighter.unHighlight();};
+	gameObjects.push(okButton);
+
+	highlighter.highlight();
+	wrongNameNotification.isHighlighted = true;
 	okButton.isHighlighted = true;
 }
 //*****************************************************************************************
