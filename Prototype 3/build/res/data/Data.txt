@@ -34,3 +34,39 @@ Total number of attempted matches: 0
 Total number of accepted matches: 0
 Total number of rejected matches: 0
 
+ID: CUyzyc50JzAGwd0q_ktp
+Time joined: 16:34:27
+Time left: 16:34:47
+Current Stats: 
+Total number of players: 5
+Highest number of players at one time: 2
+Number of succesful interactions: 0
+Number of shares: 0
+Total number of attempted matches: 3
+Total number of accepted matches: 2
+Total number of rejected matches: 2
+
+ID: IJCe1wWUU-gXJbth_ktr
+Time joined: 16:34:53
+Time left: 16:35:5
+Current Stats: 
+Total number of players: 6
+Highest number of players at one time: 2
+Number of succesful interactions: 0
+Number of shares: 0
+Total number of attempted matches: 4
+Total number of accepted matches: 2
+Total number of rejected matches: 3
+
+ID: XkaB47DXLHQMkpqz_ktq
+Time joined: 16:34:31
+Time left: 16:35:6
+Current Stats: 
+Total number of players: 6
+Highest number of players at one time: 2
+Number of succesful interactions: 0
+Number of shares: 0
+Total number of attempted matches: 4
+Total number of accepted matches: 2
+Total number of rejected matches: 4
+
