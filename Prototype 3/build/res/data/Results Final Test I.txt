@@ -1,0 +1,273 @@
+ID: T38zBRYICS9ZQXbdSMFS
+Server time joined: 00:06:20 - seconds connected: 46
+Time joined: 11:50:0
+Time left: 11:50:46
+Number of succesful interactions by this player: 0
+Number of potential matches this player had: 0
+Number of matches accepted by this player: 0
+Number of matches rejected by this player: 0
+Number of times this player was rejected: 0
+Number of babies shared by this player: 0
+
+ID: Z-kn_8MxxPsXZTLLSMFX
+Server time joined: 00:09:10 - seconds connected: 120
+Time joined: 11:53:39
+Time left: 11:55:39
+Number of succesful interactions by this player: 0
+Number of potential matches this player had: 0
+Number of matches accepted by this player: 0
+Number of matches rejected by this player: 0
+Number of times this player was rejected: 0
+Number of babies shared by this player: 0
+
+ID: 9AmPW94xBaU7ZBbmSMFT
+Server time joined: 00:11:30 - seconds connected: 355
+Time joined: 11:50:43
+Time left: 11:56:38
+Number of succesful interactions by this player: 2
+Number of potential matches this player had: 3
+Number of matches accepted by this player: 2
+Number of matches rejected by this player: 1
+Number of times this player was rejected: 0
+Number of babies shared by this player: 0
+
+ID: v95RwDBrG_xXiKqESMFV
+Server time joined: 00:11:30 - seconds connected: 322
+Time joined: 11:51:46
+Time left: 11:57:8
+Number of succesful interactions by this player: 2
+Number of potential matches this player had: 4
+Number of matches accepted by this player: 3
+Number of matches rejected by this player: 1
+Number of times this player was rejected: 0
+Number of babies shared by this player: 1
+
+ID: 1n8H0Dnmr-jeJXtmSMFU
+Server time joined: 00:11:30 - seconds connected: 428
+Time joined: 11:50:51
+Time left: 11:57:59
+Number of succesful interactions by this player: 3
+Number of potential matches this player had: 6
+Number of matches accepted by this player: 3
+Number of matches rejected by this player: 1
+Number of times this player was rejected: 2
+Number of babies shared by this player: 1
+
+ID: -r5BbTf5PmABQ_36SMFa
+Server time joined: 00:11:30 - seconds connected: 225
+Time joined: 11:55:57
+Time left: 11:59:42
+Number of succesful interactions by this player: 1
+Number of potential matches this player had: 4
+Number of matches accepted by this player: 2
+Number of matches rejected by this player: 0
+Number of times this player was rejected: 2
+Number of babies shared by this player: 0
+
+ID: 2sto9qonJ7dACjWqSMFZ
+Server time joined: 00:15:50 - seconds connected: 270
+Time joined: 11:55:53
+Time left: 12:0:23
+Number of succesful interactions by this player: 1
+Number of potential matches this player had: 2
+Number of matches accepted by this player: 1
+Number of matches rejected by this player: 1
+Number of times this player was rejected: 0
+Number of babies shared by this player: 0
+
+ID: 0KXs4C6fPIWqDcOtSMFY
+Server time joined: 00:15:50 - seconds connected: 276
+Time joined: 11:55:48
+Time left: 12:0:24
+Number of succesful interactions by this player: 1
+Number of potential matches this player had: 2
+Number of matches accepted by this player: 1
+Number of matches rejected by this player: 0
+Number of times this player was rejected: 1
+Number of babies shared by this player: 1
+
+ID: eXLVI3KVs86N4zQ2SMFc
+Server time joined: 00:17:10 - seconds connected: 64
+Time joined: 12:1:35
+Time left: 12:2:39
+Number of succesful interactions by this player: 0
+Number of potential matches this player had: 0
+Number of matches accepted by this player: 0
+Number of matches rejected by this player: 0
+Number of times this player was rejected: 0
+Number of babies shared by this player: 0
+
+ID: iMfbALHAqxQ2SPyTSMFb
+Server time joined: 00:17:10 - seconds connected: 202
+Time joined: 12:0:14
+Time left: 12:3:36
+Number of succesful interactions by this player: 2
+Number of potential matches this player had: 4
+Number of matches accepted by this player: 2
+Number of matches rejected by this player: 2
+Number of times this player was rejected: 0
+Number of babies shared by this player: 0
+
+ID: 75T_UNKfwbolD61lSMFd
+Server time joined: 00:20:30 - seconds connected: 24
+Time joined: 12:4:57
+Time left: 12:5:21
+Number of succesful interactions by this player: 0
+Number of potential matches this player had: 0
+Number of matches accepted by this player: 0
+Number of matches rejected by this player: 0
+Number of times this player was rejected: 0
+Number of babies shared by this player: 0
+
+ID: HLulap00UGfWnRNSSMFW
+Server time joined: 00:20:30 - seconds connected: 744
+Time joined: 11:53:33
+Time left: 12:5:57
+Number of succesful interactions by this player: 4
+Number of potential matches this player had: 7
+Number of matches accepted by this player: 4
+Number of matches rejected by this player: 0
+Number of times this player was rejected: 3
+Number of babies shared by this player: 1
+
+ID: Wt5VQSLsCxWyI3JNSMFh
+Server time joined: 00:24:40 - seconds connected: 149
+Time joined: 12:8:52
+Time left: 12:11:21
+Number of succesful interactions by this player: 1
+Number of potential matches this player had: 1
+Number of matches accepted by this player: 1
+Number of matches rejected by this player: 0
+Number of times this player was rejected: 0
+Number of babies shared by this player: 0
+
+ID: H3Gry1wqAwmtimfbSMFf
+Server time joined: 00:24:40 - seconds connected: 270
+Time joined: 12:6:57
+Time left: 12:11:27
+Number of succesful interactions by this player: 1
+Number of potential matches this player had: 4
+Number of matches accepted by this player: 1
+Number of matches rejected by this player: 3
+Number of times this player was rejected: 0
+Number of babies shared by this player: 0
+
+ID: smKtOa014SBSDaKnSMFe
+Server time joined: 00:28:30 - seconds connected: 407
+Time joined: 12:6:53
+Time left: 12:13:40
+Number of succesful interactions by this player: 3
+Number of potential matches this player had: 6
+Number of matches accepted by this player: 3
+Number of matches rejected by this player: 1
+Number of times this player was rejected: 2
+Number of babies shared by this player: 0
+
+ID: CE3gsyhS2eLBULGCSMFm
+Server time joined: 00:28:30 - seconds connected: 83
+Time joined: 12:12:54
+Time left: 12:14:17
+Number of succesful interactions by this player: 0
+Number of potential matches this player had: 2
+Number of matches accepted by this player: 1
+Number of matches rejected by this player: 0
+Number of times this player was rejected: 1
+Number of babies shared by this player: 0
+
+ID: jOEPxFG-WEZOwwR7SMFg
+Server time joined: 00:28:30 - seconds connected: 365
+Time joined: 12:8:48
+Time left: 12:14:53
+Number of succesful interactions by this player: 2
+Number of potential matches this player had: 4
+Number of matches accepted by this player: 3
+Number of matches rejected by this player: 1
+Number of times this player was rejected: 0
+Number of babies shared by this player: 0
+
+ID: QH52rXQqdSB8WnOQSMFj
+Server time joined: 00:28:30 - seconds connected: 256
+Time joined: 12:11:32
+Time left: 12:15:48
+Number of succesful interactions by this player: 1
+Number of potential matches this player had: 3
+Number of matches accepted by this player: 1
+Number of matches rejected by this player: 1
+Number of times this player was rejected: 1
+Number of babies shared by this player: 0
+
+ID: 2wHlHkViPdsrKlLSSMFl
+Server time joined: 00:28:30 - seconds connected: 258
+Time joined: 12:11:38
+Time left: 12:15:56
+Number of succesful interactions by this player: 1
+Number of potential matches this player had: 2
+Number of matches accepted by this player: 1
+Number of matches rejected by this player: 1
+Number of times this player was rejected: 0
+Number of babies shared by this player: 0
+
+ID: HcDagChh5RT4-XnnSMFi
+Server time joined: 00:28:30 - seconds connected: 471
+Time joined: 12:9:6
+Time left: 12:16:57
+Number of succesful interactions by this player: 2
+Number of potential matches this player had: 5
+Number of matches accepted by this player: 2
+Number of matches rejected by this player: 1
+Number of times this player was rejected: 2
+Number of babies shared by this player: 0
+
+ID: 29RRspdkqG191zvhSMFk
+Server time joined: 00:28:30 - seconds connected: 337
+Time joined: 12:11:36
+Time left: 12:17:13
+Number of succesful interactions by this player: 1
+Number of potential matches this player had: 3
+Number of matches accepted by this player: 1
+Number of matches rejected by this player: 0
+Number of times this player was rejected: 2
+Number of babies shared by this player: 1
+
+ID: zRfmKmiWjNVtSQfESMFn
+Server time joined: 00:37:10 - seconds connected: 46
+Time joined: 12:21:37
+Time left: 12:22:23
+Number of succesful interactions by this player: 0
+Number of potential matches this player had: 0
+Number of matches accepted by this player: 0
+Number of matches rejected by this player: 0
+Number of times this player was rejected: 0
+Number of babies shared by this player: 0
+
+ID: ZKsjUOyw52AVEamySMFo
+Server time joined: 00:42:40 - seconds connected: 199
+Time joined: 12:27:1
+Time left: 12:30:20
+Number of succesful interactions by this player: 1
+Number of potential matches this player had: 2
+Number of matches accepted by this player: 1
+Number of matches rejected by this player: 1
+Number of times this player was rejected: 0
+Number of babies shared by this player: 0
+
+ID: ZckioaGD4czHQuHeSMFp
+Server time joined: 00:42:40 - seconds connected: 198
+Time joined: 12:27:4
+Time left: 12:30:22
+Number of succesful interactions by this player: 1
+Number of potential matches this player had: 2
+Number of matches accepted by this player: 1
+Number of matches rejected by this player: 0
+Number of times this player was rejected: 1
+Number of babies shared by this player: 0
+
+Total Stats: 
+Total number of players: 24
+Highest number of players at one time: 7
+Number of completed interactions: 15
+Number of babies shared: 5
+Total number of attempted matches: 33
+Total number of accepted matches: 17
+Total number of rejected matches: 17
+
