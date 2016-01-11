@@ -268,6 +268,6 @@ Highest number of players at one time: 7
 Number of completed interactions: 15
 Number of babies shared: 5
 Total number of attempted matches: 33
-Total number of accepted matches: 17
+Total number of accepted matches: 16
 Total number of rejected matches: 17
 
